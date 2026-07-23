@@ -1,10 +1,12 @@
 欢迎使用模组加载器！
-模组加载器V1.6——2026.0502
-1.紧急修复1.5往前的版本检测错误
-2.修复手动寻找路径无法保存的错误
-3.添加在线下载TLDLoader.dll（感谢熙洛提供的下载方式）
+模组加载器V1.7——2026.0723
+1.gitlab莫名奇妙封我号导致代码和版本号无法更新，所以现在换github来托管了，只是无法更新而已不是说无法访问了。
+2.没什么更新的。
 官网一
-https://modloader.netlify.app/
+https://ksny2025.github.io/TLDTool/
 官网二
 https://ksny2025.gitlab.io/TLDTool/
+官网三
+https://modloader.netlify.app/
+
 QQ：2975713196——By：BENBAIJIE
