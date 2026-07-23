@@ -1,2 +1,2 @@
-1.6
-https://ksny2025.gitlab.io/TLDTool/
+1.7
+https://ksny2025.github.io/TLDTool/
