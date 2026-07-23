@@ -1,7 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <link rel="icon" href="https://gitlab.com/ksny2025/TLDTool/-/raw/main/favicon.ico" type="image/x-icon">
+<link rel="icon" href="https://gitlab.com/ksny2025/TLDTool/-/raw/main/favicon.ico" type="image/x-icon">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BENBAIJIE站</title>
@@ -44,7 +46,7 @@
 
         .logo-area {
             padding: 0 24px 28px 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 24px;
         }
 
@@ -102,7 +104,7 @@
             background: rgba(255, 255, 255, 0.15);
             color: white;
             font-weight: 500;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
         .nav-slider {
@@ -114,7 +116,7 @@
             transition: top 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1), height 0.25s ease;
             pointer-events: none;
             z-index: 1;
-            box-shadow: 0 0 6px rgba(229, 233, 240, 0.6);
+            box-shadow: 0 0 6px rgba(229,233,240,0.6);
         }
 
         .main-content {
@@ -199,7 +201,7 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             cursor: pointer;
             transition: 0.2s;
         }
@@ -239,120 +241,30 @@
         .version-meta {
             font-size: 0.75rem;
             color: #8096af;
-            margin-bottom: 12px;
-            border-top: 1px dashed rgba(255, 255, 255, 0.1);
+            margin-bottom: 18px;
+            border-top: 1px dashed rgba(255,255,255,0.1);
             padding-top: 12px;
-        }
-
-        .download-stats {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-            color: #9aacc2;
-            margin-bottom: 14px;
-            padding: 4px 0 4px 2px;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
-            padding-top: 12px;
-        }
-        .download-stats .stat-icon {
-            font-size: 0.9rem;
-            margin-right: 2px;
-        }
-        .download-stats .stat-number {
-            font-weight: 600;
-            color: #dde6f0;
-            min-width: 24px;
-            display: inline-block;
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-        }
-        .download-stats .stat-label {
-            color: #8a9eb0;
-            font-size: 0.75rem;
-        }
-        .download-stats .stat-loading {
-            opacity: 0.5;
-            font-size: 0.7rem;
-        }
-
-        .download-btn-wrap {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-top: 2px;
         }
 
         .download-btn {
             display: inline-block;
             text-align: center;
             background: #2f3540;
-            padding: 10px 20px;
+            padding: 10px 16px;
             border-radius: 40px;
             color: #f0f3f8;
             text-decoration: none;
             font-weight: 500;
             transition: 0.2s;
+            width: fit-content;
+            align-self: flex-start;
+            margin-top: 6px;
             font-size: 0.9rem;
-            border: none;
-            cursor: pointer;
-            flex-shrink: 0;
         }
+
         .download-btn:hover {
             background: #4a5364;
             transform: scale(1.02);
-        }
-        .download-btn:active {
-            transform: scale(0.97);
-        }
-
-        .total-stats-bar {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 16px 30px;
-            background: rgba(16, 20, 26, 0.7);
-            border-radius: 16px;
-            padding: 14px 24px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        .total-stats-bar .stat-item {
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-            font-size: 0.95rem;
-            color: #bccadc;
-        }
-        .total-stats-bar .stat-item .num {
-            font-weight: 700;
-            font-size: 1.3rem;
-            color: #f0f4fc;
-            font-variant-numeric: tabular-nums;
-        }
-        .total-stats-bar .stat-item .lbl {
-            font-size: 0.8rem;
-            color: #8a9eb0;
-        }
-        .total-stats-bar .stat-divider {
-            color: #2f3a48;
-            font-size: 1.2rem;
-        }
-        .total-stats-bar .refresh-btn {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #b0c2d6;
-            padding: 4px 14px;
-            border-radius: 30px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-left: auto;
-        }
-        .total-stats-bar .refresh-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: white;
         }
 
         .tip-warning {
@@ -459,7 +371,7 @@
         .desc-line {
             font-size: 16px;
             color: #8c9bb0;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255,255,255,0.1);
             display: inline-block;
             padding-top: 20px;
             margin-top: 20px;
@@ -470,30 +382,8 @@
         }
 
         @keyframes gentleAppear {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .stat-number.pop {
-            animation: popNum 0.3s ease;
-        }
-        @keyframes popNum {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.35);
-                color: #fff;
-            }
-            100% {
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 720px) {
@@ -513,7 +403,7 @@
                 padding: 10px 12px;
                 background: rgba(18, 22, 28, 0.92);
                 backdrop-filter: blur(30px);
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                border-top: 1px solid rgba(255,255,255,0.1);
                 border-right: none;
                 z-index: 200;
             }
@@ -554,23 +444,6 @@
             .download-grid {
                 grid-template-columns: 1fr;
             }
-            .total-stats-bar {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-                padding: 14px 18px;
-            }
-            .total-stats-bar .refresh-btn {
-                margin-left: 0;
-                align-self: flex-start;
-            }
-            .download-btn-wrap {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .download-btn {
-                text-align: center;
-            }
         }
 
         ::-webkit-scrollbar {
@@ -591,504 +464,319 @@
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <aside class="sidebar">
-            <div class="logo-area">
-                <h2>BENBAIJIE</h2>
-            </div>
-            <div class="nav-links">
-                <button class="nav-item active" data-page="home">主页</button>
-                <button class="nav-item" data-page="download">下载</button>
-                <button class="nav-item" data-page="announcement">公告</button>
-                <div class="nav-slider" id="navSlider"></div>
-            </div>
-        </aside>
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="logo-area">
+            <h2>BENBAIJIE</h2>
+        </div>
+        <div class="nav-links">
+            <button class="nav-item active" data-page="home">主页</button>
+            <button class="nav-item" data-page="download">下载</button>
+            <button class="nav-item" data-page="announcement">公告</button>
+            <div class="nav-slider" id="navSlider"></div>
+        </div>
+    </aside>
 
-        <main class="main-content">
-            <div id="home-page" class="page-view active-page">
-                <div class="card-pane" style="text-align: center;">
-                    <div class="home-hero">
-                        <h1 class="home-title">BENBAIJIE</h1>
-                        <p class="home-sub" id="changingSub">欢迎来到长途旅行下载站！</p>
-                    </div>
-                    <div style="margin-top: 40px;">
-                        <p style="color:#b3c2d4; max-width: 560px; margin: 0 auto; line-height: 1.6;">
-                            <a href="https://b23.tv/eoXbYnf" class="bili-nav-btn" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:6px 16px;margin-left:12px;background:linear-gradient(135deg,#151921,#151921);color:rgb(255,255,255)!important;font-size:14px;font-weight:500;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;text-decoration:none;border-radius:40px;transition:all 0.2s ease;box-shadow:0 2px 5px rgba(255,255,255,0.3);white-space:nowrap;">
-                                主播B站
-                            </a>
-                        </p>
-                    </div>
+    <main class="main-content">
+        <div id="home-page" class="page-view active-page">
+            <div class="card-pane" style="text-align: center;">
+                <div class="home-hero">
+                    <h1 class="home-title">BENBAIJIE</h1>
+                    <p class="home-sub" id="changingSub">欢迎来到长途旅行下载站！</p>
+
+                </div>
+                <div style="margin-top: 40px;">
+                    <p style="color:#b3c2d4; max-width: 560px; margin: 0 auto; line-height: 1.6;">
+
+<style>
+  .bili-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    margin-left: 12px;
+    background: linear-gradient(135deg, #151921, #151921);
+    color: rgb(255, 255, 255) !important;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    text-decoration: none;
+    border-radius: 40px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.3);
+    white-space: nowrap;
+  }
+  .bili-nav-btn:hover {
+    background: linear-gradient(135deg, #1c2128, #1c2128);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 12px rgba(202, 202, 202, 0.4);
+    color: rgb(255, 255, 255) !important;
+    text-decoration: none;
+  }
+  @media (max-width: 640px) {
+    .bili-nav-btn {
+      padding: 5px 12px;
+      font-size: 13px;
+      margin-left: 8px;
+    }
+  }
+</style>
+
+<a href="https://b23.tv/eoXbYnf" class="bili-nav-btn" target="_blank" rel="noopener noreferrer">
+  主播B站
+</a>
+
+                    </p>
                 </div>
             </div>
+        </div>
 
-            <div id="download-page" class="page-view">
-                <h2 class="page-title">软件下载</h2>
-
-                <div class="total-stats-bar" id="totalStatsBar">
-                    <div class="stat-item">
-                        <span class="lbl">总下载</span>
-                        <span class="num" id="totalDownloads">0</span>
-                        <span class="lbl">次</span>
-                    </div>
-                    <div class="stat-divider">|</div>
-                    <div class="stat-item">
-                        <span class="lbl">软件数</span>
-                        <span class="num" id="totalSoftCount">0</span>
-                        <span class="lbl">个</span>
-                    </div>
-                    <button class="refresh-btn" id="refreshStatsBtn">⟳ 刷新</button>
-                </div>
-
-                <div class="card-pane">
-                    <div class="download-grid" id="downloadGrid">
-                    </div>
-                    <div class="tip-warning">
-                        提示：网盘是小飞机网盘支持不登录直链下载，并且还不限速，但是我还是建议进群下载，因为群内的消息绝对是最新的！
-                    </div>
-                </div>
-            </div>
-
-            <div id="announcement-page" class="page-view">
-                <h2 class="page-title">最新公告</h2>
-                <div class="card-pane">
-                    <div class="announcement-list">
-                        <div class="announcement-item">
-                            <div class="announcement-title">通知</div>
-                            <div class="announcement-meta"><span>日期 2026-05-29</span><span>作者 BENBAIJIE</span></div>
-                            <div class="announcement-content">本网站是专门下载软件的网站。</div>
+        <div id="download-page" class="page-view">
+            <h2 class="page-title">软件下载</h2>
+            <div class="card-pane">
+                <div class="download-grid">
+                    <div class="software-card">
+                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林之子模组加载器.png">
+                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/BENBAIJIELoader.png">
                         </div>
-                        <div class="announcement-item">
-                            <div class="announcement-title">长途旅行小助手 1.36 版本更新</div>
-                            <div class="announcement-meta"><span>日期 2026-05-02</span><span>作者 BENBAIJIE</span></div>
-                            <div class="announcement-content">长途旅行小助手1.36更新，已经移除老网站，不再使用老网站，但是还能进去访问。</div>
+                        <div class="software-info">
+                            <div class="software-name">BENBAIJIELoader注入器</div>
+                            <div class="software-desc">此软件是集合了多个游戏的加载器，比较实用建议下载这个！基于长途旅行模组加载器改过来的。</div>
+                            <div class="version-meta">版本 V1.0 | 日期 2026-06-18 | 大小 7.07 MB | 作者 BENBAIJIE</div>
+                            <a href="https://share.feijipan.com/s/VEc73VOK" class="download-btn" target="_blank">下载</a>
                         </div>
-                        <div class="announcement-item">
-                            <div class="announcement-title">网站开放</div>
-                            <div class="announcement-meta"><span>日期 2026-04-14</span><span>作者 BENBAIJIE</span></div>
-                            <div class="announcement-content">网站在这一天开放，将会有一些软件放上去提供下载</div>
+                    </div>
+
+                    <div class="software-card">
+                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/长途旅行.png">
+                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/长途旅行.png" alt="长途旅行本体预览">
+                        </div>
+                        <div class="software-info">
+                            <div class="software-name">长途旅行本体</div>
+                            <div class="software-desc">该版本并不是最新的，但是用来加模组是最好的一个版本。</div>
+                            <div class="version-meta">版本 V2023.05.03D | 日期 2026-04-16 | 大小 346.46 MB | 作者 Genesz</div>
+                            <a href="https://share.feijipan.com/s/eS4bQJtZ" class="download-btn" target="_blank">下载</a>
+                        </div>
+                    </div>
+
+                    <div class="software-card">
+                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/小助手.png">
+                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/小助手.png" alt="长途旅行小助手预览">
+                        </div>
+                        <div class="software-info">
+                            <div class="software-name">长途旅行小助手</div>
+                            <div class="software-desc">兼容模组加载器、加模组功能、一些小功能，目前没啥好更新的了，已是完全版。</div>
+                            <div class="version-meta">版本 V1.38 | 日期 2026-06-27 | 大小 142.1 MB | 作者 BENBAIJIE</div>
+                            <a href="https://share.feijipan.com/s/YD4bQcp8" class="download-btn" target="_blank">下载</a>
+                        </div>
+                    </div>
+
+                    <div class="software-card">
+                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/模组加载器.png">
+                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/模组加载器.png" alt="模组加载器预览">
+                        </div>
+                        <div class="software-info">
+                            <div class="software-name">长途旅行模组加载器</div>
+                            <div class="software-desc">用来给长途旅行加载模组的，注意这个软件并不能添加模组。</div>
+                            <div class="version-meta">版本 V1.6 | 日期 2026-05-02 | 大小 6.8 MB | 作者 BENBAIJIE</div>
+                            <a href="https://share.feijipan.com/s/ME4bQlFi" class="download-btn" target="_blank">下载</a>
+                        </div>
+                    </div>
+
+                    <div class="software-card">
+                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/Asset文件.png">
+                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/Asset文件.png" alt="Assets文件预览">
+                        </div>
+                        <div class="software-info">
+                            <div class="software-name">Assets文件</div>
+                            <div class="software-desc">Assets是mod的前置文件，不安装的话将会导致长途旅行模组不完全！</div>
+                            <div class="version-meta">版本 V1.0 | 日期 2026-04-15 | 大小 242.76 MB | 作者 BENBAIJIE</div>
+                            <a href="https://share.feijipan.com/s/Xd4b1UB3" class="download-btn" target="_blank">下载</a>
+                        </div>
+                    </div>
+
+                    <div class="software-card">
+                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/后室模组加载器.png">
+                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/后室模组加载器.png" alt="后室模组加载器预览">
+                        </div>
+                        <div class="software-info">
+                            <div class="software-name">后室模组加载器</div>
+                            <div class="software-desc">由于后室更新了，目前模组是加不了的。</div>
+                            <div class="version-meta">版本 V1.1 | 日期 2026-05-05 | 大小 3.61 MB | 作者 BENBAIJIE</div>
+                            <a href="https://share.feijipan.com/s/l84fmqup" class="download-btn" target="_blank">下载</a>
+                        </div>
+                    </div>
+
+                    <div class="software-card">
+                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/植物大战僵尸辅助.png">
+                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/植物大战僵尸辅助.png">
+                        </div>
+                        <div class="software-info">
+                            <div class="software-name">植物大战僵尸杂交版辅助</div>
+                            <div class="software-desc">自己学习制作的一个辅助，没啥功能。</div>
+                            <div class="version-meta">版本 V1.2 | 日期 2026-06-03 | 大小 1.91 MB | 作者 BENBAIJIE</div>
+                            <a href="https://share.feijipan.com/s/PwbYKR4B" class="download-btn" target="_blank">下载</a>
+                        </div>
+                    </div>
+
+                    <div class="software-card">
+                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/车间工具.png">
+                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/车间工具.png">
+                        </div>
+                        <div class="software-info">
+                            <div class="software-name">长途旅行车间工具</div>
+                            <div class="software-desc">由熙洛汉化的车间工具，该工具与原版车间工具功能相同，只是汉化了而已。</div>
+                            <div class="version-meta">版本 V未知 | 日期 2026-06-09 | 大小 1.58 MB | 作者 熙洛</div>
+                            <a href="https://share.feijipan.com/s/RZcUdWkg" class="download-btn" target="_blank">下载</a>
+                        </div>
+                    </div>
+
+                    <div class="software-card">
+                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林之子模组加载器.png">
+                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林之子模组加载器.png">
+                        </div>
+                        <div class="software-info">
+                            <div class="software-name">森林之子模组加载器</div>
+                            <div class="software-desc">BENBAIJIE个人制作，现在东西很少，也是基于长途旅行模组加载器改过来的。</div>
+                            <div class="version-meta">版本 V1.1 | 日期 2026-06-14 | 大小 2.77 MB | 作者 BENBAIJIE</div>
+                            <a href="https://share.feijipan.com/s/X0cVOPck" class="download-btn" target="_blank">下载</a>
+                        </div>
+                    </div>
+
+                    <div class="software-card">
+                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林之子模组加载器.png">
+                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林科技加载.png">
+                        </div>
+                        <div class="software-info">
+                            <div class="software-name">森林科技加载</div>
+                            <div class="software-desc">他可以帮你辅助游戏，BENBAIJIE个人制作，基于长途旅行模组加载器改过来的。</div>
+                            <div class="version-meta">版本 V1.0 | 日期 2026-06-17 | 大小 2.08 MB | 作者 BENBAIJIE</div>
+                            <a href="https://share.feijipan.com/s/lpc5uqZv" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
                 </div>
+                <div class="tip-warning">
+                    提示：网盘是小飞机网盘支持不登录直链下载，并且还不限速，但是我还是建议进群下载，因为群内的消息绝对是最新的！
+                </div>
             </div>
+        </div>
 
-            <div id="about-page" class="page-view">
-                <h2 class="page-title">关于我们</h2>
-                <div class="stat-badge">网站开放时间: 2026.04.14</div>
-                <a href="https://qm.qq.com/q/5iUnJBtBWU" target="_blank" class="group-btn">进入官方QQ群 (点击跳转)</a>
+        <div id="announcement-page" class="page-view">
+            <h2 class="page-title">最新公告</h2>
+            <div class="card-pane">
+                <div class="announcement-list">
+                    <div class="announcement-item">
+                        <div class="announcement-title">通知</div>
+                        <div class="announcement-meta"><span>日期 2026-05-29</span><span>作者 BENBAIJIE</span></div>
+                        <div class="announcement-content">本网站是专门下载软件的网站。</div>
+                    </div>
+                    <div class="announcement-item">
+                        <div class="announcement-title">长途旅行小助手 1.36 版本更新</div>
+                        <div class="announcement-meta"><span>日期 2026-05-02</span><span>作者 BENBAIJIE</span></div>
+                        <div class="announcement-content">长途旅行小助手1.36更新，已经移除老网站，不再使用老网站，但是还能进去访问。</div>
+                    </div>
+                    <div class="announcement-item">
+                        <div class="announcement-title">网站开放</div>
+                        <div class="announcement-meta"><span>日期 2026-04-14</span><span>作者 BENBAIJIE</span></div>
+                        <div class="announcement-content">网站在这一天开放，将会有一些软件放上去提供下载</div>
+                    </div>
+                </div>
             </div>
-        </main>
-    </div>
+        </div>
 
-    <script>
-        (function() {
-            'use strict';
+        <div id="about-page" class="page-view">
+            <h2 class="page-title">关于我们</h2>
+            <div class="stat-badge">网站开放时间: 2026.04.14</div>
+            <a href="https://qm.qq.com/q/5iUnJBtBWU" target="_blank" class="group-btn">进入官方QQ群 (点击跳转)</a>
+        </div>
+    </main>
+</div>
 
-            var SOFTWARE_LIST = [{
-                key: 'benbaijie_loader',
-                name: 'BENBAIJIELoader注入器',
-                desc: '此软件是集合了多个游戏的加载器，比较实用建议下载这个！基于长途旅行模组加载器改过来的。',
-                version: 'V1.0',
-                date: '2026-06-18',
-                size: '7.07 MB',
-                author: 'BENBAIJIE',
-                downloadUrl: 'https://share.feijipan.com/s/VEc73VOK',
-                imgSrc: 'https://gitlab.com/ksny2025/TLDTool/-/raw/main/BENBAIJIELoader.png'
-            }, {
-                key: 'tldt_game',
-                name: '长途旅行本体',
-                desc: '该版本并不是最新的，但是用来加模组是最好的一个版本。',
-                version: 'V2023.05.03D',
-                date: '2026-04-16',
-                size: '346.46 MB',
-                author: 'Genesz',
-                downloadUrl: 'https://share.feijipan.com/s/eS4bQJtZ',
-                imgSrc: 'https://gitlab.com/ksny2025/TLDTool/-/raw/main/长途旅行.png'
-            }, {
-                key: 'tldt_assistant',
-                name: '长途旅行小助手',
-                desc: '兼容模组加载器、加模组功能、一些小功能，目前没啥好更新的了，已是完全版。',
-                version: 'V1.37',
-                date: '2026-06-07',
-                size: '138.9 MB',
-                author: 'BENBAIJIE',
-                downloadUrl: 'https://share.feijipan.com/s/YD4bQcp8',
-                imgSrc: 'https://gitlab.com/ksny2025/TLDTool/-/raw/main/小助手.png'
-            }, {
-                key: 'tldt_modloader',
-                name: '长途旅行模组加载器',
-                desc: '用来给长途旅行加载模组的，注意这个软件并不能添加模组。',
-                version: 'V1.6',
-                date: '2026-05-02',
-                size: '6.8 MB',
-                author: 'BENBAIJIE',
-                downloadUrl: 'https://share.feijipan.com/s/ME4bQlFi',
-                imgSrc: 'https://gitlab.com/ksny2025/TLDTool/-/raw/main/模组加载器.png'
-            }, {
-                key: 'tldt_assets',
-                name: 'Assets文件',
-                desc: 'Assets是mod的前置文件，不安装的话将会导致长途旅行模组不完全！',
-                version: 'V1.0',
-                date: '2026-04-15',
-                size: '242.76 MB',
-                author: 'BENBAIJIE',
-                downloadUrl: 'https://share.feijipan.com/s/Xd4b1UB3',
-                imgSrc: 'https://gitlab.com/ksny2025/TLDTool/-/raw/main/Asset文件.png'
-            }, {
-                key: 'backroom_loader',
-                name: '后室模组加载器',
-                desc: '由于后室更新了，目前模组是加不了的。',
-                version: 'V1.1',
-                date: '2026-05-05',
-                size: '3.61 MB',
-                author: 'BENBAIJIE',
-                downloadUrl: 'https://share.feijipan.com/s/l84fmqup',
-                imgSrc: 'https://gitlab.com/ksny2025/TLDTool/-/raw/main/后室模组加载器.png'
-            }, {
-                key: 'pvz_hybrid',
-                name: '植物大战僵尸杂交版辅助',
-                desc: '自己学习制作的一个辅助，没啥功能。',
-                version: 'V1.2',
-                date: '2026-06-03',
-                size: '1.91 MB',
-                author: 'BENBAIJIE',
-                downloadUrl: 'https://share.feijipan.com/s/PwbYKR4B',
-                imgSrc: 'https://gitlab.com/ksny2025/TLDTool/-/raw/main/植物大战僵尸辅助.png'
-            }, {
-                key: 'tldt_workshop',
-                name: '长途旅行车间工具',
-                desc: '由熙洛汉化的车间工具，该工具与原版车间工具功能相同，只是汉化了而已。',
-                version: 'V未知',
-                date: '2026-06-09',
-                size: '1.58 MB',
-                author: '熙洛',
-                downloadUrl: 'https://share.feijipan.com/s/RZcUdWkg',
-                imgSrc: 'https://gitlab.com/ksny2025/TLDTool/-/raw/main/车间工具.png'
-            }, {
-                key: 'forest_loader',
-                name: '森林之子模组加载器',
-                desc: 'BENBAIJIE个人制作，现在东西很少，也是基于长途旅行模组加载器改过来的。',
-                version: 'V1.1',
-                date: '2026-06-14',
-                size: '2.77 MB',
-                author: 'BENBAIJIE',
-                downloadUrl: 'https://share.feijipan.com/s/X0cVOPck',
-                imgSrc: 'https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林之子模组加载器.png'
-            }, {
-                key: 'forest_tech',
-                name: '森林科技加载',
-                desc: '他可以帮你辅助游戏，BENBAIJIE个人制作，基于长途旅行模组加载器改过来的。',
-                version: 'V1.0',
-                date: '2026-06-17',
-                size: '2.08 MB',
-                author: 'BENBAIJIE',
-                downloadUrl: 'https://share.feijipan.com/s/lpc5uqZv',
-                imgSrc: 'https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林科技加载.png'
-            }];
+<script>
+    (function() {
+        const navItems = document.querySelectorAll('.nav-item');
+        const slider = document.getElementById('navSlider');
+        const pages = {
+            home: document.getElementById('home-page'),
+            download: document.getElementById('download-page'),
+            announcement: document.getElementById('announcement-page'),
+            about: document.getElementById('about-page')
+        };
 
-            var NAMESPACE = 'benbaijie';
-            var STORAGE_KEY = 'benbaijie_stats_cache';
-            var statsCache = {};
-            var isLoading = false;
+        function updateSliderPosition(activeBtn) {
+            if (!slider || !activeBtn) return;
+            slider.style.top = activeBtn.offsetTop + 'px';
+            slider.style.height = activeBtn.offsetHeight + 'px';
+        }
 
-            function loadCacheFromStorage() {
-                try {
-                    var raw = localStorage.getItem(STORAGE_KEY);
-                    if (raw) {
-                        var parsed = JSON.parse(raw);
-                        if (parsed && typeof parsed === 'object') return parsed;
-                    }
-                } catch (_) {}
-                return {};
-            }
-
-            function saveCacheToStorage(cache) {
-                try {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
-                } catch (_) {}
-            }
-
-            async function fetchCountFromAPI(key) {
-                try {
-                    var resp = await fetch('https://api.countapi.xyz/get/' + NAMESPACE + '/' + key, {
-                        signal: AbortSignal.timeout(5000)
-                    });
-                    if (!resp.ok) throw new Error('API error');
-                    var data = await resp.json();
-                    return data.value || 0;
-                } catch (e) {
-                    return null;
-                }
-            }
-
-            async function incrementCountOnAPI(key) {
-                try {
-                    var resp = await fetch('https://api.countapi.xyz/hit/' + NAMESPACE + '/' + key, {
-                        signal: AbortSignal.timeout(5000)
-                    });
-                    if (!resp.ok) throw new Error('API error');
-                    var data = await resp.json();
-                    return data.value || 0;
-                } catch (e) {
-                    return null;
-                }
-            }
-
-            async function fetchAllStats(forceRefresh) {
-                if (isLoading) return statsCache;
-                if (forceRefresh) {
-                    statsCache = {};
-                }
-                if (Object.keys(statsCache).length === 0) {
-                    var cached = loadCacheFromStorage();
-                    statsCache = { ...cached };
-                }
-                isLoading = true;
-                var results = {};
-                var promises = SOFTWARE_LIST.map(function(sw) {
-                    return fetchCountFromAPI(sw.key).then(function(val) {
-                        if (val !== null) {
-                            results[sw.key] = val;
-                        } else {
-                            results[sw.key] = statsCache[sw.key] || 0;
-                        }
-                    });
-                });
-                await Promise.allSettled(promises);
-                isLoading = false;
-                statsCache = { ...statsCache, ...results };
-                saveCacheToStorage(statsCache);
-                return statsCache;
-            }
-
-            async function incrementStat(swKey) {
-                var newVal = await incrementCountOnAPI(swKey);
-                if (newVal !== null) {
-                    statsCache[swKey] = newVal;
-                    saveCacheToStorage(statsCache);
-                    return newVal;
-                }
-                var current = statsCache[swKey] || 0;
-                var fallbackVal = current + 1;
-                statsCache[swKey] = fallbackVal;
-                saveCacheToStorage(statsCache);
-                return fallbackVal;
-            }
-
-            var grid = document.getElementById('downloadGrid');
-            var totalDownloadsEl = document.getElementById('totalDownloads');
-            var totalSoftCountEl = document.getElementById('totalSoftCount');
-
-            function renderCards() {
-                grid.innerHTML = '';
-                SOFTWARE_LIST.forEach(function(sw) {
-                    var card = document.createElement('div');
-                    card.className = 'software-card';
-                    card.dataset.key = sw.key;
-
-                    var imgDiv = document.createElement('div');
-                    imgDiv.className = 'software-img';
-                    imgDiv.dataset.imgSrc = sw.imgSrc;
-                    var img = document.createElement('img');
-                    img.src = sw.imgSrc;
-                    img.alt = sw.name + '预览';
-                    img.loading = 'lazy';
-                    imgDiv.appendChild(img);
-
-                    var infoDiv = document.createElement('div');
-                    infoDiv.className = 'software-info';
-
-                    var nameDiv = document.createElement('div');
-                    nameDiv.className = 'software-name';
-                    nameDiv.textContent = sw.name;
-
-                    var descDiv = document.createElement('div');
-                    descDiv.className = 'software-desc';
-                    descDiv.textContent = sw.desc;
-
-                    var metaDiv = document.createElement('div');
-                    metaDiv.className = 'version-meta';
-                    metaDiv.textContent = '版本 ' + sw.version + ' | 日期 ' + sw.date + ' | 大小 ' + sw.size + ' | 作者 ' + sw.author;
-
-                    var statsDiv = document.createElement('div');
-                    statsDiv.className = 'download-stats';
-                    statsDiv.id = 'stat-' + sw.key;
-                    statsDiv.innerHTML = '<span class="stat-icon">⬇</span><span class="stat-label">下载</span> <span class="stat-number" id="num-' + sw.key + '">0</span> <span class="stat-label">次</span> <span class="stat-loading" id="loading-' + sw.key + '">⏳</span>';
-
-                    var btnWrap = document.createElement('div');
-                    btnWrap.className = 'download-btn-wrap';
-                    var btn = document.createElement('a');
-                    btn.className = 'download-btn';
-                    btn.href = sw.downloadUrl;
-                    btn.target = '_blank';
-                    btn.textContent = '下载';
-                    btn.dataset.key = sw.key;
-
-                    btn.addEventListener('click', async function(e) {
-                        var key = this.dataset.key;
-                        var newVal = await incrementStat(key);
-                        var numEl = document.getElementById('num-' + key);
-                        if (numEl) {
-                            numEl.textContent = newVal || 0;
-                            numEl.classList.remove('pop');
-                            void numEl.offsetWidth;
-                            numEl.classList.add('pop');
-                        }
-                        var loadingEl = document.getElementById('loading-' + key);
-                        if (loadingEl) {
-                            loadingEl.textContent = '';
-                            loadingEl.style.display = 'none';
-                        }
-                        updateTotalStats();
-                    });
-
-                    btnWrap.appendChild(btn);
-                    infoDiv.appendChild(metaDiv);
-                    infoDiv.appendChild(statsDiv);
-                    infoDiv.appendChild(btnWrap);
-
-                    card.appendChild(imgDiv);
-                    card.appendChild(infoDiv);
-                    grid.appendChild(card);
-
-                    imgDiv.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        var src = this.querySelector('img')?.src || this.dataset.imgSrc;
-                        if (src) window.open(src, '_blank');
-                    });
-                });
-                totalSoftCountEl.textContent = SOFTWARE_LIST.length;
-            }
-
-            function updateSingleStat(key, value) {
-                var el = document.getElementById('num-' + key);
-                if (el) {
-                    el.textContent = value || 0;
-                }
-                var loadingEl = document.getElementById('loading-' + key);
-                if (loadingEl) {
-                    loadingEl.textContent = '';
-                    loadingEl.style.display = 'none';
-                }
-            }
-
-            function updateTotalStats() {
-                var total = 0;
-                SOFTWARE_LIST.forEach(function(sw) {
-                    total += (statsCache[sw.key] || 0);
-                });
-                totalDownloadsEl.textContent = total;
-            }
-
-            async function refreshAllStats(force) {
-                SOFTWARE_LIST.forEach(function(sw) {
-                    var loadingEl = document.getElementById('loading-' + sw.key);
-                    if (loadingEl) {
-                        loadingEl.textContent = '⏳';
-                        loadingEl.style.display = 'inline';
-                    }
-                });
-                await fetchAllStats(force);
-                SOFTWARE_LIST.forEach(function(sw) {
-                    var val = statsCache[sw.key] || 0;
-                    updateSingleStat(sw.key, val);
-                });
-                updateTotalStats();
-                SOFTWARE_LIST.forEach(function(sw) {
-                    var loadingEl = document.getElementById('loading-' + sw.key);
-                    if (loadingEl) {
-                        loadingEl.textContent = '';
-                        loadingEl.style.display = 'none';
-                    }
-                });
-            }
-
-            var navItems = document.querySelectorAll('.nav-item');
-            var slider = document.getElementById('navSlider');
-            var pages = {
-                home: document.getElementById('home-page'),
-                download: document.getElementById('download-page'),
-                announcement: document.getElementById('announcement-page'),
-                about: document.getElementById('about-page')
-            };
-
-            function updateSliderPosition(activeBtn) {
-                if (!slider || !activeBtn) return;
-                slider.style.top = activeBtn.offsetTop + 'px';
-                slider.style.height = activeBtn.offsetHeight + 'px';
-            }
-
-            function switchPage(pageId, clickedBtn) {
-                Object.values(pages).forEach(function(page) {
-                    if (page) page.classList.remove('active-page');
-                });
-                var targetPage = pages[pageId];
-                if (targetPage) {
-                    targetPage.style.animation = 'none';
-                    targetPage.offsetHeight;
-                    targetPage.classList.add('active-page');
-                }
-                navItems.forEach(function(btn) {
-                    btn.classList.remove('active');
-                });
-                if (clickedBtn) clickedBtn.classList.add('active');
-                updateSliderPosition(clickedBtn);
-                document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-
-            navItems.forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    var pageTarget = btn.getAttribute('data-page');
-                    if (pageTarget && pages[pageTarget]) {
-                        switchPage(pageTarget, btn);
-                        if (pageTarget === 'download') {
-                            refreshAllStats(false);
-                        }
-                    }
-                });
+        function switchPage(pageId, clickedBtn) {
+            Object.values(pages).forEach(page => {
+                if (page) page.classList.remove('active-page');
             });
-
-            var initialActive = document.querySelector('.nav-item.active');
-            if (initialActive) updateSliderPosition(initialActive);
-            window.addEventListener('resize', function() {
-                var currentActive = document.querySelector('.nav-item.active');
-                if (currentActive) updateSliderPosition(currentActive);
-            });
-
-            var subElem = document.querySelector('#home-page .home-sub');
-            if (subElem) {
-                var msgs = ['长途旅行小助手（他能为你的长途旅行添加模组！）', '模组加载 | 助手工具 | 一站式下载', '欢迎来到 BENBAIJIE 下载站！'];
-                var idx = 0;
-                setInterval(function() {
-                    idx = (idx + 1) % msgs.length;
-                    subElem.innerText = msgs[idx];
-                    subElem.classList.add('fade-in');
-                    setTimeout(function() {
-                        subElem.classList.remove('fade-in');
-                    }, 700);
-                }, 5000);
+            const targetPage = pages[pageId];
+            if (targetPage) {
+                targetPage.style.animation = 'none';
+                targetPage.offsetHeight;
+                targetPage.classList.add('active-page');
             }
-
-            renderCards();
-            refreshAllStats(false).then(function() {});
-
-            document.getElementById('refreshStatsBtn')?.addEventListener('click', function() {
-                var self = this;
-                self.textContent = '⟳ 刷新中...';
-                self.disabled = true;
-                refreshAllStats(true).then(function() {
-                    self.textContent = '⟳ 刷新';
-                    self.disabled = false;
-                }).catch(function() {
-                    self.textContent = '⟳ 刷新';
-                    self.disabled = false;
-                });
+            navItems.forEach(btn => {
+                btn.classList.remove('active');
             });
+            if (clickedBtn) clickedBtn.classList.add('active');
+            updateSliderPosition(clickedBtn);
+            document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-            if (document.getElementById('download-page').classList.contains('active-page')) {
-                refreshAllStats(false);
-            }
+        navItems.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const pageTarget = btn.getAttribute('data-page');
+                if (pageTarget && pages[pageTarget]) {
+                    switchPage(pageTarget, btn);
+                }
+            });
+        });
 
-        })();
-    </script>
+        const initialActive = document.querySelector('.nav-item.active');
+        if (initialActive) updateSliderPosition(initialActive);
+        window.addEventListener('resize', () => {
+            const currentActive = document.querySelector('.nav-item.active');
+            if (currentActive) updateSliderPosition(currentActive);
+        });
+
+        let subElem = document.querySelector('#home-page .home-sub');
+        if (subElem) {
+            const originalSub = subElem.innerText;
+            setTimeout(() => {
+                subElem.innerText = '长途旅行小助手（他能为你的长途旅行添加模组！）';
+                subElem.classList.add('fade-in');
+                setTimeout(() => subElem.classList.remove('fade-in'), 700);
+            }, 600);
+            setTimeout(() => {
+                subElem.innerText = originalSub;
+                subElem.classList.add('fade-in');
+                setTimeout(() => subElem.classList.remove('fade-in'), 700);
+            }, 6200);
+            setTimeout(() => {
+                subElem.innerText = '模组加载 | 助手工具 ';
+                subElem.classList.add('fade-in');
+                setTimeout(() => subElem.classList.remove('fade-in'), 700);
+            }, 9800);
+        }
+        
+        const imgContainers = document.querySelectorAll('.software-img');
+        imgContainers.forEach(container => {
+            container.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const imgElement = container.querySelector('img');
+                if (imgElement && imgElement.src) {
+                    window.open(imgElement.src, '_blank');
+                } else {
+                    const fallbackSrc = container.getAttribute('data-img-src');
+                    if (fallbackSrc) window.open(fallbackSrc, '_blank');
+                }
+            });
+        });
+    })();
+</script>
 </body>
 </html>
