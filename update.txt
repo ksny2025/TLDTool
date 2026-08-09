@@ -1,2 +1,2 @@
-1.39
+1.40
 https://ksny2025.github.io/TLDTool/
