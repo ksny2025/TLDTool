@@ -1,467 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<link rel="icon" href="https://gitlab.com/ksny2025/TLDTool/-/raw/main/favicon.ico" type="image/x-icon">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BENBAIJIE站</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Segoe UI", "微软雅黑", "Helvetica Neue", sans-serif;
-        }
-
-        body {
-            background-color: #0c0f14;
-            background-image: radial-gradient(circle at 25% 40%, rgba(45, 55, 72, 0.4) 0%, #0c0f14 90%);
-            min-height: 100vh;
-            color: #e9edf2;
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-            position: relative;
-        }
-
-        .sidebar {
-            width: 260px;
-            flex-shrink: 0;
-            background: rgba(20, 24, 30, 0.85);
-            backdrop-filter: blur(30px);
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 32px 0 20px 0;
-            display: flex;
-            flex-direction: column;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            z-index: 100;
-        }
-
-        .logo-area {
-            padding: 0 24px 28px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 24px;
-        }
-
-        .logo-area h2 {
-            font-size: 22px;
-            font-weight: 500;
-            letter-spacing: 1px;
-            background: linear-gradient(135deg, #eef2f5, #bccbd8);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .logo-area p {
-            font-size: 12px;
-            color: #9aa9b9;
-            margin-top: 6px;
-        }
-
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 0 16px;
-            flex: 1;
-            position: relative;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 18px;
-            background: transparent;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 450;
-            color: #cfddee;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
-            width: 100%;
-            position: relative;
-            z-index: 2;
-            transform: scale(1);
-        }
-
-        .nav-item:hover {
-            transform: scale(1.05);
-            background: rgba(255, 255, 255, 0.08);
-            color: white;
-        }
-
-        .nav-item.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            font-weight: 500;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-
-        .nav-slider {
-            position: absolute;
-            left: 16px;
-            width: 3px;
-            background: linear-gradient(180deg, #e5e9f0, #9aafcf, #e5e9f0);
-            border-radius: 3px;
-            transition: top 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1), height 0.25s ease;
-            pointer-events: none;
-            z-index: 1;
-            box-shadow: 0 0 6px rgba(229,233,240,0.6);
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 28px 32px 60px 32px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-        }
-
-        .page-view {
-            display: none;
-        }
-
-        .page-view.active-page {
-            display: block;
-            animation: pageRotateIn 0.45s cubic-bezier(0.2, 0.9, 0.4, 1.2) forwards;
-        }
-
-        @keyframes pageRotateIn {
-            0% {
-                opacity: 0;
-                transform: rotateX(12deg) rotateY(3deg) scale(0.96);
-                filter: blur(2px);
-            }
-            100% {
-                opacity: 1;
-                transform: rotateX(0deg) rotateY(0deg) scale(1);
-                filter: blur(0);
-            }
-        }
-
-        .card-pane {
-            background: rgba(32, 36, 43, 0.7);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            padding: 28px 30px;
-            margin-bottom: 28px;
-        }
-
-        .page-title {
-            font-size: 28px;
-            font-weight: 500;
-            margin-bottom: 20px;
-            color: #ffffff;
-            letter-spacing: -0.3px;
-            border-left: 4px solid #c0cfdf;
-            padding-left: 18px;
-        }
-
-        .download-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 28px;
-            margin: 20px 0 15px;
-        }
-
-        .software-card {
-            background: rgba(24, 28, 35, 0.8);
-            border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.25s;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .software-card:hover {
-            transform: translateY(-4px);
-            background: rgba(40, 45, 55, 0.9);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 28px -12px black;
-        }
-
-        .software-img {
-            width: 100%;
-            height: 160px;
-            background-color: #1a1e26;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .software-img:hover {
-            filter: brightness(1.05);
-        }
-
-        .software-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            pointer-events: none;
-        }
-
-        .software-info {
-            padding: 20px 20px 24px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .software-name {
-            font-size: 1.45rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #f0f4fa;
-        }
-
-        .software-desc {
-            font-size: 0.9rem;
-            line-height: 1.5;
-            color: #b7c5d6;
-            margin-bottom: 16px;
-        }
-
-        .version-meta {
-            font-size: 0.75rem;
-            color: #8096af;
-            margin-bottom: 18px;
-            border-top: 1px dashed rgba(255,255,255,0.1);
-            padding-top: 12px;
-        }
-
-        .download-btn {
-            display: inline-block;
-            text-align: center;
-            background: #2f3540;
-            padding: 10px 16px;
-            border-radius: 40px;
-            color: #f0f3f8;
-            text-decoration: none;
-            font-weight: 500;
-            transition: 0.2s;
-            width: fit-content;
-            align-self: flex-start;
-            margin-top: 6px;
-            font-size: 0.9rem;
-        }
-
-        .download-btn:hover {
-            background: #4a5364;
-            transform: scale(1.02);
-        }
-
-        .tip-warning {
-            background: rgba(0, 0, 0, 0.4);
-            border-left: 3px solid #b9cadb;
-            padding: 14px 20px;
-            border-radius: 14px;
-            margin-top: 20px;
-            color: #cfdfef;
-            font-size: 14px;
-        }
-
-        .announcement-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .announcement-item {
-            background: rgba(20, 24, 30, 0.6);
-            border-radius: 20px;
-            padding: 18px 22px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .announcement-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #eef4ff;
-        }
-
-        .announcement-meta {
-            display: flex;
-            gap: 20px;
-            font-size: 12px;
-            color: #8e9eae;
-            margin-bottom: 12px;
-        }
-
-        .announcement-content {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #cbdbec;
-        }
-
-        .group-btn {
-            display: inline-block;
-            background: #3a414c;
-            padding: 14px 28px;
-            border-radius: 36px;
-            color: white;
-            font-weight: 500;
-            text-decoration: none;
-            transition: 0.2s;
-            margin-top: 20px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .group-btn:hover {
-            background: #545e6b;
-            transform: scale(1.02);
-        }
-
-        .stat-info {
-            display: flex;
-            gap: 30px;
-            margin: 24px 0 10px;
-            flex-wrap: wrap;
-        }
-
-        .stat-badge {
-            background: #232832;
-            border-radius: 36px;
-            padding: 6px 18px;
-            font-size: 15px;
-            color: #c0d0e0;
-        }
-
-        .home-hero {
-            text-align: center;
-            margin: 40px 0 20px;
-        }
-
-        .home-title {
-            font-size: 52px;
-            font-weight: 600;
-            background: linear-gradient(130deg, #6e8094, #b8c5cf);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        .home-sub {
-            font-size: 20px;
-            color: #bdc9db;
-            margin-bottom: 12px;
-            font-weight: 400;
-        }
-
-        .desc-line {
-            font-size: 16px;
-            color: #8c9bb0;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            display: inline-block;
-            padding-top: 20px;
-            margin-top: 20px;
-        }
-
-        .fade-in {
-            animation: gentleAppear 0.7s ease;
-        }
-
-        @keyframes gentleAppear {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 720px) {
-            .app-container {
-                flex-direction: column;
-            }
-            .sidebar {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                top: auto;
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                justify-content: space-around;
-                padding: 10px 12px;
-                background: rgba(18, 22, 28, 0.92);
-                backdrop-filter: blur(30px);
-                border-top: 1px solid rgba(255,255,255,0.1);
-                border-right: none;
-                z-index: 200;
-            }
-            .logo-area {
-                display: none;
-            }
-            .nav-links {
-                flex-direction: row;
-                padding: 0;
-                gap: 6px;
-                justify-content: space-evenly;
-                position: relative;
-            }
-            .nav-item {
-                flex-direction: column;
-                padding: 8px 12px;
-                gap: 4px;
-                font-size: 12px;
-                border-radius: 28px;
-                width: auto;
-            }
-            .nav-slider {
-                display: none;
-            }
-            .main-content {
-                padding: 20px 18px 80px 18px;
-                margin-bottom: 0;
-            }
-            .page-title {
-                font-size: 24px;
-            }
-            .home-title {
-                font-size: 38px;
-            }
-            .card-pane {
-                padding: 20px;
-            }
-            .download-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e232b;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #4a5563;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6c7a8a;
-        }
-    </style>
+    <link rel="icon" href="https://gitlab.com/ksny2025/TLDTool/-/raw/main/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="app-container">
@@ -483,51 +27,15 @@
                 <div class="home-hero">
                     <h1 class="home-title">BENBAIJIE</h1>
                     <p class="home-sub" id="changingSub">欢迎来到长途旅行下载站！</p>
-
                 </div>
-                <div style="margin-top: 40px;">
-                    <p style="color:#b3c2d4; max-width: 560px; margin: 0 auto; line-height: 1.6;">
-
-<style>
-  .bili-nav-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 16px;
-    margin-left: 12px;
-    background: linear-gradient(135deg, #151921, #151921);
-    color: rgb(255, 255, 255) !important;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    text-decoration: none;
-    border-radius: 40px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.3);
-    white-space: nowrap;
-  }
-  .bili-nav-btn:hover {
-    background: linear-gradient(135deg, #1c2128, #1c2128);
-    transform: translateY(-1px);
-    box-shadow: 0 5px 12px rgba(202, 202, 202, 0.4);
-    color: rgb(255, 255, 255) !important;
-    text-decoration: none;
-  }
-  @media (max-width: 640px) {
-    .bili-nav-btn {
-      padding: 5px 12px;
-      font-size: 13px;
-      margin-left: 8px;
-    }
-  }
-</style>
-
-<a href="https://b23.tv/eoXbYnf" class="bili-nav-btn" target="_blank" rel="noopener noreferrer">
-  主播B站
-</a>
-
-                    </p>
+                <div class="social-buttons">
+                    <a href="https://b23.tv/eoXbYnf" class="social-btn" target="_blank" rel="noopener noreferrer">主播B站</a>
+                    <a href="https://www.coolapk.com/u/Znine2026" class="social-btn" target="_blank" rel="noopener noreferrer">主播酷安</a>
+                    <a href="https://v.douyin.com/W3Kr-T5m2cU/" class="social-btn" target="_blank" rel="noopener noreferrer">主播抖音</a>
                 </div>
+            </div>
+            <div class="video-wrapper">
+                <iframe src="https://player.bilibili.com/player.html?bvid=BV1Vd7j6DEhq&page=1&autoplay=1&muted=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
         </div>
 
@@ -535,6 +43,7 @@
             <h2 class="page-title">软件下载</h2>
             <div class="card-pane">
                 <div class="download-grid">
+                    <!-- 所有软件卡片保持不变 -->
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林之子模组加载器.png">
                             <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/BENBAIJIELoader.png">
@@ -546,7 +55,6 @@
                             <a href="https://share.feijipan.com/s/VEc73VOK" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-					
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://github.com/ksny2025/TLDTool/raw/refs/heads/main/TempROOT.png">
                             <img src="https://github.com/ksny2025/TLDTool/raw/refs/heads/main/TempROOT.png" alt="一键临时ROOT">
@@ -558,7 +66,6 @@
                             <a href="https://share.feijipan.com/s/tq8BfpRQ" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://github.com/ksny2025/TLDTool/raw/refs/heads/main/TempROOT.png">
                             <img src="https://github.com/ksny2025/TLDTool/raw/refs/heads/main/HTE.png" alt="真正的异环">
@@ -570,7 +77,6 @@
                             <a href="https://share.feijipan.com/s/3j5jLUtC" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/长途旅行.png">
                             <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/长途旅行.png" alt="长途旅行本体预览">
@@ -582,7 +88,6 @@
                             <a href="https://share.feijipan.com/s/eS4bQJtZ" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/小助手.png">
                             <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/小助手.png" alt="长途旅行小助手预览">
@@ -594,7 +99,6 @@
                             <a href="https://share.feijipan.com/s/YD4bQcp8" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/模组加载器.png">
                             <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/模组加载器.png" alt="模组加载器预览">
@@ -606,7 +110,6 @@
                             <a href="https://share.feijipan.com/s/ME4bQlFi" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/Asset文件.png">
                             <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/Asset文件.png" alt="Assets文件预览">
@@ -618,7 +121,6 @@
                             <a href="https://share.feijipan.com/s/Xd4b1UB3" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/后室模组加载器.png">
                             <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/后室模组加载器.png" alt="后室模组加载器预览">
@@ -630,7 +132,6 @@
                             <a href="https://share.feijipan.com/s/l84fmqup" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/植物大战僵尸辅助.png">
                             <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/植物大战僵尸辅助.png">
@@ -642,7 +143,6 @@
                             <a href="https://share.feijipan.com/s/PwbYKR4B" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/车间工具.png">
                             <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/车间工具.png">
@@ -654,7 +154,6 @@
                             <a href="https://share.feijipan.com/s/RZcUdWkg" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林之子模组加载器.png">
                             <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林之子模组加载器.png">
@@ -666,7 +165,6 @@
                             <a href="https://share.feijipan.com/s/X0cVOPck" class="download-btn" target="_blank">下载</a>
                         </div>
                     </div>
-
                     <div class="software-card">
                         <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林之子模组加载器.png">
                             <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林科技加载.png">
@@ -716,91 +214,6 @@
     </main>
 </div>
 
-<script>
-    (function() {
-        const navItems = document.querySelectorAll('.nav-item');
-        const slider = document.getElementById('navSlider');
-        const pages = {
-            home: document.getElementById('home-page'),
-            download: document.getElementById('download-page'),
-            announcement: document.getElementById('announcement-page'),
-            about: document.getElementById('about-page')
-        };
-
-        function updateSliderPosition(activeBtn) {
-            if (!slider || !activeBtn) return;
-            slider.style.top = activeBtn.offsetTop + 'px';
-            slider.style.height = activeBtn.offsetHeight + 'px';
-        }
-
-        function switchPage(pageId, clickedBtn) {
-            Object.values(pages).forEach(page => {
-                if (page) page.classList.remove('active-page');
-            });
-            const targetPage = pages[pageId];
-            if (targetPage) {
-                targetPage.style.animation = 'none';
-                targetPage.offsetHeight;
-                targetPage.classList.add('active-page');
-            }
-            navItems.forEach(btn => {
-                btn.classList.remove('active');
-            });
-            if (clickedBtn) clickedBtn.classList.add('active');
-            updateSliderPosition(clickedBtn);
-            document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        navItems.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const pageTarget = btn.getAttribute('data-page');
-                if (pageTarget && pages[pageTarget]) {
-                    switchPage(pageTarget, btn);
-                }
-            });
-        });
-
-        const initialActive = document.querySelector('.nav-item.active');
-        if (initialActive) updateSliderPosition(initialActive);
-        window.addEventListener('resize', () => {
-            const currentActive = document.querySelector('.nav-item.active');
-            if (currentActive) updateSliderPosition(currentActive);
-        });
-
-        let subElem = document.querySelector('#home-page .home-sub');
-        if (subElem) {
-            const originalSub = subElem.innerText;
-            setTimeout(() => {
-                subElem.innerText = '长途旅行小助手（他能为你的长途旅行添加模组！）';
-                subElem.classList.add('fade-in');
-                setTimeout(() => subElem.classList.remove('fade-in'), 700);
-            }, 600);
-            setTimeout(() => {
-                subElem.innerText = originalSub;
-                subElem.classList.add('fade-in');
-                setTimeout(() => subElem.classList.remove('fade-in'), 700);
-            }, 6200);
-            setTimeout(() => {
-                subElem.innerText = '模组加载 | 助手工具 ';
-                subElem.classList.add('fade-in');
-                setTimeout(() => subElem.classList.remove('fade-in'), 700);
-            }, 9800);
-        }
-        
-        const imgContainers = document.querySelectorAll('.software-img');
-        imgContainers.forEach(container => {
-            container.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const imgElement = container.querySelector('img');
-                if (imgElement && imgElement.src) {
-                    window.open(imgElement.src, '_blank');
-                } else {
-                    const fallbackSrc = container.getAttribute('data-img-src');
-                    if (fallbackSrc) window.open(fallbackSrc, '_blank');
-                }
-            });
-        });
-    })();
-</script>
+<script src="script.js"></script>
 </body>
 </html>
