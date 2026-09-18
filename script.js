@@ -11,6 +11,10 @@
     gridLayer.className = 'grid-overlay';
     document.body.appendChild(gridLayer);
 
+    var svgLayer = document.createElement('div');
+    svgLayer.innerHTML = '<svg width="0" height="0" style="position:absolute"><defs><filter id="liquidDrop" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.011 0.017" numOctaves="2" seed="7" result="noise"/><feGaussianBlur in="noise" stdDeviation="1.6" result="softNoise"/><feDisplacementMap in="SourceGraphic" in2="softNoise" scale="90" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>';
+    document.body.appendChild(svgLayer);
+
     var isTouch = window.matchMedia('(hover: none)').matches;
 
     var navItems = document.querySelectorAll('.nav-item');
@@ -22,10 +26,17 @@
         about: document.getElementById('about-page')
     };
 
+    var sliderInitialized = false;
     function updateSliderPosition(activeBtn) {
         if (!slider || !activeBtn) return;
-        slider.style.top = activeBtn.offsetTop + 'px';
-        slider.style.height = activeBtn.offsetHeight + 'px';
+        slider.style.left = (activeBtn.offsetLeft - 5) + 'px';
+        slider.style.width = (activeBtn.offsetWidth + 10) + 'px';
+        if (sliderInitialized) {
+            slider.classList.remove('morphing');
+            slider.offsetHeight;
+            slider.classList.add('morphing');
+        }
+        sliderInitialized = true;
     }
 
     function revealInPage(pageEl) {
