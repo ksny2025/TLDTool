@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>正在跳转…</title>
-  <meta http-equiv="refresh" content="0; url=http://058244d315b9.ofalias.org:54037/">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%234f6ef7'/%3E%3C/svg%3E">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,13 +37,24 @@
 </head>
 <body>
   <div class="spinner"></div>
-  <h1>正在为你跳转…</h1>
-  <p>如果长时间没有响应，点击这里：<br>
-    <a href="http://058244d315b9.ofalias.org:54037/">http://058244d315b9.ofalias.org:54037/</a>
+  <h1>正在尝试连接主节点…</h1>
+  <p id="tip">4秒内未加载成功，将自动切换备用站点<br>
+    <a id="mainLink" href="http://058244d315b9.ofalias.org:54037/">主节点：http://058244d315b9.ofalias.org:54037/</a>
+    <br><br>
+    <a id="backupLink" href="https://ksny2025.github.io/Znine/">备用站点：https://ksny2025.github.io/Znine/</a>
   </p>
-  <script>
-    // JS 兜底跳转
-    window.location.replace("http://058244d315b9.ofalias.org:54037/");
-  </script>
+
+<script>
+const mainUrl = "http://058244d315b9.ofalias.org:54037/";
+const backupUrl = "https://ksny2025.github.io/Znine/";
+const waitTime = 4000;
+
+let jumpTimer = setTimeout(()=>{
+  window.location.href = backupUrl;
+}, waitTime);
+
+// 优先直接跳主站，如果主站加载成功就不会触发倒计时
+window.location.href = mainUrl;
+</script>
 </body>
 </html>
