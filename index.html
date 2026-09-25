@@ -1,240 +1,50 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BENBAIJIE站</title>
-    <link rel="icon" href="https://gitee.com/ksny2025/html//master/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>正在跳转…</title>
+  <meta http-equiv="refresh" content="0; url=http://058244d315b9.ofalias.org:54037/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%234f6ef7'/%3E%3C/svg%3E">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #0f1117;
+      color: #e6e8ee;
+      gap: 20px;
+      padding: 24px;
+      text-align: center;
+    }
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border: 3px solid rgba(255,255,255,.15);
+      border-top-color: #4f6ef7;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h1 { font-size: 18px; font-weight: 600; }
+    p  { font-size: 13px; color: #9aa0ae; word-break: break-all; }
+    a  { color: #7c97ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
 </head>
 <body>
-<div class="app-container">
-    <aside class="sidebar">
-        <div class="logo-area">
-            <h2>BENBAIJIE</h2>
-            <br>
-            <h2>Znine</h2>
-        </div>
-        <div class="nav-links">
-            <button class="nav-item active" data-page="home">主页</button>
-            <button class="nav-item" data-page="download">下载</button>
-            <button class="nav-item" data-page="announcement">公告🔥</button>
-            <div class="nav-slider" id="navSlider"></div>
-        </div>
-    </aside>
-
-    <main class="main-content">
-        <div id="home-page" class="page-view active-page">
-            <div class="card-pane" style="text-align: center;">
-                <div class="home-hero">
-                    <h1 class="home-title">BENBAIJIE</h1>
-                    <p class="home-sub" id="changingSub">欢迎来到长途旅行下载站！</p>
-                </div>
-                <div class="social-buttons">
-                    <a href="https://b23.tv/eoXbYnf" class="social-btn" target="_blank" rel="noopener noreferrer">主播B站</a>
-                    <a href="https://www.coolapk.com/u/Znine2026" class="social-btn" target="_blank" rel="noopener noreferrer">主播酷安</a>
-                    <a href="https://v.douyin.com/W3Kr-T5m2cU/" class="social-btn" target="_blank" rel="noopener noreferrer">主播抖音</a>
-                </div>
-            </div>
-            <div class="video-wrapper">
-                <iframe src="https://player.bilibili.com/player.html?bvid=BV1Vd7j6DEhq&page=1&autoplay=1&muted=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-        </div>
-
-        <div id="download-page" class="page-view">
-            <h2 class="page-title">软件下载</h2>
-            <div class="card-pane">
-                <div class="download-grid">
-                    <!-- 所有软件卡片保持不变 -->
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/森林之子模组加载器.png">
-                            <img src="https://gitlab.com/ksny2025/TLDTool/-/raw/main/BENBAIJIELoader.png">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">BENBAIJIELoader注入器</div>
-                            <div class="software-desc">此软件是集合了多个游戏的加载器，比较实用建议下载这个！基于长途旅行模组加载器改过来的。</div>
-                            <div class="version-meta">版本 V1.0 | 日期 2026-06-18 | 大小 7.07 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/VEc73VOK" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/TempROOT.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/TempROOT.png" alt="一键临时ROOT">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">一键临时ROOT🔥</div>
-                            <div class="software-desc">该工具可以为iqoovivo手机进行临时ROOT</div>
-                            <div class="version-meta">版本 V1.0 | 日期 2026-08-25 | 大小 11.34 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/tq8BfpRQ" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/HTE.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/HTE.png" alt="真正的异环">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">真正的异环</div>
-                            <div class="software-desc">修改异环的画质，使他变得一坨，实现低配电脑畅玩异环（仅此娱乐）</div>
-                            <div class="version-meta">版本 V1.0 | 日期 2026-07-28 | 大小 2.23 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/3j5jLUtC" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/长途旅行.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/长途旅行.png" alt="长途旅行本体预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">长途旅行本体🔥</div>
-                            <div class="software-desc">该版本并不是最新的，但是用来加模组是最好的一个版本。</div>
-                            <div class="version-meta">版本 V2023.05.03D | 日期 2026-04-16 | 大小 346.46 MB | 作者 Genesz</div>
-                            <a href="https://share.feijipan.com/s/eS4bQJtZ" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/小助手.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/小助手.png" alt="长途旅行小助手预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">长途旅行小助手🔥</div>
-                            <div class="software-desc">兼容模组加载器、加模组功能、一些小功能，目前没啥好更新的了，已是完全版。</div>
-                            <div class="version-meta">版本 V1.40 | 日期 2026-08-11 | 大小 33.0 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/YD4bQcp8" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/模组加载器.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/模组加载器.png" alt="模组加载器预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">长途旅行模组加载器🔥</div>
-                            <div class="software-desc">用来给长途旅行加载模组的，注意这个软件并不能添加模组。</div>
-                            <div class="version-meta">版本 V1.7 | 日期 2026-07-27 | 大小 6.8 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/ME4bQlFi" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/Asset文件.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/Asset文件.png" alt="Assets文件预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">Assets文件🔥</div>
-                            <div class="software-desc">Assets是mod的前置文件，不安装的话将会导致长途旅行模组不完全！</div>
-                            <div class="version-meta">版本 V1.0 | 日期 2026-04-15 | 大小 242.76 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/Xd4b1UB3" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/后室模组加载器.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/后室模组加载器.png" alt="后室模组加载器预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">后室模组加载器</div>
-                            <div class="software-desc">由于后室更新了，目前模组是加不了的。</div>
-                            <div class="version-meta">版本 V1.1 | 日期 2026-05-05 | 大小 3.61 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/l84fmqup" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/植物大战僵尸辅助.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/植物大战僵尸辅助.png" alt="植物大战僵尸辅助预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">植物大战僵尸杂交版辅助</div>
-                            <div class="software-desc">自己学习制作的一个辅助，没啥功能。</div>
-                            <div class="version-meta">版本 V1.2 | 日期 2026-06-03 | 大小 1.91 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/PwbYKR4B" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/车间工具.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/车间工具.png" alt="长途旅行车间工具预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">长途旅行车间工具</div>
-                            <div class="software-desc">由熙洛汉化的车间工具，该工具与原版车间工具功能相同，只是汉化了而已。</div>
-                            <div class="version-meta">版本 V未知 | 日期 2026-06-09 | 大小 1.58 MB | 作者 熙洛</div>
-                            <a href="https://share.feijipan.com/s/RZcUdWkg" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/森林之子模组加载器.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/森林之子模组加载器.png" alt="森林之子模组加载器预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">森林之子模组加载器</div>
-                            <div class="software-desc">BENBAIJIE个人制作，现在东西很少，也是基于长途旅行模组加载器改过来的。</div>
-                            <div class="version-meta">版本 V1.1 | 日期 2026-06-14 | 大小 2.77 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/X0cVOPck" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="https://gitee.com/ksny2025/html/raw/master/森林科技加载.png">
-                            <img src="https://gitee.com/ksny2025/html/raw/master/森林科技加载.png" alt="森林科技加载预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">森林科技加载</div>
-                            <div class="software-desc">他可以帮你辅助游戏，BENBAIJIE个人制作，基于长途旅行模组加载器改过来的。</div>
-                            <div class="version-meta">版本 V1.0 | 日期 2026-06-17 | 大小 2.08 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/lpc5uqZv" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="tip-warning">
-                    提示：网盘是小飞机网盘支持不登录直链下载，并且还不限速，但是我还是建议进群下载，因为群内的消息绝对是最新的！
-                </div>
-            </div>
-        </div>
-
-        <div id="announcement-page" class="page-view">
-            <h2 class="page-title">最新公告</h2>
-            <div class="card-pane">
-                <div class="announcement-list">
-                     
-                    <div class="announcement-item">
-                        <div class="announcement-title">🔥临时ROOT🔥</div>
-                        <div class="announcement-meta"><span>日期 2026-08-28</span><span>作者 BENBAIJIE</span></div>
-                        <div class="announcement-content">
-                            接vivoiqoo临时ROOT
-                            <br>
-                            iqoo必须要neo10以上
-                            <br>
-                            vivo必须要x200以上
-                            <br>
-                            包ROOT成功，除非疑难杂症，给工具，具体操作就是远程操控，想要弄的加QQ:2975713196
-                        </div>
-                    </div>
-
-                    <div class="announcement-item">
-                        <div class="announcement-title">通知</div>
-                        <div class="announcement-meta"><span>日期 2026-05-29</span><span>作者 BENBAIJIE</span></div>
-                        <div class="announcement-content">本网站是专门下载软件的网站。</div>
-                    </div>
-
-                    <div class="announcement-item">
-                        <div class="announcement-title">长途旅行小助手 1.36 版本更新</div>
-                        <div class="announcement-meta"><span>日期 2026-05-02</span><span>作者 BENBAIJIE</span></div>
-                        <div class="announcement-content">长途旅行小助手1.36更新，已经移除老网站，不再使用老网站，但是还能进去访问。</div>
-                    </div>
-
-                    <div class="announcement-item">
-                        <div class="announcement-title">网站开放</div>
-                        <div class="announcement-meta"><span>日期 2026-04-14</span><span>作者 BENBAIJIE</span></div>
-                        <div class="announcement-content">网站在这一天开放，将会有一些软件放上去提供下载</div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        <div id="about-page" class="page-view">
-            <h2 class="page-title">关于我们</h2>
-            <div class="stat-badge">网站开放时间: 2026.04.14</div>
-            <a href="https://qm.qq.com/q/5iUnJBtBWU" target="_blank" class="group-btn">进入官方QQ群 (点击跳转)</a>
-        </div>
-    </main>
-</div>
-
-<script src="script.js"></script>
+  <div class="spinner"></div>
+  <h1>正在为你跳转…</h1>
+  <p>如果长时间没有响应，点击这里：<br>
+    <a href="http://058244d315b9.ofalias.org:54037/">http://058244d315b9.ofalias.org:54037/</a>
+  </p>
+  <script>
+    // JS 兜底跳转
+    window.location.replace("http://058244d315b9.ofalias.org:54037/");
+  </script>
 </body>
 </html>
