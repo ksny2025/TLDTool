@@ -30,40 +30,55 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     h1 { font-size: 18px; font-weight: 600; }
-    p  { font-size: 13px; color: #9aa0ae; word-break: break-all; }
+    p  { font-size: 13px; color: #9aa0ae; word-break: break-all; line-height:1.8; }
     a  { color: #7c97ff; text-decoration: none; }
     a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="spinner"></div>
-  <h1>正在为你跳转… <span id="countdown">5</span>秒</h1>
-  <p>如果长时间没有响应，点击这里：<br>
-    <a id="jumpLink" href="http://058244d315b9.ofalias.org:54037/">http://058244d315b9.ofalias.org:54037/</a>
+  <h1 id="title">正在尝试主节点 <span id="countdown">3</span>秒</h1>
+  <p>
+    主节点访问：<a id="mainLink" href="http://058244d315b9.ofalias.org:54037/">http://058244d315b9.ofalias.org:54037/</a>
+    <br>
+    备用站点：<a id="backupLink" href="https://ksny2025.github.io/Znine/">https://ksny2025.github.io/Znine/</a>
   </p>
 
 <script>
-const targetUrl = "http://058244d315b9.ofalias.org:54037/";
-// sessionStorage：当前标签会话有效；返回页面检测到此标记就不执行自动跳转
+const mainUrl = "http://058244d315b9.ofalias.org:54037/";
+const backupUrl = "https://ksny2025.github.io/Znine/";
 const JUMP_FLAG = "has_auto_jumped";
 
-// 如果已经自动跳转过，直接停止逻辑
+// 如果已经自动跳转过（浏览器返回回来），关闭自动逻辑
 if(sessionStorage.getItem(JUMP_FLAG)){
-  document.querySelector("h1").innerText = "已跳过自动跳转，请手动点击链接访问";
+  document.getElementById("title").innerText = "自动跳转已结束，请手动点击链接访问";
 }else{
-  let remain = 5;
+  let remain = 3;
   const countDom = document.getElementById("countdown");
-  const timer = setInterval(()=>{
+  let timer = setInterval(()=>{
     remain--;
     countDom.innerText = remain;
     if(remain <= 0){
       clearInterval(timer);
-      // 设置标记，下次返回页面不会自动跳
       sessionStorage.setItem(JUMP_FLAG,"1");
-      // replace：跳转，不会留下当前页在历史栈，减少返回回到本页的概率
-      window.location.replace(targetUrl);
+      // 3秒超时，跳备用链接
+      window.location.replace(backupUrl);
     }
   },1000);
+
+  // 尝试探测主站连通性，能连通直接走主站
+  fetch(mainUrl, {mode:"no-cors"})
+  .then(()=>{
+    clearInterval(timer);
+    sessionStorage.setItem(JUMP_FLAG,"1");
+    window.location.replace(mainUrl);
+  })
+  .catch(()=>{
+    // fetch捕获错误，立刻切备用，不用等倒计时结束
+    clearInterval(timer);
+    sessionStorage.setItem(JUMP_FLAG,"1");
+    window.location.replace(backupUrl);
+  })
 }
 </script>
 </body>
