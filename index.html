@@ -37,24 +37,34 @@
 </head>
 <body>
   <div class="spinner"></div>
-  <h1>正在尝试连接主节点…</h1>
-  <p id="tip">4秒内未加载成功，将自动切换备用站点<br>
-    <a id="mainLink" href="http://058244d315b9.ofalias.org:54037/">主节点：http://058244d315b9.ofalias.org:54037/</a>
-    <br><br>
-    <a id="backupLink" href="https://ksny2025.github.io/Znine/">备用站点：https://ksny2025.github.io/Znine/</a>
+  <h1>正在为你跳转… <span id="countdown">5</span>秒</h1>
+  <p>如果长时间没有响应，点击这里：<br>
+    <a id="jumpLink" href="http://058244d315b9.ofalias.org:54037/">http://058244d315b9.ofalias.org:54037/</a>
   </p>
 
 <script>
-const mainUrl = "http://058244d315b9.ofalias.org:54037/";
-const backupUrl = "https://ksny2025.github.io/Znine/";
-const waitTime = 4000;
+const targetUrl = "http://058244d315b9.ofalias.org:54037/";
+// sessionStorage：当前标签会话有效；返回页面检测到此标记就不执行自动跳转
+const JUMP_FLAG = "has_auto_jumped";
 
-let jumpTimer = setTimeout(()=>{
-  window.location.href = backupUrl;
-}, waitTime);
-
-// 优先直接跳主站，如果主站加载成功就不会触发倒计时
-window.location.href = mainUrl;
+// 如果已经自动跳转过，直接停止逻辑
+if(sessionStorage.getItem(JUMP_FLAG)){
+  document.querySelector("h1").innerText = "已跳过自动跳转，请手动点击链接访问";
+}else{
+  let remain = 5;
+  const countDom = document.getElementById("countdown");
+  const timer = setInterval(()=>{
+    remain--;
+    countDom.innerText = remain;
+    if(remain <= 0){
+      clearInterval(timer);
+      // 设置标记，下次返回页面不会自动跳
+      sessionStorage.setItem(JUMP_FLAG,"1");
+      // replace：跳转，不会留下当前页在历史栈，减少返回回到本页的概率
+      window.location.replace(targetUrl);
+    }
+  },1000);
+}
 </script>
 </body>
 </html>
