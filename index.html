@@ -1,323 +1,70 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BENBAIJIE站</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>正在跳转…</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%234f6ef7'/%3E%3C/svg%3E">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #0f1117;
+      color: #e6e8ee;
+      gap: 20px;
+      padding: 24px;
+      text-align: center;
+    }
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border: 3px solid rgba(255,255,255,.15);
+      border-top-color: #4f6ef7;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h1 { font-size: 18px; font-weight: 600; }
+    p  { font-size: 13px; color: #9aa0ae; word-break: break-all; }
+    a  { color: #7c97ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
 </head>
 <body>
-<div class="app-container">
-    <aside class="sidebar">
-        <div class="logo-area">
-            <h2>BENBAIJIE</h2>
-            <br>
-            <h2>Znine</h2>
-        </div>
-        <div class="nav-links">
-            <button class="nav-item active" data-page="home">主页</button>
-            <button class="nav-item" data-page="download">下载</button>
-            <button class="nav-item" data-page="announcement">公告🔥</button>
-            <button class="nav-item" data-page="chat">聊天💬</button>
-            <div class="nav-slider" id="navSlider"></div>
-        </div>
-    </aside>
+  <div class="spinner"></div>
+  <h1>正在为你跳转… <span id="countdown">5</span>秒</h1>
+  <p>如果长时间没有响应，点击这里：<br>
+    <a id="jumpLink" href="http://058244d315b9.ofalias.org:54037/">http://058244d315b9.ofalias.org:54037/</a>
+  </p>
 
-    <main class="main-content">
-        <div id="home-page" class="page-view active-page">
-            <div class="card-pane home-card" style="text-align: center;">
-                <button class="lang-btn" id="langBtn" type="button">EN</button>
-                <div class="home-hero">
-                    <h1 class="home-title">BENBAIJIE</h1>
-                    <p class="home-sub" id="changingSub">欢迎来到长途旅行下载站！</p>
-                </div>
-                <div class="social-buttons">
-                    <a href="https://b23.tv/eoXbYnf" class="social-btn" target="_blank" rel="noopener noreferrer">主播B站</a>
-                    <a href="https://www.coolapk.com/u/Znine2026" class="social-btn" target="_blank" rel="noopener noreferrer">主播酷安</a>
-                    <a href="https://v.douyin.com/W3Kr-T5m2cU/" class="social-btn" target="_blank" rel="noopener noreferrer">主播抖音</a>
-                </div>
-                <div class="stat-info site-stats">
-                    <span class="stat-badge">总访问量 <b id="statTotal">-</b></span>
-                    <span class="stat-badge">今日访问 <b id="statToday">-</b></span>
-                    <span class="stat-badge">当前在线 <b id="statOnline">-</b></span>
-                </div>
-            </div>
-            <div class="video-wrapper">
-                <iframe src="https://player.bilibili.com/player.html?bvid=BV1Vd7j6DEhq&page=1&autoplay=1&muted=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-        </div>
+<script>
+const targetUrl = "http://058244d315b9.ofalias.org:54037/";
+// sessionStorage：当前标签会话有效；返回页面检测到此标记就不执行自动跳转
+const JUMP_FLAG = "has_auto_jumped";
 
-        <div id="download-page" class="page-view">
-            <h2 class="page-title">软件下载</h2>
-            <div class="card-pane">
-                <div class="download-grid">
-
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="森林之子模组加载器.png">
-                            <img src="BENBAIJIELoader.png">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">BENBAIJIELoader注入器</div>
-                            <div class="software-desc">此软件是集合了多个游戏的加载器，比较实用建议下载这个！基于长途旅行模组加载器改过来的。</div>
-                            <div class="version-meta">版本 V1.0 | 日期 2026-06-18 | 大小 7.07 MB | 作者 BENBAIJIE</div>
-                            <a href="BENBAIJIELoaderV1.0.exe" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="TempROOT.png">
-                            <img src="TempROOT.png" alt="一键临时ROOT">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">一键临时ROOT🔥</div>
-                            <div class="software-desc">该工具可以为iqoovivo手机进行临时ROOT</div>
-                            <div class="version-meta">版本 V1.0 | 日期 2026-08-25 | 大小 11.34 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/tq8BfpRQ" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="HTE.png">
-                            <img src="HTE.png" alt="真正的异环">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">真正的异环</div>
-                            <div class="software-desc">修改异环的画质，使他变得一坨，实现低配电脑畅玩异环（仅此娱乐）</div>
-                            <div class="version-meta">版本 V1.0 | 日期 2026-07-28 | 大小 2.23 MB | 作者 BENBAIJIE</div>
-                            <a href="真正的异环V1.0.exe" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="长途旅行.png">
-                            <img src="长途旅行.png" alt="长途旅行本体预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">长途旅行本体🔥</div>
-                            <div class="software-desc">该版本并不是最新的，但是用来加模组是最好的一个版本。</div>
-                            <div class="version-meta">版本 V2023.05.03D | 日期 2026-04-16 | 大小 346.46 MB | 作者 Genesz</div>
-                            <a href="https://share.feijipan.com/s/eS4bQJtZ" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="小助手.png">
-                            <img src="小助手.png" alt="长途旅行小助手预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">长途旅行小助手🔥</div>
-                            <div class="software-desc">兼容模组加载器、加模组功能、一些小功能，目前没啥好更新的了，已是完全版。</div>
-                            <div class="version-meta">版本 V1.40 | 日期 2026-08-11 | 大小 33.0 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/YD4bQcp8" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="模组加载器.png">
-                            <img src="模组加载器.png" alt="模组加载器预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">长途旅行模组加载器🔥</div>
-                            <div class="software-desc">用来给长途旅行加载模组的，注意这个软件并不能添加模组。</div>
-                            <div class="version-meta">版本 V1.7 | 日期 2026-07-27 | 大小 6.8 MB | 作者 BENBAIJIE</div>
-                            <a href="长途旅行模组加载器V1.7.exe" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="Asset文件.png">
-                            <img src="Asset文件.png" alt="Assets文件预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">Assets文件🔥</div>
-                            <div class="software-desc">Assets是mod的前置文件，不安装的话将会导致长途旅行模组不完全！</div>
-                            <div class="version-meta">版本 V1.0 | 日期 2026-04-15 | 大小 242.76 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/Xd4b1UB3" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="后室模组加载器.png">
-                            <img src="后室模组加载器.png" alt="后室模组加载器预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">后室模组加载器</div>
-                            <div class="software-desc">由于后室更新了，目前模组是加不了的。</div>
-                            <div class="version-meta">版本 V1.1 | 日期 2026-05-05 | 大小 3.61 MB | 作者 BENBAIJIE</div>
-                            <a href="后室模组加载器V1.1.exe" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="植物大战僵尸辅助.png">
-                            <img src="植物大战僵尸辅助.png" alt="植物大战僵尸辅助预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">植物大战僵尸杂交版辅助</div>
-                            <div class="software-desc">自己学习制作的一个辅助，没啥功能。</div>
-                            <div class="version-meta">版本 V1.2 | 日期 2026-06-03 | 大小 1.91 MB | 作者 BENBAIJIE</div>
-                            <a href="https://share.feijipan.com/s/PwbYKR4B" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="车间工具.png">
-                            <img src="车间工具.png" alt="长途旅行车间工具预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">长途旅行车间工具</div>
-                            <div class="software-desc">由熙洛汉化的车间工具，该工具与原版车间工具功能相同，只是汉化了而已。</div>
-                            <div class="version-meta">版本 V未知 | 日期 2026-06-09 | 大小 1.58 MB | 作者 熙洛</div>
-                            <a href="https://share.feijipan.com/s/RZcUdWkg" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="森林之子模组加载器.png">
-                            <img src="森林之子模组加载器.png" alt="森林之子模组加载器预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">森林之子模组加载器</div>
-                            <div class="software-desc">BENBAIJIE个人制作，现在东西很少，也是基于长途旅行模组加载器改过来的。</div>
-                            <div class="version-meta">版本 V1.1 | 日期 2026-06-14 | 大小 2.77 MB | 作者 BENBAIJIE</div>
-                            <a href="森林之子模组加载器V1.1.exe" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                    <div class="software-card">
-                        <div class="software-img" data-img-src="森林科技加载.png">
-                            <img src="森林科技加载.png" alt="森林科技加载预览">
-                        </div>
-                        <div class="software-info">
-                            <div class="software-name">森林科技加载</div>
-                            <div class="software-desc">他可以帮你辅助游戏，BENBAIJIE个人制作，基于长途旅行模组加载器改过来的。</div>
-                            <div class="version-meta">版本 V1.0 | 日期 2026-06-17 | 大小 2.08 MB | 作者 BENBAIJIE</div>
-                            <a href="森林科技加载V1.0.exe" class="download-btn" target="_blank">下载</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="tip-warning">
-                    提示：网盘是小飞机网盘支持不登录直链下载，并且还不限速，但是我还是建议进群下载，因为群内的消息绝对是最新的！
-                </div>
-            </div>
-        </div>
-
-        <div id="announcement-page" class="page-view">
-            <h2 class="page-title">最新公告</h2>
-            <div class="card-pane">
-                <form class="ann-compose" id="annForm" style="display:none;">
-                    <input type="text" id="annTitle" placeholder="公告标题" maxlength="50" required>
-                    <textarea id="annContent" placeholder="公告内容..." maxlength="2000" rows="4" required></textarea>
-                    <div class="compose-btns"><button type="submit" class="f-btn primary">发布公告</button></div>
-                    <div class="auth-error" id="annError"></div>
-                </form>
-                <div class="announcement-list" id="annList"></div>
-            </div>
-        </div>
-
-        <div id="chat-page" class="page-view">
-            <h2 class="page-title">聊天室</h2>
-
-            <div class="card-pane" id="authPane">
-                <div class="auth-tabs">
-                    <button class="auth-tab active" id="loginTab" type="button">登录</button>
-                    <button class="auth-tab" id="registerTab" type="button">注册</button>
-                </div>
-
-                <form class="auth-form" id="loginForm">
-                    <div class="field-row">
-                        <input type="text" id="loginEmail" placeholder="邮箱" required autocomplete="username">
-                        <span class="field-hint" id="loginEmailHint">邮箱格式不正确</span>
-                    </div>
-                    <input type="password" id="loginPassword" placeholder="密码" required autocomplete="current-password">
-                    <button type="submit" class="auth-submit">登录</button>
-                    <div class="auth-links"><button type="button" class="auth-link" id="forgotLink">忘记密码？</button></div>
-                </form>
-
-                <form class="auth-form" id="registerForm" style="display:none;">
-                    <input type="text" id="regUsername" placeholder="用户名" maxlength="20" required>
-                    <div class="field-row">
-                        <input type="email" id="regEmail" placeholder="邮箱" required autocomplete="email">
-                        <span class="field-hint" id="regEmailHint">邮箱格式不正确</span>
-                    </div>
-                    <div class="code-row" id="regCodeRow" style="display:none;">
-                        <input type="text" id="regCode" placeholder="邮箱验证码" maxlength="6" inputmode="numeric">
-                        <button type="button" class="code-btn" id="regCodeBtn">获取验证码</button>
-                    </div>
-                    <input type="password" id="regPassword" placeholder="密码（至少6位）" minlength="6" required autocomplete="new-password">
-                    <button type="submit" class="auth-submit">注册并登录</button>
-                </form>
-
-                <form class="auth-form" id="resetForm" style="display:none;">
-                    <div class="field-row">
-                        <input type="email" id="resetEmail" placeholder="注册时用的邮箱" required autocomplete="email">
-                        <span class="field-hint" id="resetEmailHint">邮箱格式不正确</span>
-                    </div>
-                    <div class="code-row">
-                        <input type="text" id="resetCode" placeholder="邮箱验证码" maxlength="6" inputmode="numeric" required>
-                        <button type="button" class="code-btn" id="resetCodeBtn">获取验证码</button>
-                    </div>
-                    <input type="password" id="resetPassword" placeholder="新密码（至少6位）" minlength="6" required autocomplete="new-password">
-                    <button type="submit" class="auth-submit">重置密码</button>
-                    <div class="auth-links"><button type="button" class="auth-link" id="backToLogin">返回登录</button></div>
-                </form>
-
-                <div class="auth-error" id="authError"></div>
-            </div>
-
-            <div class="card-pane chat-pane" id="chatPane" style="display:none;">
-                <div class="chat-header">
-                    <div class="chat-header-btns">
-                        <button class="chat-logout" id="changePwdBtn" type="button">账号管理</button>
-                        <button class="chat-logout" id="logoutBtn" type="button">退出登录</button>
-                    </div>
-                </div>
-                <form class="auth-form change-pwd-form" id="changePwdForm" style="display:none;">
-                    <div class="account-info" id="accountInfo"></div>
-                    <div class="avatar-row">
-                        <span class="avatar avatar-lg avatar-letter" id="myAvatar">?</span>
-                        <div class="avatar-side">
-                            <label class="code-btn avatar-upload-btn" for="avatarInput">上传头像</label>
-                            <input type="file" id="avatarInput" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
-                            <div class="account-stats" id="accountStats"></div>
-                        </div>
-                    </div>
-                    <div class="auth-error" id="avatarMsg"></div>
-                    <input type="password" id="oldPwd" placeholder="当前密码" required autocomplete="current-password">
-                    <input type="password" id="newPwd" placeholder="新密码（至少6位）" minlength="6" required autocomplete="new-password">
-                    <button type="submit" class="auth-submit">确认修改</button>
-                    <div class="auth-error" id="pwdError"></div>
-                </form>
-                <div class="chat-subtabs">
-                    <button class="auth-tab active" id="tabChat" type="button">聊天室</button>
-                    <button class="auth-tab" id="tabForum" type="button">论坛</button>
-                </div>
-                <div id="chatView">
-                    <div class="chat-messages" id="chatMessages"></div>
-                    <form class="chat-input-row" id="chatForm">
-                        <input type="text" id="chatInput" placeholder="说点什么..." maxlength="500" autocomplete="off">
-                        <button type="submit" class="chat-send">发送</button>
-                    </form>
-                </div>
-                <div id="forumView" style="display:none;">
-                    <div class="forum-toolbar">
-                        <input type="text" id="forumSearch" placeholder="搜索帖子标题、内容或作者..." maxlength="50" autocomplete="off">
-                        <button class="f-btn" id="newPostBtn" type="button">＋ 发帖</button>
-                    </div>
-                    <form class="forum-compose" id="postForm" style="display:none;">
-                        <input type="text" id="postTitle" placeholder="帖子标题" maxlength="50" required>
-                        <input type="text" id="postTags" placeholder="标签（用逗号分隔，最多5个）" maxlength="60">
-                        <textarea id="postContent" placeholder="分享点什么..." maxlength="2000" rows="3" required></textarea>
-                        <div class="compose-btns">
-                            <button type="button" class="f-btn" id="cancelPostBtn">取消</button>
-                            <button type="submit" class="f-btn primary">发布</button>
-                        </div>
-                    </form>
-                    <div class="forum-list" id="forumList"></div>
-                    <div class="post-detail" id="postDetail" style="display:none;"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="about-page" class="page-view">
-            <h2 class="page-title">关于我们</h2>
-            <div class="stat-badge">网站开放时间: 2026.04.14</div>
-            <a href="https://qm.qq.com/q/5iUnJBtBWU" target="_blank" class="group-btn">进入官方QQ群 (点击跳转)</a>
-        </div>
-    </main>
-</div>
-
-<script src="script.js"></script>
+// 如果已经自动跳转过，直接停止逻辑
+if(sessionStorage.getItem(JUMP_FLAG)){
+  document.querySelector("h1").innerText = "已跳过自动跳转，请手动点击链接访问";
+}else{
+  let remain = 5;
+  const countDom = document.getElementById("countdown");
+  const timer = setInterval(()=>{
+    remain--;
+    countDom.innerText = remain;
+    if(remain <= 0){
+      clearInterval(timer);
+      // 设置标记，下次返回页面不会自动跳
+      sessionStorage.setItem(JUMP_FLAG,"1");
+      // replace：跳转，不会留下当前页在历史栈，减少返回回到本页的概率
+      window.location.replace(targetUrl);
+    }
+  },1000);
+}
+</script>
 </body>
 </html>
