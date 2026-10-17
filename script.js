@@ -111,18 +111,17 @@
         }, 9800);
     }
 
-    var imgContainers = document.querySelectorAll('.software-img');
-    imgContainers.forEach(function(container) {
-        container.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var imgElement = container.querySelector('img');
-            if (imgElement && imgElement.src) {
-                window.open(imgElement.src, '_blank');
-            } else {
-                var fallbackSrc = container.getAttribute('data-img-src');
-                if (fallbackSrc) window.open(fallbackSrc, '_blank');
-            }
-        });
+    // 软件卡片图片：点开大图（事件委托，兼容动态渲染的卡片）
+    document.addEventListener('click', function(e) {
+        var container = e.target.closest('.software-img');
+        if (!container) return;
+        var imgElement = container.querySelector('img');
+        if (imgElement && imgElement.src) {
+            window.open(imgElement.src, '_blank');
+        } else {
+            var fallbackSrc = container.getAttribute('data-img-src');
+            if (fallbackSrc) window.open(fallbackSrc, '_blank');
+        }
     });
 
     var announcementItems = document.querySelectorAll('.announcement-item');
@@ -130,8 +129,6 @@
         item.classList.add('reveal');
         item.style.transitionDelay = idx * 70 + 'ms';
     });
-
-    var cards = document.querySelectorAll('.software-card');
 
     if (typeof IntersectionObserver !== 'undefined') {
         var io = new IntersectionObserver(function(entries) {
@@ -146,57 +143,70 @@
         document.querySelectorAll('.reveal').forEach(function(el) {
             io.observe(el);
         });
-
-        var cardObserver = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.style.transform = '';
-                    entry.target.classList.remove('rising');
-                    entry.target.offsetHeight;
-                    entry.target.classList.add('rising');
-                } else {
-                    entry.target.style.transform = '';
-                    entry.target.classList.remove('rising');
-                }
-            });
-        }, { threshold: 0.15, root: document.querySelector('.main-content') });
-        document.querySelectorAll('.software-card').forEach(function(card) {
-            cardObserver.observe(card);
-        });
     } else {
         document.querySelectorAll('.reveal').forEach(function(el) {
             el.classList.add('in-view');
         });
-        document.querySelectorAll('.software-card').forEach(function(card) {
-            card.classList.add('rising');
+    }
+
+    // 卡片动效（倾斜+浮现），供下载页动态渲染后重新绑定
+    function bindTilt(card) {
+        var img = card.querySelector('.software-img');
+        card.addEventListener('mousemove', function(e) {
+            var rect = card.getBoundingClientRect();
+            var x = e.clientX - rect.left;
+            var y = e.clientY - rect.top;
+            var px = x / rect.width;
+            var py = y / rect.height;
+            var rx = (py - 0.5) * -8;
+            var ry = (px - 0.5) * 10;
+            card.style.transform =
+                'translateY(-6px) perspective(900px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
+            if (img) {
+                img.style.setProperty('--mx', (px * 100) + '%');
+                img.style.setProperty('--my', (py * 100) + '%');
+            }
+            card.style.setProperty('--mx', (px * 100) + '%');
+            card.style.setProperty('--my', (py * 100) + '%');
+        });
+        card.addEventListener('mouseleave', function() {
+            card.style.transform = '';
         });
     }
 
-    if (!isTouch) {
-        cards.forEach(function(card) {
-            var img = card.querySelector('.software-img');
-            card.addEventListener('mousemove', function(e) {
-                var rect = card.getBoundingClientRect();
-                var x = e.clientX - rect.left;
-                var y = e.clientY - rect.top;
-                var px = x / rect.width;
-                var py = y / rect.height;
-                var rx = (py - 0.5) * -8;
-                var ry = (px - 0.5) * 10;
-                card.style.transform =
-                    'translateY(-6px) perspective(900px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
-                if (img) {
-                    img.style.setProperty('--mx', (px * 100) + '%');
-                    img.style.setProperty('--my', (py * 100) + '%');
-                }
-                card.style.setProperty('--mx', (px * 100) + '%');
-                card.style.setProperty('--my', (py * 100) + '%');
+    window.__bindCardFx = function(scope) {
+        var root = scope || document;
+        var allCards = root.querySelectorAll('.software-card');
+        if (typeof IntersectionObserver !== 'undefined') {
+            if (!window.__cardObserver) {
+                window.__cardObserver = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            entry.target.style.transform = '';
+                            entry.target.classList.remove('rising');
+                            entry.target.offsetHeight;
+                            entry.target.classList.add('rising');
+                        } else {
+                            entry.target.style.transform = '';
+                            entry.target.classList.remove('rising');
+                        }
+                    });
+                }, { threshold: 0.15, root: document.querySelector('.main-content') });
+            }
+            allCards.forEach(function(card) {
+                if (card.dataset.fxBound) return;
+                card.dataset.fxBound = '1';
+                window.__cardObserver.observe(card);
+                if (!isTouch) bindTilt(card);
             });
-            card.addEventListener('mouseleave', function() {
-                card.style.transform = '';
+        } else {
+            allCards.forEach(function(card) {
+                if (!card.classList.contains('rising')) card.classList.add('rising');
             });
-        });
-    }
+        }
+    };
+
+    window.__bindCardFx(document);
 
     var homeBtns = document.querySelectorAll('#home-page .social-btn, #about-page .group-btn');
     homeBtns.forEach(function(btn) {
@@ -847,10 +857,9 @@
 
     function loadAnnouncements() {
         if (!annList) return;
-        fetch('/api/announcements').then(function(res) { return res.json(); }).then(function(res) {
-            if (!res.ok) return;
-            annsCache = res.announcements;
-            annList.innerHTML = res.announcements.map(function(a) {
+        function renderAnns(announcements) {
+            annsCache = announcements;
+            annList.innerHTML = announcements.map(function(a) {
                 var h = '<div class="announcement-item">';
                 h += '<div class="announcement-title">' + escapeHtml(a.title) + '</div>';
                 h += '<div class="announcement-meta"><span>' + T('日期 ') + formatDate(a.time) + '</span><span>' + T('作者 ') + escapeHtml(a.author) + '</span></div>';
@@ -858,7 +867,15 @@
                 if (isAdmin()) h += '<div class="compose-btns ann-btns"><button type="button" class="f-btn ann-edit" data-id="' + a.id + '">' + T('编辑') + '</button><button type="button" class="f-btn ann-del" data-id="' + a.id + '">' + T('删除') + '</button></div>';
                 return h + '</div>';
             }).join('');
-        }).catch(function() {});
+        }
+        fetch('/api/announcements').then(function(res) { return res.json(); }).then(function(res) {
+            if (res && res.ok) { renderAnns(res.announcements); return; }
+            throw new Error('no api');
+        }).catch(function() {
+            fetch('data/announcements.json').then(function(res) { return res.json(); }).then(function(arr) {
+                renderAnns(arr);
+            }).catch(function() {});
+        });
     }
 
     annForm.addEventListener('submit', function(e) {
@@ -943,6 +960,214 @@
 })();
 
 (function() {
+    // 下载页软件管理：动态渲染 + 管理员发布/编辑/删除/排序
+    var grid = document.getElementById('downloadGrid');
+    if (!grid) return;
+    var adminBar = document.getElementById('dlAdminBar');
+    var addBtn = document.getElementById('dlAddBtn');
+    var modal = document.getElementById('dlModal');
+    var modalTitle = document.getElementById('dlModalTitle');
+    var swError = document.getElementById('swError');
+    var imgInput = document.getElementById('swImage');
+    var imgPreview = document.getElementById('swImgPreview');
+    var imgThumb = document.getElementById('swImgThumb');
+    var imgClear = document.getElementById('swImgClear');
+    var list = [];
+    var editingId = null;
+    var pendingImage = null; // 'KEEP' 保持原图 | 'CLEAR' 移除 | 'DATA:...' 新图 base64 | null 无操作
+
+    function isAdmin() { return localStorage.getItem('chat_admin') === '1'; }
+    function getToken() { return localStorage.getItem('chat_token') || ''; }
+    function T(s) { return window.T ? window.T(s) : s; }
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+    function apiPost(path, data) {
+        return fetch(path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(function(res) { return res.json(); });
+    }
+
+    function render() {
+        var admin = isAdmin();
+        grid.innerHTML = list.map(function(s) {
+            var h = '<div class="software-card" data-id="' + esc(s.id) + '" data-name="' + esc(s.name) + '">';
+            h += '<div class="software-img"' + (s.image ? ' data-img-src="' + esc(s.image) + '"' : '') + '>';
+            if (s.image) h += '<img src="' + esc(s.image) + '" alt="' + esc(s.name) + '">';
+            h += '</div><div class="software-info">';
+            h += '<div class="software-name">' + esc(s.name) + '</div>';
+            h += '<div class="software-desc">' + esc(s.desc) + '</div>';
+            h += '<div class="version-meta">版本 ' + esc(s.version) + ' | 日期 ' + esc(s.date) + ' | 大小 ' + esc(s.size) + ' | 作者 ' + esc(s.author);
+            h += '<span class="dl-count" data-soft="' + esc(s.name) + '">' + T(' · 下载 ') + '0' + T(' 次') + '</span></div>';
+            if (s.url) h += '<a href="' + esc(s.url) + '" class="download-btn" target="_blank" rel="noopener">下载</a>';
+            if (admin) {
+                h += '<div class="dl-tools">'
+                  + '<button type="button" class="f-btn dl-edit">编辑</button>'
+                  + '<button type="button" class="f-btn dl-del">删除</button>'
+                  + '<button type="button" class="f-btn dl-up" title="上移">↑</button>'
+                  + '<button type="button" class="f-btn dl-down" title="下移">↓</button>'
+                  + '</div>';
+            }
+            h += '</div></div>';
+            return h;
+        }).join('');
+        if (adminBar) adminBar.style.display = admin ? 'flex' : 'none';
+        if (window.__bindCardFx) window.__bindCardFx(grid);
+        if (window.__applyLangText) window.__applyLangText(grid);
+    }
+
+    function load() {
+        function applyList(arr) { list = arr || []; render(); }
+        fetch('/api/software').then(function(res) { return res.json(); }).then(function(res) {
+            if (res && res.ok) { applyList(res.software); return; }
+            throw new Error('no api');
+        }).catch(function() {
+            fetch('data/software.json').then(function(res) { return res.json(); }).then(function(arr) {
+                applyList(arr);
+            }).catch(function() {});
+        });
+    }
+
+    // ---- 弹窗 ----
+    function resetModal() {
+        editingId = null;
+        pendingImage = null;
+        swError.textContent = '';
+        imgInput.value = '';
+        imgPreview.style.display = 'none';
+        imgThumb.removeAttribute('src');
+        modalTitle.textContent = T('发布软件');
+        document.getElementById('swSaveBtn').textContent = T('发布');
+        ['swName', 'swDesc', 'swVersion', 'swDate', 'swSize', 'swAuthor', 'swUrl'].forEach(function(id) {
+            document.getElementById(id).value = '';
+        });
+    }
+
+    function openModal(item) {
+        resetModal();
+        if (item) {
+            editingId = item.id;
+            document.getElementById('swName').value = item.name || '';
+            document.getElementById('swDesc').value = item.desc || '';
+            document.getElementById('swVersion').value = item.version || '';
+            document.getElementById('swDate').value = item.date || '';
+            document.getElementById('swSize').value = item.size || '';
+            document.getElementById('swAuthor').value = item.author || '';
+            document.getElementById('swUrl').value = item.url || '';
+            modalTitle.textContent = T('编辑软件');
+            document.getElementById('swSaveBtn').textContent = T('保存');
+            if (item.image) {
+                pendingImage = 'KEEP';
+                imgThumb.src = item.image;
+                imgPreview.style.display = 'flex';
+            }
+        }
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() { modal.style.display = 'none'; }
+
+    addBtn.addEventListener('click', function() { openModal(null); });
+    document.getElementById('swCancelBtn').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+
+    imgInput.addEventListener('change', function() {
+        var file = imgInput.files && imgInput.files[0];
+        if (!file) {
+            if (pendingImage && pendingImage.indexOf('DATA:') === 0) pendingImage = null;
+            imgPreview.style.display = (pendingImage === 'KEEP') ? 'flex' : 'none';
+            if (pendingImage !== 'KEEP') imgThumb.removeAttribute('src');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            swError.textContent = '图片太大（最大5MB）';
+            imgInput.value = '';
+            return;
+        }
+        swError.textContent = '';
+        var reader = new FileReader();
+        reader.onload = function() {
+            pendingImage = 'DATA:' + reader.result;
+            imgThumb.src = reader.result;
+            imgPreview.style.display = 'flex';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    imgClear.addEventListener('click', function() {
+        pendingImage = 'CLEAR';
+        imgInput.value = '';
+        imgPreview.style.display = 'none';
+        imgThumb.removeAttribute('src');
+    });
+
+    document.getElementById('swSaveBtn').addEventListener('click', function() {
+        var name = document.getElementById('swName').value.trim();
+        if (!name) { swError.textContent = '软件名不能为空'; return; }
+        var image;
+        if (pendingImage === 'KEEP') image = 'keep';
+        else if (pendingImage === 'CLEAR') image = '';
+        else if (pendingImage && pendingImage.indexOf('DATA:') === 0) image = pendingImage.slice(5);
+        else image = editingId ? 'keep' : '';
+        var btn = document.getElementById('swSaveBtn');
+        btn.disabled = true;
+        apiPost('/api/software_save', {
+            token: getToken(),
+            id: editingId || '',
+            name: name,
+            desc: document.getElementById('swDesc').value,
+            version: document.getElementById('swVersion').value,
+            date: document.getElementById('swDate').value,
+            size: document.getElementById('swSize').value,
+            author: document.getElementById('swAuthor').value,
+            url: document.getElementById('swUrl').value,
+            image: image
+        }).then(function(res) {
+            btn.disabled = false;
+            if (res.ok) { closeModal(); load(); }
+            else swError.textContent = res.error || '保存失败';
+        }).catch(function() { btn.disabled = false; swError.textContent = '无法连接服务器'; });
+    });
+
+    grid.addEventListener('click', function(e) {
+        var card = e.target.closest('.software-card');
+        if (!card) return;
+        var id = card.getAttribute('data-id');
+        if (e.target.closest('.dl-edit')) {
+            var item = list.find(function(s) { return s.id === id; });
+            if (item) openModal(item);
+            return;
+        }
+        if (e.target.closest('.dl-del')) {
+            if (!confirm('确定删除「' + (card.getAttribute('data-name') || '') + '」吗？删除后无法恢复。')) return;
+            apiPost('/api/software_delete', { token: getToken(), id: id }).then(function(res) {
+                if (res.ok) load();
+            }).catch(function() {});
+            return;
+        }
+        var up = e.target.closest('.dl-up');
+        var down = e.target.closest('.dl-down');
+        if (up || down) {
+            apiPost('/api/software_move', { token: getToken(), id: id, dir: up ? 'up' : 'down' }).then(function(res) {
+                if (res.ok) load();
+            }).catch(function() {});
+        }
+    });
+
+    document.querySelectorAll('.nav-item').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (btn.getAttribute('data-page') === 'download') load();
+        });
+    });
+
+    load();
+})();
+
+(function() {
     var cid = localStorage.getItem('site_cid');
     if (!cid) {
         cid = 'c' + Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -961,26 +1186,13 @@
     var statToday = document.getElementById('statToday');
     var statOnline = document.getElementById('statOnline');
 
-    var countSpans = [];
-    document.querySelectorAll('.software-card').forEach(function(card) {
-        var nameEl = card.querySelector('.software-name');
-        var meta = card.querySelector('.version-meta');
-        if (!nameEl || !meta) return;
-        var span = document.createElement('span');
-        span.className = 'dl-count';
-        span.setAttribute('data-soft', nameEl.textContent.trim());
-        span.textContent = ' · 下载 0 次';
-        meta.appendChild(span);
-        countSpans.push(span);
-    });
-
     function updateAll(res) {
         if (!res || !res.ok) return;
         if (statTotal) statTotal.textContent = res.total_pv;
         if (statToday) statToday.textContent = res.today_pv;
         if (statOnline) statOnline.textContent = res.online;
         var downloads = res.downloads || {};
-        countSpans.forEach(function(span) {
+        document.querySelectorAll('.dl-count').forEach(function(span) {
             var n = downloads[span.getAttribute('data-soft')] || 0;
             span.textContent = T(' · 下载 ') + n + T(' 次');
         });
@@ -994,21 +1206,21 @@
     ping();
     setInterval(ping, 5000);
 
-    document.querySelectorAll('.software-card .download-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var card = btn.closest('.software-card');
-            var nameEl = card ? card.querySelector('.software-name') : null;
-            if (!nameEl) return;
-            var name = nameEl.textContent.trim();
-            post('/api/download', { name: name }).then(function(res) {
-                if (!res.ok) return;
-                countSpans.forEach(function(span) {
-                    if (span.getAttribute('data-soft') === name) {
-                        span.textContent = T(' · 下载 ') + res.count + T(' 次');
-                    }
-                });
-            }).catch(function() {});
-        });
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.download-btn');
+        if (!btn) return;
+        var card = btn.closest('.software-card');
+        if (!card) return;
+        var name = card.getAttribute('data-name') || '';
+        if (!name) return;
+        post('/api/download', { name: name }).then(function(res) {
+            if (!res.ok) return;
+            document.querySelectorAll('.dl-count').forEach(function(span) {
+                if (span.getAttribute('data-soft') === name) {
+                    span.textContent = T(' · 下载 ') + res.count + T(' 次');
+                }
+            });
+        }).catch(function() {});
     });
 })();
 
@@ -1068,7 +1280,12 @@
         '回复': 'Reply', '删除': 'Delete', '编辑': 'Edit', '← 返回列表': '← Back to list',
         '没有找到相关帖子': 'No posts found', '当前账号：': 'Account: ', '（管理员）': ' (Admin)',
         '日期 ': 'Date ', '作者 ': 'By ', '关注 ': 'Following ', ' · 粉丝 ': ' · Fans ', ' · 发帖 ': ' · Posts ',
-        ' · 回复 ': ' · Replies ', ' · 下载 ': ' · ', ' 次': ' downloads'
+        ' · 回复 ': ' · Replies ', ' · 下载 ': ' · ', ' 次': ' downloads',
+        '+ 发布软件': '+ Publish', '发布软件': 'Publish Software', '编辑软件': 'Edit Software',
+        '发布': 'Publish', '保存': 'Save', '移除图片': 'Remove Image',
+        '软件名称': 'Software name', '软件简介...': 'Description...',
+        '如 V1.0': 'e.g. V1.0', '如 2026-10-10': 'e.g. 2026-10-10', '如 3.75 MB': 'e.g. 3.75 MB',
+        '网盘链接或本地文件名': 'Download link or local file'
     };
     var TEXT_SEL = '.nav-item, .page-title, .social-btn, .software-name, .software-desc, .download-btn, .tip-warning, .home-sub, .group-btn, .auth-tab, .auth-submit, .code-btn, .chat-send, .auth-link, .field-hint, #newPostBtn, #cancelPostBtn, .compose-btns .f-btn, #changePwdBtn, #logoutBtn';
 
@@ -1110,6 +1327,26 @@
         if (btn) btn.textContent = toEn ? '中文' : 'EN';
         window.dispatchEvent(new Event('langchange'));
     }
+
+    // 供动态渲染的区域（如下载页卡片）做局部翻译
+    window.__applyLangText = function(root) {
+        if (!root) return;
+        var toEn = (localStorage.getItem(STORE_KEY) || 'zh') === 'en';
+        root.querySelectorAll(TEXT_SEL).forEach(function(el) {
+            if (!el.dataset.zh) el.dataset.zh = el.textContent;
+            var zh = el.dataset.zh;
+            el.textContent = toEn ? (DICT[zh] || zh) : zh;
+        });
+        root.querySelectorAll('.version-meta').forEach(function(el) {
+            el.childNodes.forEach(function(node) {
+                if (node.nodeType !== 3) return;
+                if (!node._zh) node._zh = node.nodeValue;
+                node.nodeValue = toEn
+                    ? node._zh.replace(/版本/g, 'Ver').replace(/日期/g, 'Date').replace(/大小/g, 'Size').replace(/作者/g, 'By')
+                    : node._zh;
+            });
+        });
+    };
 
     var langBtn = document.getElementById('langBtn');
     if (langBtn) {

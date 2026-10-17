@@ -1620,3 +1620,137 @@ body {
     background: rgba(255, 214, 110, 0.12);
     vertical-align: 1px;
 }
+
+/* ===== 下载页软件管理（仅管理员可见） ===== */
+.dl-admin-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 14px;
+}
+
+.dl-tools {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.dl-tools .f-btn {
+    padding: 2px 10px;
+    font-size: 12px;
+}
+
+.dl-tools .f-btn.dl-del:hover {
+    color: #ff7b9c;
+    border-color: rgba(255, 123, 156, 0.5);
+}
+
+.software-img:empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0 8px, transparent 8px 16px);
+}
+
+/* ===== 软件发布/编辑弹窗 ===== */
+.dl-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.dl-modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: 86vh;
+    overflow-y: auto;
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 22px 24px;
+}
+
+.dl-modal h3 {
+    margin: 0 0 16px;
+    color: #e5edf7;
+    font-size: 18px;
+}
+
+.dl-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dl-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #c8d4e2;
+    font-size: 13px;
+}
+
+.dl-row {
+    display: flex;
+    gap: 12px;
+}
+
+.dl-row .dl-field {
+    flex: 1;
+}
+
+.dl-field input,
+.dl-field textarea {
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e5edf7;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dl-field input:focus,
+.dl-field textarea:focus {
+    border-color: var(--accent-cyan);
+}
+
+.dl-field input[type="file"] {
+    padding: 7px;
+    cursor: pointer;
+}
+
+.dl-img-hint {
+    color: rgba(200, 212, 226, 0.5);
+    font-size: 12px;
+}
+
+.dl-img-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dl-img-preview img {
+    width: 84px;
+    height: 84px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.dl-modal-btns {
+    justify-content: flex-end;
+    margin-top: 4px;
+}
