@@ -1,78 +1,304 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>正在跳转…</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%234f6ef7'/%3E%3C/svg%3E">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-      background: #0f1117;
-      color: #e6e8ee;
-      gap: 20px;
-      padding: 24px;
-      text-align: center;
-    }
-    .spinner {
-      width: 42px;
-      height: 42px;
-      border: 3px solid rgba(255,255,255,.15);
-      border-top-color: #4f6ef7;
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    h1 { font-size: 22px; font-weight: 600; }
-    p  { font-size: 15px; color: #9aa0ae; word-break: break-all; line-height: 2; }
-    a  { color: #7c97ff; text-decoration: none; display:block; margin:8px 0; }
-    a:hover { text-decoration: underline; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <base href="https://ksny2025.github.io/Znine/">
+    <script>
+    /* 静默线路检测：仅在本域名下运行，检测主站是否可达，可达则静默跳转，否则留在静态站 */
+    (function () {
+      var TUNNEL = 'http://058244d315b9.ofalias.org:54037/';
+      var HOME = 'https://znine.fun/';
+      var KEY = 'znine_probe_at';
+      var BLOCK = 'znine_probe_block';
+      var host = location.hostname.toLowerCase();
+      if (host !== 'znine.fun' && host !== 'www.znine.fun') return;
+
+      var search = location.search;
+      var probing = /(?:^|[?&])probe=1(?:&|$)/.test(search);
+      var returned = /(?:^|[?&])p=1(?:&|$)/.test(search);
+      var now = Date.now();
+      var st = null;
+      try { st = sessionStorage; } catch (e) {}
+
+      function get(k) { try { return parseInt(st.getItem(k) || '0', 10) || 0; } catch (e) { return 0; } }
+      function set(k, v) { try { st.setItem(k, String(v)); } catch (e) {} }
+
+      function hide() {
+        var css = document.createElement('style');
+        css.textContent = 'html{background:#0f1117!important}html body{visibility:hidden!important}';
+        (document.head || document.documentElement).appendChild(css);
+      }
+
+      function check(done) {
+        var finished = false;
+        setTimeout(function () { if (!finished) { finished = true; done(false); } }, 2000);
+        try {
+          fetch(TUNNEL, { mode: 'no-cors', cache: 'no-store' }).then(function () {
+            if (!finished) { finished = true; done(true); }
+          }, function () {
+            if (!finished) { finished = true; done(false); }
+          });
+        } catch (e) {
+          if (!finished) { finished = true; done(false); }
+        }
+      }
+
+      /* HTTP 探测页：页面留白，检测完成后静默跳转 */
+      if (probing) {
+        hide();
+        if (location.protocol !== 'http:') { set(BLOCK, now); location.replace(HOME + '?p=1'); return; }
+        check(function (ok) { location.replace(ok ? TUNNEL : HOME + '?p=1'); });
+        return;
+      }
+
+      /* 刚从探测页返回：直接展示静态站，不再重复检测 */
+      if (returned) {
+        try { history.replaceState(null, '', location.href.split('?')[0]); } catch (e) {}
+        return;
+      }
+      if (now - get(KEY) < 120000) return;
+
+      /* HTTP 访问时原地检测 */
+      if (location.protocol === 'http:') {
+        check(function (ok) { if (ok) location.replace(TUNNEL); });
+        return;
+      }
+
+      /* HTTPS 无法直接探测 HTTP 主站，静默转到 HTTP 探测页（GitHub 未强制 HTTPS 时可用） */
+      if (now - get(BLOCK) < 600000) return;
+      set(KEY, now);
+      location.replace('http://znine.fun/?probe=1');
+    })();
+    </script>
+    <title>BENBAIJIE站</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="spinner"></div>
-  <h1 id="title">正在为你跳转… <span id="countdown">3</span>秒</h1>
-  <p>
-    主节点：<a href="http://058244d315b9.ofalias.org:54037/">http://058244d315b9.ofalias.org:54037/</a>
-    备用站点：<a href="https://ksny2025.github.io/Znine/">https://ksny2025.github.io/Znine/</a>
-  </p>
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="logo-area">
+            <h2>BENBAIJIE</h2>
+            <br>
+            <h2>Znine</h2>
+        </div>
+        <div class="nav-links">
+            <button class="nav-item active" data-page="home">主页</button>
+            <button class="nav-item" data-page="download">下载</button>
+            <button class="nav-item" data-page="announcement">公告</button>
+            <button class="nav-item" data-page="chat">聊天</button>
+            <div class="nav-slider" id="navSlider"></div>
+        </div>
+    </aside>
 
-<script>
-const mainUrl = "http://058244d315b9.ofalias.org:54037/";
-const backupUrl = "https://ksny2025.github.io/Znine/";
-const JUMP_FLAG = "has_auto_jumped";
+    <main class="main-content">
+        <div id="home-page" class="page-view active-page">
+            <div class="card-pane home-card" style="text-align: center;">
+                <button class="lang-btn" id="langBtn" type="button">EN</button>
+                <div class="home-hero">
+                    <h1 class="home-title">BENBAIJIE</h1>
+                    <p class="home-sub" id="changingSub">欢迎来到长途旅行下载站！</p>
+                </div>
+                <div class="social-buttons">
+                    <a href="https://b23.tv/eoXbYnf" class="social-btn" target="_blank" rel="noopener noreferrer">主播B站</a>
+                    <a href="https://www.coolapk.com/u/Znine2026" class="social-btn" target="_blank" rel="noopener noreferrer">主播酷安</a>
+                    <a href="https://v.douyin.com/W3Kr-T5m2cU/" class="social-btn" target="_blank" rel="noopener noreferrer">主播抖音</a>
+                </div>
+                <div class="stat-info site-stats">
+                    <span class="stat-badge">总访问量 <b id="statTotal">-</b></span>
+                    <span class="stat-badge">今日访问 <b id="statToday">-</b></span>
+                    <span class="stat-badge">当前在线 <b id="statOnline">-</b></span>
+                </div>
+            </div>
+            <div class="video-wrapper">
+                <iframe src="https://player.bilibili.com/player.html?bvid=BV1Vd7j6DEhq&page=1&autoplay=1&muted=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+        </div>
 
-if(sessionStorage.getItem(JUMP_FLAG)){
-  document.getElementById("title").innerText = "自动跳转已结束，请手动点击链接访问";
-}else{
-  let remain = 3;
-  const countDom = document.getElementById("countdown");
-  let timer = setInterval(()=>{
-    remain--;
-    countDom.innerText = remain;
-    if(remain <= 0){
-      clearInterval(timer);
-      sessionStorage.setItem(JUMP_FLAG,"1");
-      window.location.replace(backupUrl);
-    }
-  },1000);
+        <div id="download-page" class="page-view">
+            <h2 class="page-title">软件下载</h2>
+            <div class="card-pane">
+                <div class="dl-admin-bar" id="dlAdminBar" style="display:none;">
+                    <button type="button" class="f-btn primary" id="dlAddBtn">+ 发布软件</button>
+                </div>
+                <div class="download-grid" id="downloadGrid"></div>
+                <div class="tip-warning">
+                    提示：网盘是小飞机网盘支持不登录直链下载，并且还不限速，但是我还是建议进群下载，因为群内的消息绝对是最新的！
+                </div>
+            </div>
+        </div>
 
-  fetch(mainUrl, {mode:"no-cors"})
-  .then(()=>{
-    clearInterval(timer);
-    sessionStorage.setItem(JUMP_FLAG,"1");
-    window.location.replace(mainUrl);
-  })
-  .catch(()=>{
-    // 探测失败，等待倒计时结束，不会立刻跳转
-  })
-}
-</script>
+        <div id="announcement-page" class="page-view">
+            <h2 class="page-title">最新公告</h2>
+            <div class="card-pane">
+                <form class="ann-compose" id="annForm" style="display:none;">
+                    <input type="text" id="annTitle" placeholder="公告标题" maxlength="50" required>
+                    <textarea id="annContent" placeholder="公告内容..." maxlength="2000" rows="4" required></textarea>
+                    <div class="compose-btns"><button type="submit" class="f-btn primary">发布公告</button></div>
+                    <div class="auth-error" id="annError"></div>
+                </form>
+                <div class="announcement-list" id="annList"></div>
+            </div>
+        </div>
+
+        <div id="chat-page" class="page-view">
+            <h2 class="page-title">聊天室</h2>
+
+            <div class="card-pane" id="authPane">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="loginTab" type="button">登录</button>
+                    <button class="auth-tab" id="registerTab" type="button">注册</button>
+                </div>
+
+                <form class="auth-form" id="loginForm">
+                    <div class="field-row">
+                        <input type="text" id="loginEmail" placeholder="邮箱" required autocomplete="username">
+                        <span class="field-hint" id="loginEmailHint">邮箱格式不正确</span>
+                    </div>
+                    <input type="password" id="loginPassword" placeholder="密码" required autocomplete="current-password">
+                    <button type="submit" class="auth-submit">登录</button>
+                    <div class="auth-links"><button type="button" class="auth-link" id="forgotLink">忘记密码？</button></div>
+                </form>
+
+                <form class="auth-form" id="registerForm" style="display:none;">
+                    <input type="text" id="regUsername" placeholder="用户名" maxlength="20" required>
+                    <div class="field-row">
+                        <input type="email" id="regEmail" placeholder="邮箱" required autocomplete="email">
+                        <span class="field-hint" id="regEmailHint">邮箱格式不正确</span>
+                    </div>
+                    <div class="code-row" id="regCodeRow" style="display:none;">
+                        <input type="text" id="regCode" placeholder="邮箱验证码" maxlength="6" inputmode="numeric">
+                        <button type="button" class="code-btn" id="regCodeBtn">获取验证码</button>
+                    </div>
+                    <input type="password" id="regPassword" placeholder="密码（至少6位）" minlength="6" required autocomplete="new-password">
+                    <button type="submit" class="auth-submit">注册并登录</button>
+                </form>
+
+                <form class="auth-form" id="resetForm" style="display:none;">
+                    <div class="field-row">
+                        <input type="email" id="resetEmail" placeholder="注册时用的邮箱" required autocomplete="email">
+                        <span class="field-hint" id="resetEmailHint">邮箱格式不正确</span>
+                    </div>
+                    <div class="code-row">
+                        <input type="text" id="resetCode" placeholder="邮箱验证码" maxlength="6" inputmode="numeric" required>
+                        <button type="button" class="code-btn" id="resetCodeBtn">获取验证码</button>
+                    </div>
+                    <input type="password" id="resetPassword" placeholder="新密码（至少6位）" minlength="6" required autocomplete="new-password">
+                    <button type="submit" class="auth-submit">重置密码</button>
+                    <div class="auth-links"><button type="button" class="auth-link" id="backToLogin">返回登录</button></div>
+                </form>
+
+                <div class="auth-error" id="authError"></div>
+            </div>
+
+            <div class="card-pane chat-pane" id="chatPane" style="display:none;">
+                <div class="chat-header">
+                    <div class="chat-header-btns">
+                        <button class="chat-logout" id="changePwdBtn" type="button">账号管理</button>
+                        <button class="chat-logout" id="logoutBtn" type="button">退出登录</button>
+                    </div>
+                </div>
+                <form class="auth-form change-pwd-form" id="changePwdForm" style="display:none;">
+                    <div class="account-info" id="accountInfo"></div>
+                    <div class="avatar-row">
+                        <span class="avatar avatar-lg avatar-letter" id="myAvatar">?</span>
+                        <div class="avatar-side">
+                            <label class="code-btn avatar-upload-btn" for="avatarInput">上传头像</label>
+                            <input type="file" id="avatarInput" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
+                            <div class="account-stats" id="accountStats"></div>
+                        </div>
+                    </div>
+                    <div class="auth-error" id="avatarMsg"></div>
+                    <input type="password" id="oldPwd" placeholder="当前密码" required autocomplete="current-password">
+                    <input type="password" id="newPwd" placeholder="新密码（至少6位）" minlength="6" required autocomplete="new-password">
+                    <button type="submit" class="auth-submit">确认修改</button>
+                    <div class="auth-error" id="pwdError"></div>
+                </form>
+                <div class="chat-subtabs">
+                    <button class="auth-tab active" id="tabChat" type="button">聊天室</button>
+                    <button class="auth-tab" id="tabForum" type="button">论坛</button>
+                </div>
+                <div id="chatView">
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <form class="chat-input-row" id="chatForm">
+                        <input type="text" id="chatInput" placeholder="说点什么..." maxlength="500" autocomplete="off">
+                        <button type="submit" class="chat-send">发送</button>
+                    </form>
+                </div>
+                <div id="forumView" style="display:none;">
+                    <div class="forum-toolbar">
+                        <input type="text" id="forumSearch" placeholder="搜索帖子标题、内容或作者..." maxlength="50" autocomplete="off">
+                        <button class="f-btn" id="newPostBtn" type="button">＋ 发帖</button>
+                    </div>
+                    <form class="forum-compose" id="postForm" style="display:none;">
+                        <input type="text" id="postTitle" placeholder="帖子标题" maxlength="50" required>
+                        <input type="text" id="postTags" placeholder="标签（用逗号分隔，最多5个）" maxlength="60">
+                        <textarea id="postContent" placeholder="分享点什么..." maxlength="2000" rows="3" required></textarea>
+                        <div class="compose-btns">
+                            <button type="button" class="f-btn" id="cancelPostBtn">取消</button>
+                            <button type="submit" class="f-btn primary">发布</button>
+                        </div>
+                    </form>
+                    <div class="forum-list" id="forumList"></div>
+                    <div class="post-detail" id="postDetail" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="about-page" class="page-view">
+            <h2 class="page-title">关于我们</h2>
+            <div class="stat-badge">网站开放时间: 2026.04.14</div>
+            <a href="https://qm.qq.com/q/5iUnJBtBWU" target="_blank" class="group-btn">进入官方QQ群 (点击跳转)</a>
+        </div>
+    </main>
+</div>
+
+<div class="dl-mask" id="dlModal" style="display:none;">
+    <div class="dl-modal">
+        <h3 id="dlModalTitle">发布软件</h3>
+        <div class="dl-form">
+            <label class="dl-field">软件名称
+                <input type="text" id="swName" maxlength="50" placeholder="软件名称">
+            </label>
+            <label class="dl-field">简介
+                <textarea id="swDesc" maxlength="500" rows="3" placeholder="软件简介..."></textarea>
+            </label>
+            <div class="dl-row">
+                <label class="dl-field">版本
+                    <input type="text" id="swVersion" maxlength="30" placeholder="如 V1.0">
+                </label>
+                <label class="dl-field">日期
+                    <input type="text" id="swDate" maxlength="20" placeholder="如 2026-10-10">
+                </label>
+            </div>
+            <div class="dl-row">
+                <label class="dl-field">大小
+                    <input type="text" id="swSize" maxlength="30" placeholder="如 3.75 MB">
+                </label>
+                <label class="dl-field">作者
+                    <input type="text" id="swAuthor" maxlength="30" placeholder="作者">
+                </label>
+            </div>
+            <label class="dl-field">下载链接
+                <input type="text" id="swUrl" maxlength="500" placeholder="网盘链接或本地文件名">
+            </label>
+            <label class="dl-field">封面图片 <span class="dl-img-hint">png/jpg/gif/webp，最大5MB，可留空</span>
+                <input type="file" id="swImage" accept="image/png,image/jpeg,image/gif,image/webp">
+                <div class="dl-img-preview" id="swImgPreview" style="display:none;">
+                    <img id="swImgThumb" alt="预览">
+                    <button type="button" class="f-btn dl-img-clear" id="swImgClear">移除图片</button>
+                </div>
+            </label>
+            <div class="auth-error" id="swError"></div>
+            <div class="compose-btns dl-modal-btns">
+                <button type="button" class="f-btn primary" id="swSaveBtn">发布</button>
+                <button type="button" class="f-btn" id="swCancelBtn">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
