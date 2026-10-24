@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <base href="https://ksny2025.github.io/Znine/">
     <title>BENBAIJIE站</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
@@ -57,7 +56,7 @@
                 </div>
                 <div class="download-grid" id="downloadGrid"></div>
                 <div class="tip-warning">
-                    提示：网盘是小飞机网盘支持不登录直链下载，并且还不限速，但是我还是建议进群下载，因为群内的消息绝对是最新的！
+                    提示：点「下载」可选择「直链下载」或「小飞机网盘」——直链速度快，网盘是不限速且无需登录；后端掉线时直链会自动切到静态站文件，仍可正常下载。建议进群，群内消息永远是最新的！
                 </div>
             </div>
         </div>
@@ -213,8 +212,11 @@
                     <input type="text" id="swAuthor" maxlength="30" placeholder="作者">
                 </label>
             </div>
-            <label class="dl-field">下载链接
-                <input type="text" id="swUrl" maxlength="500" placeholder="网盘链接或本地文件名">
+            <label class="dl-field">直链下载 <span class="dl-img-hint">本地文件名或完整链接，留空则只显示网盘</span>
+                <input type="text" id="swUrl" maxlength="500" placeholder="如 BENBAIJIELoaderV1.0.exe 或 https://...">
+            </label>
+            <label class="dl-field">小飞机网盘链接 <span class="dl-img-hint">留空则不显示网盘下载</span>
+                <input type="text" id="swPan" maxlength="500" placeholder="https://share.feijipan.com/s/...">
             </label>
             <label class="dl-field">封面图片 <span class="dl-img-hint">png/jpg/gif/webp，最大5MB，可留空</span>
                 <input type="file" id="swImage" accept="image/png,image/jpeg,image/gif,image/webp">
