@@ -1066,7 +1066,13 @@
             // 相对文件：后端在线走隧道，离线回退到 GitHub 仓库内的同名文件
             direct = (window.__API_BASE && window.__backendOnline) ? window.__API_BASE + '/' + rel : rel;
         }
-        return { direct: direct, pan: pan };
+        return {
+            direct: direct,
+            pan: pan,
+            quark: String(s.quark == null ? '' : s.quark).trim(),
+            pan123: String(s.pan123 == null ? '' : s.pan123).trim(),
+            baidu: String(s.baidu == null ? '' : s.baidu).trim()
+        };
     }
     function apiPost(path, data) {
         return fetch(path, {
@@ -1089,14 +1095,22 @@
                 '直链下载<em>速度快，推荐</em></button>' +
             '<button type="button" class="f-btn dl-choice-btn" data-kind="pan">' +
                 '小飞机网盘<em>不限速，无需登录</em></button>' +
+            '<button type="button" class="f-btn dl-choice-btn" data-kind="quark">' +
+                '夸克网盘<em>整合全部资源</em></button>' +
+            '<button type="button" class="f-btn dl-choice-btn" data-kind="pan123">' +
+                '123网盘<em>整合全部资源</em></button>' +
+            '<button type="button" class="f-btn dl-choice-btn" data-kind="baidu">' +
+                '百度网盘<em>整合全部资源</em></button>' +
             '<div class="compose-btns"><button type="button" class="f-btn" data-kind="cancel">取消</button></div>' +
         '</div>';
     document.body.appendChild(choiceMask);
 
     var choiceName = choiceMask.querySelector('.dl-choice-name');
-    var choiceDirectBtn = choiceMask.querySelector('[data-kind="direct"]');
-    var choicePanBtn = choiceMask.querySelector('[data-kind="pan"]');
-    var choiceTarget = { direct: '', pan: '', name: '' };
+    var choiceBtns = {};
+    ['direct', 'pan', 'quark', 'pan123', 'baidu'].forEach(function(k) {
+        choiceBtns[k] = choiceMask.querySelector('[data-kind="' + k + '"]');
+    });
+    var choiceTarget = { direct: '', pan: '', quark: '', pan123: '', baidu: '' };
 
     function closeChoice() { choiceMask.style.display = 'none'; }
 
@@ -1113,27 +1127,29 @@
     }
 
     function openChoice(btn) {
-        var direct = btn.getAttribute('data-direct') || '';
-        var pan = btn.getAttribute('data-pan') || '';
+        var kinds = ['direct', 'pan', 'quark', 'pan123', 'baidu'];
         var card = btn.closest('.software-card');
         var name = card ? (card.getAttribute('data-name') || '') : '';
-        if (!direct && !pan) return;
-        choiceTarget = { direct: direct, pan: pan, name: name };
+        var any = false;
+        kinds.forEach(function(k) {
+            var url = btn.getAttribute('data-' + k) || '';
+            choiceTarget[k] = url;
+            // 没有的方式隐藏，避免点了没反应
+            choiceBtns[k].style.display = url ? '' : 'none';
+            if (url) any = true;
+        });
+        if (!any) return;
         choiceName.textContent = name;
-        // 没有的方式隐藏，避免点了没反应
-        choiceDirectBtn.style.display = direct ? '' : 'none';
-        choicePanBtn.style.display = pan ? '' : 'none';
         choiceMask.style.display = 'flex';
     }
 
     choiceMask.addEventListener('click', function(e) {
         if (e.target === choiceMask) { closeChoice(); return; }
-        var btn = e.target.closest('[data-kind]');
-        if (!btn) return;
-        var kind = btn.getAttribute('data-kind');
+        var el = e.target.closest('[data-kind]');
+        if (!el) return;
+        var kind = el.getAttribute('data-kind');
         if (kind === 'cancel') { closeChoice(); return; }
-        if (kind === 'direct') goDownload(choiceTarget.direct);
-        if (kind === 'pan') goDownload(choiceTarget.pan);
+        if (choiceTarget[kind] !== undefined) goDownload(choiceTarget[kind]);
     });
 
     // 后端在线状态确定后重绘一次，确保直链地址按在线/离线正确解析
@@ -1160,10 +1176,11 @@
             h += '<div class="version-meta">版本 ' + esc(s.version) + ' | 日期 ' + esc(s.date) + ' | 大小 ' + esc(s.size) + ' | 作者 ' + esc(s.author);
             h += '<span class="dl-count" data-soft="' + esc(s.name) + '">' + T(' · 下载 ') + '0' + T(' 次') + '</span></div>';
             var w = ways(s);
-            if (w.direct || w.pan) {
-                // 点击后弹出「直链下载 / 小飞机网盘」选择框
+            if (w.direct || w.pan || w.quark || w.pan123 || w.baidu) {
+                // 点击后弹出「直链 / 各网盘」选择框
                 h += '<button type="button" class="download-btn" data-direct="' + esc(w.direct)
-                   + '" data-pan="' + esc(w.pan) + '">下载</button>';
+                   + '" data-pan="' + esc(w.pan) + '" data-quark="' + esc(w.quark)
+                   + '" data-pan123="' + esc(w.pan123) + '" data-baidu="' + esc(w.baidu) + '">下载</button>';
             }
             if (admin) {
                 h += '<div class="dl-tools">'
@@ -1208,7 +1225,7 @@
         imgThumb.removeAttribute('src');
         modalTitle.textContent = T('发布软件');
         document.getElementById('swSaveBtn').textContent = T('发布');
-        ['swName', 'swDesc', 'swVersion', 'swDate', 'swSize', 'swAuthor', 'swUrl', 'swPan'].forEach(function(id) {
+        ['swName', 'swDesc', 'swVersion', 'swDate', 'swSize', 'swAuthor', 'swUrl', 'swPan', 'swQuark', 'swPan123', 'swBaidu'].forEach(function(id) {
             document.getElementById(id).value = '';
         });
     }
@@ -1225,6 +1242,9 @@
             document.getElementById('swAuthor').value = item.author || '';
             document.getElementById('swUrl').value = item.url || '';
             document.getElementById('swPan').value = item.pan || '';
+            document.getElementById('swQuark').value = item.quark || '';
+            document.getElementById('swPan123').value = item.pan123 || '';
+            document.getElementById('swBaidu').value = item.baidu || '';
             modalTitle.textContent = T('编辑软件');
             document.getElementById('swSaveBtn').textContent = T('保存');
             if (item.image) {
@@ -1293,6 +1313,9 @@
             author: document.getElementById('swAuthor').value,
             url: document.getElementById('swUrl').value,
             pan: document.getElementById('swPan').value,
+            quark: document.getElementById('swQuark').value,
+            pan123: document.getElementById('swPan123').value,
+            baidu: document.getElementById('swBaidu').value,
             image: image
         }).then(function(res) {
             btn.disabled = false;

@@ -1688,6 +1688,8 @@ body {
 /* 下载方式选择弹窗（直链 / 小飞机网盘） */
 .dl-choice {
     max-width: 400px;
+    max-height: 86vh;
+    overflow-y: auto;
 }
 
 .dl-choice-name {
