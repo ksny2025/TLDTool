@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BENBAIJIE站</title>
+    <title>BENBAIJIE 资源下载站</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -17,7 +17,7 @@
         </div>
         <div class="nav-links">
             <button class="nav-item active" data-page="home">主页</button>
-            <button class="nav-item" data-page="download">下载</button>
+            <button class="nav-item" data-page="download">资源库</button>
             <button class="nav-item" data-page="announcement">公告</button>
             <button class="nav-item" data-page="chat">聊天</button>
             <div class="nav-slider" id="navSlider"></div>
@@ -26,37 +26,76 @@
 
     <main class="main-content">
         <div id="home-page" class="page-view active-page">
-            <div class="card-pane home-card" style="text-align: center;">
+            <div class="card-pane home-card hero-card">
                 <button class="lang-btn" id="langBtn" type="button">EN</button>
                 <div class="home-hero">
-                    <h1 class="home-title">BENBAIJIE</h1>
-                    <p class="home-sub" id="changingSub">欢迎来到长途旅行下载站！</p>
-                </div>
-                <div class="social-buttons">
-                    <a href="https://b23.tv/eoXbYnf" class="social-btn" target="_blank" rel="noopener noreferrer">主播B站</a>
-                    <a href="https://www.coolapk.com/u/Znine2026" class="social-btn" target="_blank" rel="noopener noreferrer">主播酷安</a>
-                    <a href="https://v.douyin.com/W3Kr-T5m2cU/" class="social-btn" target="_blank" rel="noopener noreferrer">主播抖音</a>
-                </div>
-                <div class="stat-info site-stats">
-                    <span class="stat-badge">总访问量 <b id="statTotal">-</b></span>
-                    <span class="stat-badge">今日访问 <b id="statToday">-</b></span>
-                    <span class="stat-badge">当前在线 <b id="statOnline">-</b></span>
+                    <span class="home-eyebrow">BENBAIJIE · 官方资源站</span>
+                    <h1 class="home-title">资源下载站</h1>
+                    <p class="home-sub" id="changingSub">长途旅行 · 模组加载器 · 实用工具，所有资源一站直达</p>
+                    <form class="hero-search" id="heroSearchForm" role="search" autocomplete="off">
+                        <span class="hero-search-icon">⌕</span>
+                        <input type="search" id="heroSearchInput" placeholder="搜索资源：模组加载器、小助手、工具…" aria-label="搜索资源">
+                        <button type="submit" class="hero-search-btn" id="heroSearchBtn">搜索资源</button>
+                    </form>
+                    <div class="hero-tags">
+                        <button type="button" class="hero-tag" data-q="模组加载器">模组加载器</button>
+                        <button type="button" class="hero-tag" data-q="小助手">小助手</button>
+                        <button type="button" class="hero-tag" data-q="ROOT">ROOT</button>
+                        <button type="button" class="hero-tag" data-q="游戏本体">游戏本体</button>
+                        <button type="button" class="hero-tag" data-q="工具">工具</button>
+                    </div>
+                    <div class="stat-info site-stats">
+                        <span class="stat-badge">总访问量 <b id="statTotal">-</b></span>
+                        <span class="stat-badge">今日访问 <b id="statToday">-</b></span>
+                        <span class="stat-badge">当前在线 <b id="statOnline">-</b></span>
+                        <span class="stat-badge">资源总数 <b id="statResources">-</b></span>
+                    </div>
+                    <div class="social-buttons">
+                        <a href="https://b23.tv/eoXbYnf" class="social-btn" target="_blank" rel="noopener noreferrer">主播B站</a>
+                        <a href="https://www.coolapk.com/u/Znine2026" class="social-btn" target="_blank" rel="noopener noreferrer">主播酷安</a>
+                        <a href="https://v.douyin.com/W3Kr-T5m2cU/" class="social-btn" target="_blank" rel="noopener noreferrer">主播抖音</a>
+                    </div>
                 </div>
             </div>
-            <div class="video-wrapper">
-                <iframe src="https://player.bilibili.com/player.html?bvid=BV1Vd7j6DEhq&page=1&autoplay=1&muted=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <div class="home-featured-wrap">
+                <div class="featured-head">
+                    <h2 class="featured-title">最近更新</h2>
+                    <button type="button" class="f-btn" id="viewAllBtn">浏览全部资源 →</button>
+                </div>
+                <div class="download-grid home-featured" id="homeFeatured"></div>
             </div>
         </div>
 
         <div id="download-page" class="page-view">
-            <h2 class="page-title">软件下载</h2>
+            <div class="dl-head">
+                <h2 class="page-title">资源库</h2>
+                <span class="dl-total" id="dlTotal">共 0 个资源</span>
+            </div>
             <div class="card-pane">
-                <div class="dl-admin-bar" id="dlAdminBar" style="display:none;">
-                    <button type="button" class="f-btn primary" id="dlAddBtn">+ 发布软件</button>
+                <div class="dl-toolbar">
+                    <div class="dl-search">
+                        <span class="dl-search-icon">⌕</span>
+                        <input type="search" id="dlSearchInput" placeholder="搜索资源名称、简介、作者…" aria-label="搜索资源" autocomplete="off">
+                        <button type="button" class="dl-search-clear" id="dlSearchClear" title="清空搜索" style="display:none;">✕</button>
+                    </div>
+                    <select class="dl-sort" id="dlSort" aria-label="排序方式">
+                        <option value="default">默认排序</option>
+                        <option value="new">最新发布</option>
+                        <option value="hot">下载最多</option>
+                        <option value="name">按名称</option>
+                    </select>
+                    <button type="button" class="hero-search-btn dl-upload-btn" id="dlUploadBtn">＋ 上传资源</button>
                 </div>
+                <div class="dl-login-hint" id="dlLoginHint">上传资源需要先登录，<button type="button" class="dl-login-link" id="dlLoginLink">点此登录 / 注册</button></div>
                 <div class="download-grid" id="downloadGrid"></div>
+                <div class="dl-empty" id="dlEmpty" style="display:none;">
+                    <div class="dl-empty-icon">⌕</div>
+                    <div class="dl-empty-title">没有找到相关资源</div>
+                    <div class="dl-empty-sub">换个关键词试试，或者清空搜索看看全部资源</div>
+                    <button type="button" class="f-btn" id="dlEmptyReset">清空搜索</button>
+                </div>
                 <div class="tip-warning">
-                    提示：点「下载」可选择「直链下载」或「小飞机网盘」——直链速度快，网盘是不限速且无需登录；后端掉线时直链会自动切到静态站文件，仍可正常下载。建议进群，群内消息永远是最新的！
+                    提示：点「下载」可选择直链、小飞机网盘、夸克 / 123 / 百度网盘等镜像——直链速度快，网盘不限速；后端掉线时直链会自动切到静态站文件，仍可正常下载。登录后还可以上传自己的资源！
                 </div>
             </div>
         </div>
@@ -188,13 +227,14 @@
 
 <div class="dl-mask" id="dlModal" style="display:none;">
     <div class="dl-modal">
-        <h3 id="dlModalTitle">发布软件</h3>
+        <h3 id="dlModalTitle">上传资源</h3>
+        <div class="dl-upload-note">登录后即可上传资源，填好下载链接（本地文件名或完整链接）就能发布；封面图片可选。</div>
         <div class="dl-form">
-            <label class="dl-field">软件名称
-                <input type="text" id="swName" maxlength="50" placeholder="软件名称">
+            <label class="dl-field">资源名称
+                <input type="text" id="swName" maxlength="50" placeholder="如：长途旅行模组加载器">
             </label>
             <label class="dl-field">简介
-                <textarea id="swDesc" maxlength="500" rows="3" placeholder="软件简介..."></textarea>
+                <textarea id="swDesc" maxlength="500" rows="3" placeholder="简单介绍这个资源的用途..."></textarea>
             </label>
             <div class="dl-row">
                 <label class="dl-field">版本
@@ -236,7 +276,7 @@
             </label>
             <div class="auth-error" id="swError"></div>
             <div class="compose-btns dl-modal-btns">
-                <button type="button" class="f-btn primary" id="swSaveBtn">发布</button>
+                <button type="button" class="f-btn primary" id="swSaveBtn">上传资源</button>
                 <button type="button" class="f-btn" id="swCancelBtn">取消</button>
             </div>
         </div>

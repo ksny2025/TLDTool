@@ -1028,11 +1028,22 @@
 })();
 
 (function() {
-    // 下载页软件管理：动态渲染 + 管理员发布/编辑/删除/排序
+    // 资源库：搜索 / 排序 / 多渠道下载 / 登录后上传资源
     var grid = document.getElementById('downloadGrid');
     if (!grid) return;
-    var adminBar = document.getElementById('dlAdminBar');
-    var addBtn = document.getElementById('dlAddBtn');
+    var homeFeatured = document.getElementById('homeFeatured');
+    var searchInput = document.getElementById('dlSearchInput');
+    var searchClear = document.getElementById('dlSearchClear');
+    var sortSelect = document.getElementById('dlSort');
+    var uploadBtn = document.getElementById('dlUploadBtn');
+    var loginHint = document.getElementById('dlLoginHint');
+    var loginLink = document.getElementById('dlLoginLink');
+    var emptyBox = document.getElementById('dlEmpty');
+    var emptyReset = document.getElementById('dlEmptyReset');
+    var totalLabel = document.getElementById('dlTotal');
+    var statResources = document.getElementById('statResources');
+    var viewAllBtn = document.getElementById('viewAllBtn');
+
     var modal = document.getElementById('dlModal');
     var modalTitle = document.getElementById('dlModalTitle');
     var swError = document.getElementById('swError');
@@ -1040,20 +1051,36 @@
     var imgPreview = document.getElementById('swImgPreview');
     var imgThumb = document.getElementById('swImgThumb');
     var imgClear = document.getElementById('swImgClear');
+    var saveBtn = document.getElementById('swSaveBtn');
+
     var list = [];
+    var downloads = {};
+    var query = '';
+    var sortMode = 'default';
     var editingId = null;
-    var pendingImage = null; // 'KEEP' 保持原图 | 'CLEAR' 移除 | 'DATA:...' 新图 base64 | null 无操作
+    var pendingImage = null; // 'KEEP' 保持原图 | 'CLEAR' 移除 | 'DATA:...' 新图 | null 无操作
 
     function isAdmin() { return localStorage.getItem('chat_admin') === '1'; }
     function getToken() { return localStorage.getItem('chat_token') || ''; }
+    function getUsername() { return localStorage.getItem('chat_username') || ''; }
     function T(s) { return window.T ? window.T(s) : s; }
     function esc(s) {
         return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
             return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
         });
     }
-    // 解析下载地址：url=直链，pan=小飞机网盘
-    // 兼容老数据（网盘链接存在 url 里时的自动识别）
+    function apiPost(path, data) {
+        return fetch(path, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(function(res) { return res.json(); });
+    }
+    function canManage(s) {
+        return isAdmin() || (!!s.uploader && !!getUsername() && s.uploader === getUsername());
+    }
+
+    // 解析下载地址：url=直链，其余为各个网盘镜像（兼容老数据把网盘链接填在 url 里）
     function ways(s) {
         var direct = String(s.url == null ? '' : s.url).trim();
         var pan = String(s.pan == null ? '' : s.pan).trim();
@@ -1063,7 +1090,7 @@
         }
         if (direct && !/^https?:/i.test(direct)) {
             var rel = direct.replace(/^\/+/, '');
-            // 相对文件：后端在线走隧道，离线回退到 GitHub 仓库内的同名文件
+            // 后端在线时直链走隧道，离线回退到仓库内的同名文件
             direct = (window.__API_BASE && window.__backendOnline) ? window.__API_BASE + '/' + rel : rel;
         }
         return {
@@ -1074,15 +1101,133 @@
             baidu: String(s.baidu == null ? '' : s.baidu).trim()
         };
     }
-    function apiPost(path, data) {
-        return fetch(path, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        }).then(function(res) { return res.json(); });
+
+    function mirrors(s) {
+        var w = ways(s);
+        var out = [];
+        if (w.direct) out.push({ kind: 'direct', label: '直链下载', sub: '速度快，推荐', url: w.direct });
+        if (w.pan) out.push({ kind: 'pan', label: '小飞机网盘', sub: '不限速，无需登录', url: w.pan });
+        if (w.quark) out.push({ kind: 'quark', label: '夸克网盘', sub: '整合全部资源', url: w.quark });
+        if (w.pan123) out.push({ kind: 'pan123', label: '123 网盘', sub: '整合全部资源', url: w.pan123 });
+        if (w.baidu) out.push({ kind: 'baidu', label: '百度网盘', sub: '需登录百度账号', url: w.baidu });
+        return out;
     }
 
-    // ---- 下载方式选择弹窗（直链 / 小飞机网盘） ----
+    // ---- 搜索 / 排序 ----
+    function matches(s) {
+        if (!query) return true;
+        var hay = [s.name, s.desc, s.author, s.version, s.uploader].join(' ').toLowerCase();
+        return query.toLowerCase().split(/\s+/).filter(Boolean).every(function(term) {
+            return hay.indexOf(term) !== -1;
+        });
+    }
+
+    function sorted(arr) {
+        var out = arr.slice();
+        if (sortMode === 'name') {
+            out.sort(function(a, b) { return String(a.name).localeCompare(String(b.name), 'zh-CN'); });
+        } else if (sortMode === 'new') {
+            out.sort(function(a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
+        } else if (sortMode === 'hot') {
+            out.sort(function(a, b) { return (downloads[b.name] || 0) - (downloads[a.name] || 0); });
+        }
+        return out;
+    }
+
+    // ---- 渲染 ----
+    function imgSrc(s) {
+        var raw = s.image ? String(s.image) : '';
+        if (!raw) return null;
+        if (window.__API_BASE && !/^https?:/i.test(raw)) {
+            return { src: window.__API_BASE + '/' + raw.replace(/^\/+/, ''), fb: raw };
+        }
+        return { src: raw, fb: '' };
+    }
+
+    function cardHtml(s, withTools) {
+        var im = imgSrc(s);
+        var h = '<div class="software-card" data-id="' + esc(s.id) + '" data-name="' + esc(s.name) + '">';
+        h += '<div class="software-img"' + (im ? ' data-img-src="' + esc(im.src) + '"' : '') + '>';
+        if (im) {
+            h += '<img src="' + esc(im.src) + '" alt="' + esc(s.name) + '"'
+               + (im.fb ? ' data-fb="' + esc(im.fb) + '"' : '') + '>';
+        }
+        h += '</div><div class="software-info">';
+        h += '<div class="software-name">' + esc(s.name) + '</div>';
+        h += '<div class="software-desc">' + esc(s.desc) + '</div>';
+        h += '<div class="version-meta">版本 ' + esc(s.version || '-')
+           + ' | 日期 ' + esc(s.date || '-')
+           + ' | 大小 ' + esc(s.size || '-')
+           + ' | 作者 ' + esc(s.author || '-');
+        if (s.uploader) h += ' | 上传 ' + esc(s.uploader);
+        h += '<span class="dl-count" data-soft="' + esc(s.name) + '">' + T(' · 下载 ')
+           + (downloads[s.name] || 0) + T(' 次') + '</span></div>';
+        if (mirrors(s).length) {
+            h += '<button type="button" class="download-btn" data-id="' + esc(s.id) + '">' + T('下载') + '</button>';
+        }
+        if (withTools && canManage(s)) {
+            h += '<div class="dl-tools">'
+               + '<button type="button" class="f-btn dl-edit">' + T('编辑') + '</button>'
+               + '<button type="button" class="f-btn dl-del">' + T('删除') + '</button>';
+            if (isAdmin()) {
+                h += '<button type="button" class="f-btn dl-up" title="上移">↑</button>'
+                   + '<button type="button" class="f-btn dl-down" title="下移">↓</button>';
+            }
+            h += '</div>';
+        }
+        h += '</div></div>';
+        return h;
+    }
+
+    function syncAuthUI() {
+        var logged = !!getToken();
+        if (uploadBtn) uploadBtn.textContent = logged ? T('＋ 上传资源') : T('＋ 上传资源（需登录）');
+        if (loginHint) loginHint.style.display = logged ? 'none' : '';
+    }
+
+    function render() {
+        var filtered = sorted(list.filter(matches));
+        grid.innerHTML = filtered.map(function(s) { return cardHtml(s, true); }).join('');
+        if (homeFeatured) {
+            var featured = list.slice().sort(function(a, b) {
+                return String(b.date || '').localeCompare(String(a.date || ''));
+            }).slice(0, 4);
+            homeFeatured.innerHTML = featured.map(function(s) { return cardHtml(s, false); }).join('');
+        }
+        if (emptyBox) emptyBox.style.display = filtered.length ? 'none' : '';
+        if (emptyReset) emptyReset.style.display = query ? '' : 'none';
+        if (totalLabel) {
+            totalLabel.textContent = query
+                ? '找到 ' + filtered.length + ' 个（共 ' + list.length + ' 个资源）'
+                : '共 ' + list.length + ' 个资源';
+        }
+        if (statResources) statResources.textContent = String(list.length);
+        if (searchClear) searchClear.style.display = query ? '' : 'none';
+        syncAuthUI();
+        if (window.__bindCardFx) { window.__bindCardFx(grid); if (homeFeatured) window.__bindCardFx(homeFeatured); }
+        if (window.__applyLangText) { window.__applyLangText(grid); if (homeFeatured) window.__applyLangText(homeFeatured); }
+    }
+
+    function applyQuery(q) {
+        query = String(q == null ? '' : q).trim();
+        if (searchInput) searchInput.value = query;
+        render();
+    }
+
+    function goLibrary() {
+        var nav = document.querySelector('.nav-item[data-page="download"]');
+        if (nav) nav.click();
+        setTimeout(function() { if (searchInput) searchInput.focus(); }, 320);
+    }
+
+    function goLogin() {
+        var nav = document.querySelector('.nav-item[data-page="chat"]');
+        if (nav) nav.click();
+        var email = document.getElementById('loginEmail');
+        if (email) setTimeout(function() { try { email.focus(); } catch (e) {} }, 380);
+    }
+
+    // ---- 下载方式选择弹窗 ----
     var choiceMask = document.createElement('div');
     choiceMask.className = 'dl-mask';
     choiceMask.id = 'dlChoice';
@@ -1091,26 +1236,13 @@
         '<div class="dl-modal dl-choice">' +
             '<h3>选择下载方式</h3>' +
             '<div class="dl-choice-name"></div>' +
-            '<button type="button" class="f-btn primary dl-choice-btn" data-kind="direct">' +
-                '直链下载<em>速度快，推荐</em></button>' +
-            '<button type="button" class="f-btn dl-choice-btn" data-kind="pan">' +
-                '小飞机网盘<em>不限速，无需登录</em></button>' +
-            '<button type="button" class="f-btn dl-choice-btn" data-kind="quark">' +
-                '夸克网盘<em>整合全部资源</em></button>' +
-            '<button type="button" class="f-btn dl-choice-btn" data-kind="pan123">' +
-                '123网盘<em>整合全部资源</em></button>' +
-            '<button type="button" class="f-btn dl-choice-btn" data-kind="baidu">' +
-                '百度网盘<em>整合全部资源</em></button>' +
-            '<div class="compose-btns"><button type="button" class="f-btn" data-kind="cancel">取消</button></div>' +
+            '<div class="dl-choice-list"></div>' +
+            '<div class="compose-btns"><button type="button" class="f-btn" data-cancel="1">取消</button></div>' +
         '</div>';
     document.body.appendChild(choiceMask);
 
     var choiceName = choiceMask.querySelector('.dl-choice-name');
-    var choiceBtns = {};
-    ['direct', 'pan', 'quark', 'pan123', 'baidu'].forEach(function(k) {
-        choiceBtns[k] = choiceMask.querySelector('[data-kind="' + k + '"]');
-    });
-    var choiceTarget = { direct: '', pan: '', quark: '', pan123: '', baidu: '' };
+    var choiceList = choiceMask.querySelector('.dl-choice-list');
 
     function closeChoice() { choiceMask.style.display = 'none'; }
 
@@ -1126,30 +1258,23 @@
         a.remove();
     }
 
-    function openChoice(btn) {
-        var kinds = ['direct', 'pan', 'quark', 'pan123', 'baidu'];
-        var card = btn.closest('.software-card');
-        var name = card ? (card.getAttribute('data-name') || '') : '';
-        var any = false;
-        kinds.forEach(function(k) {
-            var url = btn.getAttribute('data-' + k) || '';
-            choiceTarget[k] = url;
-            // 没有的方式隐藏，避免点了没反应
-            choiceBtns[k].style.display = url ? '' : 'none';
-            if (url) any = true;
-        });
-        if (!any) return;
-        choiceName.textContent = name;
+    function openChoice(s) {
+        var ms = mirrors(s);
+        if (!ms.length) return;
+        choiceName.textContent = s.name + (s.version ? ' · ' + s.version : '');
+        choiceList.innerHTML = ms.map(function(m) {
+            return '<button type="button" class="f-btn dl-choice-btn' + (m.kind === 'direct' ? ' primary' : '')
+                 + '" data-url="' + esc(m.url) + '">' + esc(m.label)
+                 + '<em>' + esc(m.sub) + '</em></button>';
+        }).join('');
         choiceMask.style.display = 'flex';
     }
 
     choiceMask.addEventListener('click', function(e) {
         if (e.target === choiceMask) { closeChoice(); return; }
-        var el = e.target.closest('[data-kind]');
-        if (!el) return;
-        var kind = el.getAttribute('data-kind');
-        if (kind === 'cancel') { closeChoice(); return; }
-        if (choiceTarget[kind] !== undefined) goDownload(choiceTarget[kind]);
+        if (e.target.closest('[data-cancel]')) { closeChoice(); return; }
+        var btn = e.target.closest('[data-url]');
+        if (btn) goDownload(btn.getAttribute('data-url'));
     });
 
     // 后端在线状态确定后重绘一次，确保直链地址按在线/离线正确解析
@@ -1157,65 +1282,17 @@
         window.__onBackendStatus(function() { if (list.length) render(); });
     }
 
-    function render() {
-        var admin = isAdmin();
-        grid.innerHTML = list.map(function(s) {
-            var h = '<div class="software-card" data-id="' + esc(s.id) + '" data-name="' + esc(s.name) + '">';
-            var imgUrl = s.image;
-            var imgFb = '';
-            if (imgUrl && window.__API_BASE && !/^https?:/i.test(String(imgUrl))) {
-                // 有后端时图片优先走隧道（GitHub 很多人连不上），加载失败自动回退 GitHub 静态图
-                imgFb = String(s.image);
-                imgUrl = window.__API_BASE + '/' + String(imgUrl).replace(/^\/+/, '');
-            }
-            h += '<div class="software-img"' + (imgUrl ? ' data-img-src="' + esc(imgUrl) + '"' : '') + '>';
-            if (imgUrl) h += '<img src="' + esc(imgUrl) + '" alt="' + esc(s.name) + '"' + (imgFb ? ' data-fb="' + esc(imgFb) + '"' : '') + '>';
-            h += '</div><div class="software-info">';
-            h += '<div class="software-name">' + esc(s.name) + '</div>';
-            h += '<div class="software-desc">' + esc(s.desc) + '</div>';
-            h += '<div class="version-meta">版本 ' + esc(s.version) + ' | 日期 ' + esc(s.date) + ' | 大小 ' + esc(s.size) + ' | 作者 ' + esc(s.author);
-            h += '<span class="dl-count" data-soft="' + esc(s.name) + '">' + T(' · 下载 ') + '0' + T(' 次') + '</span></div>';
-            var w = ways(s);
-            if (w.direct || w.pan || w.quark || w.pan123 || w.baidu) {
-                // 点击后弹出「直链 / 各网盘」选择框
-                h += '<button type="button" class="download-btn" data-direct="' + esc(w.direct)
-                   + '" data-pan="' + esc(w.pan) + '" data-quark="' + esc(w.quark)
-                   + '" data-pan123="' + esc(w.pan123) + '" data-baidu="' + esc(w.baidu) + '">下载</button>';
-            }
-            if (admin) {
-                h += '<div class="dl-tools">'
-                  + '<button type="button" class="f-btn dl-edit">编辑</button>'
-                  + '<button type="button" class="f-btn dl-del">删除</button>'
-                  + '<button type="button" class="f-btn dl-up" title="上移">↑</button>'
-                  + '<button type="button" class="f-btn dl-down" title="下移">↓</button>'
-                  + '</div>';
-            }
-            h += '</div></div>';
-            return h;
-        }).join('');
-        if (adminBar) adminBar.style.display = admin ? 'flex' : 'none';
-        if (window.__bindCardFx) window.__bindCardFx(grid);
-        if (window.__applyLangText) window.__applyLangText(grid);
+    // ---- 上传 / 编辑弹窗 ----
+    var FIELD_IDS = ['swName', 'swDesc', 'swVersion', 'swDate', 'swSize', 'swAuthor',
+                     'swUrl', 'swPan', 'swQuark', 'swPan123', 'swBaidu'];
+
+    function todayStr() {
+        var d = new Date();
+        var m = String(d.getMonth() + 1);
+        var day = String(d.getDate());
+        return d.getFullYear() + '-' + (m.length < 2 ? '0' + m : m) + '-' + (day.length < 2 ? '0' + day : day);
     }
 
-    function load() {
-        function applyList(arr) { list = arr || []; render(); }
-        fetch('/api/software').then(function(res) { return res.json(); }).then(function(res) {
-            if (res && res.ok) { applyList(res.software); return; }
-            throw new Error('no api');
-        }).catch(function() {
-            fetch('data/software.json').then(function(res) { return res.json(); }).then(function(arr) {
-                applyList(arr);
-            }).catch(function() {
-                // 兜底：仓库根目录的 software.json
-                fetch('software.json').then(function(res) { return res.json(); }).then(function(arr) {
-                    applyList(arr);
-                }).catch(function() {});
-            });
-        });
-    }
-
-    // ---- 弹窗 ----
     function resetModal() {
         editingId = null;
         pendingImage = null;
@@ -1223,10 +1300,11 @@
         imgInput.value = '';
         imgPreview.style.display = 'none';
         imgThumb.removeAttribute('src');
-        modalTitle.textContent = T('发布软件');
-        document.getElementById('swSaveBtn').textContent = T('发布');
-        ['swName', 'swDesc', 'swVersion', 'swDate', 'swSize', 'swAuthor', 'swUrl', 'swPan', 'swQuark', 'swPan123', 'swBaidu'].forEach(function(id) {
-            document.getElementById(id).value = '';
+        modalTitle.textContent = T('上传资源');
+        saveBtn.textContent = T('上传资源');
+        FIELD_IDS.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
         });
     }
 
@@ -1234,31 +1312,33 @@
         resetModal();
         if (item) {
             editingId = item.id;
-            document.getElementById('swName').value = item.name || '';
-            document.getElementById('swDesc').value = item.desc || '';
-            document.getElementById('swVersion').value = item.version || '';
-            document.getElementById('swDate').value = item.date || '';
-            document.getElementById('swSize').value = item.size || '';
-            document.getElementById('swAuthor').value = item.author || '';
-            document.getElementById('swUrl').value = item.url || '';
-            document.getElementById('swPan').value = item.pan || '';
-            document.getElementById('swQuark').value = item.quark || '';
-            document.getElementById('swPan123').value = item.pan123 || '';
-            document.getElementById('swBaidu').value = item.baidu || '';
-            modalTitle.textContent = T('编辑软件');
-            document.getElementById('swSaveBtn').textContent = T('保存');
+            ['swName', 'swDesc', 'swVersion', 'swDate', 'swSize', 'swAuthor',
+             'swUrl', 'swPan', 'swQuark', 'swPan123', 'swBaidu'].forEach(function(id, i) {
+                document.getElementById(id).value = item[['name', 'desc', 'version', 'date', 'size', 'author',
+                                                            'url', 'pan', 'quark', 'pan123', 'baidu'][i]] || '';
+            });
+            modalTitle.textContent = T('编辑资源');
+            saveBtn.textContent = T('保存修改');
             if (item.image) {
                 pendingImage = 'KEEP';
-                imgThumb.src = window.__apiUrl ? window.__apiUrl(item.image) : item.image;
+                var im = imgSrc(item);
+                imgThumb.src = im ? im.src : item.image;
                 imgPreview.style.display = 'flex';
             }
+        } else {
+            document.getElementById('swAuthor').value = getUsername();
+            document.getElementById('swDate').value = todayStr();
         }
         modal.style.display = 'flex';
     }
 
     function closeModal() { modal.style.display = 'none'; }
 
-    addBtn.addEventListener('click', function() { openModal(null); });
+    if (uploadBtn) uploadBtn.addEventListener('click', function() {
+        if (!getToken()) { goLogin(); return; }
+        openModal(null);
+    });
+    if (loginLink) loginLink.addEventListener('click', goLogin);
     document.getElementById('swCancelBtn').addEventListener('click', closeModal);
     modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
 
@@ -1292,16 +1372,25 @@
         imgThumb.removeAttribute('src');
     });
 
-    document.getElementById('swSaveBtn').addEventListener('click', function() {
+    function toast(msg) {
+        var el = document.createElement('div');
+        el.className = 'site-toast';
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(function() { el.classList.add('out'); }, 2200);
+        setTimeout(function() { if (el.parentNode) el.remove(); }, 2800);
+    }
+
+    saveBtn.addEventListener('click', function() {
         var name = document.getElementById('swName').value.trim();
-        if (!name) { swError.textContent = '软件名不能为空'; return; }
+        if (!name) { swError.textContent = '资源名称不能为空'; return; }
+        if (!getToken()) { goLogin(); return; }
         var image;
         if (pendingImage === 'KEEP') image = 'keep';
         else if (pendingImage === 'CLEAR') image = '';
         else if (pendingImage && pendingImage.indexOf('DATA:') === 0) image = pendingImage.slice(5);
         else image = editingId ? 'keep' : '';
-        var btn = document.getElementById('swSaveBtn');
-        btn.disabled = true;
+        saveBtn.disabled = true;
         apiPost('/api/software_save', {
             token: getToken(),
             id: editingId || '',
@@ -1318,43 +1407,142 @@
             baidu: document.getElementById('swBaidu').value,
             image: image
         }).then(function(res) {
-            btn.disabled = false;
-            if (res.ok) { closeModal(); load(); }
-            else swError.textContent = res.error || '保存失败';
-        }).catch(function() { btn.disabled = false; swError.textContent = '无法连接服务器'; });
+            saveBtn.disabled = false;
+            if (res.ok) {
+                var wasEdit = !!editingId;
+                closeModal();
+                toast(wasEdit ? '资源已更新' : '上传成功，感谢分享！');
+                load();
+            } else {
+                if (res.error && res.error.indexOf('登录') !== -1) {
+                    localStorage.removeItem('chat_token');
+                    syncAuthUI();
+                }
+                swError.textContent = res.error || '保存失败';
+            }
+        }).catch(function() {
+            saveBtn.disabled = false;
+            swError.textContent = '无法连接服务器';
+        });
     });
 
-    grid.addEventListener('click', function(e) {
+    // ---- 卡片操作 ----
+    function handleAreaClick(e) {
         var card = e.target.closest('.software-card');
         if (!card) return;
-        if (e.target.closest('.download-btn')) { openChoice(e.target.closest('.download-btn')); return; }
         var id = card.getAttribute('data-id');
+        var item = list.find(function(s) { return s.id === id; });
+        if (e.target.closest('.download-btn')) {
+            if (item) openChoice(item);
+            return;
+        }
+        if (!item) return;
         if (e.target.closest('.dl-edit')) {
-            var item = list.find(function(s) { return s.id === id; });
-            if (item) openModal(item);
+            if (canManage(item)) openModal(item);
             return;
         }
         if (e.target.closest('.dl-del')) {
-            if (!confirm('确定删除「' + (card.getAttribute('data-name') || '') + '」吗？删除后无法恢复。')) return;
+            if (!canManage(item)) return;
+            if (!confirm('确定删除「' + (item.name || '') + '」吗？删除后无法恢复。')) return;
             apiPost('/api/software_delete', { token: getToken(), id: id }).then(function(res) {
-                if (res.ok) load();
+                if (res.ok) { toast('已删除'); load(); }
+                else toast(res.error || '删除失败');
             }).catch(function() {});
             return;
         }
         var up = e.target.closest('.dl-up');
         var down = e.target.closest('.dl-down');
-        if (up || down) {
+        if ((up || down) && isAdmin()) {
             apiPost('/api/software_move', { token: getToken(), id: id, dir: up ? 'up' : 'down' }).then(function(res) {
                 if (res.ok) load();
             }).catch(function() {});
         }
+    }
+    grid.addEventListener('click', handleAreaClick);
+    if (homeFeatured) homeFeatured.addEventListener('click', handleAreaClick);
+
+    // ---- 搜索框 / 排序 ----
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            query = searchInput.value.trim();
+            render();
+        });
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); query = searchInput.value.trim(); render(); }
+        });
+    }
+    if (searchClear) {
+        searchClear.addEventListener('click', function() {
+            applyQuery('');
+            if (searchInput) searchInput.focus();
+        });
+    }
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            sortMode = sortSelect.value;
+            render();
+        });
+    }
+    if (emptyReset) {
+        emptyReset.addEventListener('click', function() { applyQuery(''); if (searchInput) searchInput.focus(); });
+    }
+    var heroForm = document.getElementById('heroSearchForm');
+    var heroInput = document.getElementById('heroSearchInput');
+    var mobileQuery = window.matchMedia('(max-width: 640px)');
+    function syncHeroPlaceholder() {
+        if (!heroInput) return;
+        heroInput.placeholder = mobileQuery.matches
+            ? '搜索资源名称或作者…'
+            : '搜索资源：模组加载器、小助手、工具…';
+    }
+    syncHeroPlaceholder();
+    if (mobileQuery.addEventListener) mobileQuery.addEventListener('change', syncHeroPlaceholder);
+    if (heroForm) {
+        heroForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            applyQuery(heroInput ? heroInput.value : '');
+            goLibrary();
+        });
+    }
+    document.querySelectorAll('.hero-tag').forEach(function(tag) {
+        tag.addEventListener('click', function() {
+            applyQuery(tag.getAttribute('data-q') || '');
+            goLibrary();
+        });
     });
+    if (viewAllBtn) {
+        viewAllBtn.addEventListener('click', function() { applyQuery(''); goLibrary(); });
+    }
 
     document.querySelectorAll('.nav-item').forEach(function(btn) {
         btn.addEventListener('click', function() {
             if (btn.getAttribute('data-page') === 'download') load();
         });
     });
+
+    window.addEventListener('langchange', function() { render(); syncAuthUI(); });
+
+    // ---- 加载数据 ----
+    function load() {
+        function applyList(arr) { list = arr || []; render(); }
+        fetch('/api/software').then(function(res) { return res.json(); }).then(function(res) {
+            if (res && res.ok) { applyList(res.software); return; }
+            throw new Error('no api');
+        }).catch(function() {
+            fetch('data/software.json').then(function(res) { return res.json(); }).then(function(arr) {
+                applyList(arr);
+            }).catch(function() {
+                // 兜底：仓库根目录的 software.json
+                fetch('software.json').then(function(res) { return res.json(); }).then(function(arr) {
+                    applyList(arr);
+                }).catch(function() {});
+            });
+        });
+    }
+
+    fetch('/api/downloads').then(function(res) { return res.json(); }).then(function(res) {
+        if (res && res.ok) { downloads = res.downloads || {}; if (list.length) render(); }
+    }).catch(function() {});
 
     load();
 })();
@@ -1425,6 +1613,19 @@
         '模组加载 | 助手工具 ': 'Mod Loader | Helper Tools ',
         '主播B站': 'Bilibili', '主播酷安': 'Coolapk', '主播抖音': 'Douyin',
         '软件下载': 'Downloads',
+        '资源库': 'Library', '搜索资源': 'Search', '最近更新': 'Recently Updated',
+        '浏览全部资源 →': 'Browse all →', '资源总数': 'Resources',
+        '＋ 上传资源': '+ Upload', '＋ 上传资源（需登录）': '+ Upload (login required)',
+        '上传资源': 'Upload Resource', '编辑资源': 'Edit Resource', '保存修改': 'Save Changes',
+        '模组加载器': 'Mod Loaders', '小助手': 'Helpers', '游戏本体': 'Game Files', '工具': 'Tools',
+        '直链下载': 'Direct Download', '速度快，推荐': 'Fast, recommended',
+        '小飞机网盘': 'Feijipan', '不限速，无需登录': 'No speed limit, no login',
+        '夸克网盘': 'Quark Drive', '123 网盘': '123 Drive', '百度网盘': 'Baidu Drive',
+        '整合全部资源': 'All resources', '需登录百度账号': 'Baidu account required',
+        '选择下载方式': 'Choose download source', '没有找到相关资源': 'No resources found',
+        '换个关键词试试，或者清空搜索看看全部资源': 'Try another keyword or clear the search.',
+        '清空搜索': 'Clear search', '资源名称不能为空': 'Resource name is required',
+        '上传成功，感谢分享！': 'Uploaded successfully, thanks for sharing!',
         '提示：网盘是小飞机网盘支持不登录直链下载，并且还不限速，但是我还是建议进群下载，因为群内的消息绝对是最新的！': 'Tip: Feijipan supports direct downloads without login or speed limits, but joining the QQ group is recommended for the latest updates!',
         '最新公告': 'Announcements',
         '登录': 'Login', '注册': 'Register', '忘记密码？': 'Forgot password?', '返回上一步': 'Back',
@@ -1479,7 +1680,7 @@
         '如 V1.0': 'e.g. V1.0', '如 2026-10-10': 'e.g. 2026-10-10', '如 3.75 MB': 'e.g. 3.75 MB',
         '网盘链接或本地文件名': 'Download link or local file'
     };
-    var TEXT_SEL = '.nav-item, .page-title, .social-btn, .software-name, .software-desc, .download-btn, .tip-warning, .home-sub, .group-btn, .auth-tab, .auth-submit, .code-btn, .chat-send, .auth-link, .field-hint, #newPostBtn, #cancelPostBtn, .compose-btns .f-btn, #changePwdBtn, #logoutBtn';
+    var TEXT_SEL = '.nav-item, .page-title, .social-btn, .software-name, .software-desc, .download-btn, .tip-warning, .home-sub, .group-btn, .auth-tab, .auth-submit, .code-btn, .chat-send, .auth-link, .field-hint, #newPostBtn, #cancelPostBtn, .compose-btns .f-btn, #changePwdBtn, #logoutBtn, .featured-title, .hero-tag, .dl-upload-btn, .dl-empty-title, #dlEmptyReset, #viewAllBtn, .dl-empty-sub';
 
     window.T = function(s) {
         if ((localStorage.getItem(STORE_KEY) || 'zh') !== 'en') return s;
