@@ -79,10 +79,6 @@
     gridLayer.className = 'grid-overlay';
     document.body.appendChild(gridLayer);
 
-    var svgLayer = document.createElement('div');
-    svgLayer.innerHTML = '<svg width="0" height="0" style="position:absolute"><defs><filter id="liquidDrop" x="-30%" y="-30%" width="160%" height="160%"><feTurbulence type="fractalNoise" baseFrequency="0.011 0.017" numOctaves="2" seed="7" result="noise"/><feGaussianBlur in="noise" stdDeviation="1.6" result="softNoise"/><feDisplacementMap in="SourceGraphic" in2="softNoise" scale="90" xChannelSelector="R" yChannelSelector="G"/></filter></defs></svg>';
-    document.body.appendChild(svgLayer);
-
     var isTouch = window.matchMedia('(hover: none)').matches;
 
     var navItems = document.querySelectorAll('.nav-item');
@@ -95,17 +91,10 @@
         about: document.getElementById('about-page')
     };
 
-    var sliderInitialized = false;
     function updateSliderPosition(activeBtn) {
         if (!slider || !activeBtn) return;
         slider.style.left = (activeBtn.offsetLeft - 5) + 'px';
         slider.style.width = (activeBtn.offsetWidth + 10) + 'px';
-        if (sliderInitialized) {
-            slider.classList.remove('morphing');
-            slider.offsetHeight;
-            slider.classList.add('morphing');
-        }
-        sliderInitialized = true;
     }
 
     function revealInPage(pageEl) {
@@ -1300,6 +1289,8 @@
         imgInput.value = '';
         imgPreview.style.display = 'none';
         imgThumb.removeAttribute('src');
+        var agree = document.getElementById('swAgree');
+        if (agree) agree.checked = false;
         modalTitle.textContent = T('上传资源');
         saveBtn.textContent = T('上传资源');
         FIELD_IDS.forEach(function(id) {
@@ -1382,6 +1373,11 @@
     }
 
     saveBtn.addEventListener('click', function() {
+        var agreeBox = document.getElementById('swAgree');
+        if (agreeBox && !agreeBox.checked) {
+            swError.textContent = '请先勾选并确认遵守上传内容须知（禁止色情、暴力、血腥恶心等违规内容）';
+            return;
+        }
         var name = document.getElementById('swName').value.trim();
         if (!name) { swError.textContent = '资源名称不能为空'; return; }
         if (!getToken()) { goLogin(); return; }

@@ -110,27 +110,28 @@ body {
 
 .sidebar {
     position: fixed;
-    bottom: 16px;
+    top: 16px;
+    bottom: auto;
     left: 50%;
     transform: translateX(-50%);
     width: auto;
     max-width: calc(100vw - 24px);
     height: auto;
     margin: 0;
-    padding: 10px 16px;
+    padding: 8px 14px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    background: linear-gradient(135deg, rgba(24, 30, 44, 0.5), rgba(10, 14, 22, 0.38));
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 32px;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.55),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-        0 18px 40px -12px rgba(0, 0, 0, 0.6);
+    background: rgba(12, 17, 26, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 16px;
+    box-shadow: 0 12px 28px -18px rgba(0, 0, 0, 0.75);
     z-index: 200;
+}
+
+/* 公告入口暂时隐藏：页面与逻辑都保留，需要恢复时删掉这条规则即可 */
+.nav-item[data-page="announcement"] {
+    display: none;
 }
 
 .logo-area {
@@ -210,37 +211,16 @@ body {
     height: auto;
     left: 0;
     width: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.09));
+    background: rgba(106, 184, 255, 0.24);
     border-radius: 999px;
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    backdrop-filter: url(#liquidDrop) blur(2px) saturate(160%);
-    transition: left 0.7s cubic-bezier(0.34, 1.8, 0.34, 1), width 0.7s cubic-bezier(0.34, 1.8, 0.34, 1);
+    transition: left 0.35s ease, width 0.35s ease;
     pointer-events: none;
     z-index: 1;
-    box-shadow:
-        inset 0 1px 1px rgba(255, 255, 255, 0.5),
-        inset 0 -1px 1px rgba(255, 255, 255, 0.15),
-        inset 2px 0 3px -2px rgba(255, 255, 255, 0.35),
-        inset -2px 0 3px -2px rgba(255, 255, 255, 0.35),
-        0 6px 16px -8px rgba(0, 0, 0, 0.4);
-}
-
-.nav-slider.morphing {
-    animation: liquidMorph 0.7s cubic-bezier(0.3, 0.6, 0.2, 1);
-}
-
-@keyframes liquidMorph {
-    0% { transform: scaleX(1) scaleY(1); }
-    22% { transform: scaleX(0.7) scaleY(1.32); }
-    48% { transform: scaleX(1.24) scaleY(0.8); }
-    72% { transform: scaleX(0.9) scaleY(1.1); }
-    88% { transform: scaleX(1.04) scaleY(0.97); }
-    100% { transform: scaleX(1) scaleY(1); }
 }
 
 .main-content {
     flex: 1;
-    padding: 30px 36px 130px 36px;
+    padding: 96px 36px 130px 36px;
     overflow-y: auto;
     scroll-behavior: smooth;
     position: relative;
@@ -834,9 +814,10 @@ body {
 
 @media (max-width: 720px) {
     .sidebar {
-        bottom: 10px;
-        padding: 8px 12px;
-        border-radius: 28px;
+        top: 10px;
+        bottom: auto;
+        padding: 6px 10px;
+        border-radius: 14px;
     }
     .nav-links {
         width: 100%;
@@ -847,7 +828,7 @@ body {
         font-size: 13px;
     }
     .main-content {
-        padding: 20px 18px 110px 18px;
+        padding: 82px 18px 40px 18px;
         margin-bottom: 0;
     }
     .page-title {
@@ -2110,6 +2091,50 @@ body {
     color: var(--text-muted);
     font-size: 12.5px;
     line-height: 1.6;
+}
+
+.dl-content-warn {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(255, 72, 72, 0.09);
+    border: 1px solid rgba(255, 96, 96, 0.45);
+    color: #f3d7d7;
+    font-size: 12.5px;
+    line-height: 1.7;
+}
+
+.dl-warn-title {
+    color: #ff7b7b;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+}
+
+.dl-content-warn ul {
+    margin: 0 0 10px;
+    padding-left: 18px;
+}
+
+.dl-content-warn li {
+    margin: 3px 0;
+}
+
+.dl-warn-agree {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #ffd9d9;
+    font-weight: 600;
+}
+
+.dl-warn-agree input {
+    width: 16px;
+    height: 16px;
+    accent-color: #ff5c5c;
+    cursor: pointer;
 }
 
 .dl-choice-list {
