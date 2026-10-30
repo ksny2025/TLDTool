@@ -1341,8 +1341,8 @@
             if (pendingImage !== 'KEEP') imgThumb.removeAttribute('src');
             return;
         }
-        if (file.size > 5 * 1024 * 1024) {
-            swError.textContent = '图片太大（最大5MB）';
+        if (!isAdmin() && file.size > 10 * 1024 * 1024) {
+            swError.textContent = '图片太大（最大10MB）';
             imgInput.value = '';
             return;
         }
