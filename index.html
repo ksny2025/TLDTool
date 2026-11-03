@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BENBAIJIE 资源下载站</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css?v=20261103b">
+    <link rel="stylesheet" href="style.css?v=20261103f">
 </head>
 <body>
 <div class="app-container">
@@ -75,7 +75,7 @@
                 <div class="dl-tabs" role="tablist">
                     <button type="button" class="dl-tab active" id="dlTabSite" role="tab" aria-selected="true">网站资源</button>
                     <button type="button" class="dl-tab" id="dlTabMods" role="tab" aria-selected="false">长途旅行模组下载</button>
-                    <button type="button" class="dl-tab" id="dlTabLoader" role="tab" aria-selected="false">🔧 模组加载器</button>
+                    <button type="button" class="dl-tab" id="dlTabLoader" role="tab" aria-selected="false">模组加载器</button>
                 </div>
 
                 <div id="siteResView">
@@ -138,53 +138,59 @@
                 </div>
 
                 <div id="tldLoaderView" style="display:none;">
-                    <div class="loader-hero">
-                        <div class="loader-hero-title">长途旅行模组加载器</div>
-                        <div class="loader-hero-sub">在浏览器里一键往游戏里装 TLDLoader ，无需再下载第三方工具</div>
-                    </div>
+                    <div class="loader-win">
+                        <div class="loader-win-bar">
+                            <span class="loader-win-dot"></span>
+                            <span class="loader-win-title">长途旅行模组加载器</span>
+                            <span class="loader-win-by">By: BENBAIJIE</span>
+                        </div>
 
-                    <div class="loader-steps">
-                        <div class="loader-step">
-                            <div class="loader-step-no">1</div>
-                            <div class="loader-step-body">
-                                <div class="loader-step-title">选择游戏目录</div>
-                                <div class="loader-step-sub" id="loaderGamePath">未选择（需要包含 TheLongDrive_Data 文件夹）</div>
-                                <div class="loader-step-btns">
-                                    <button type="button" class="f-btn primary" id="loaderPickGame">选择游戏目录</button>
-                                    <button type="button" class="f-btn" id="loaderScanSteam">扫描 Steam 目录</button>
-                                </div>
+                        <div class="loader-win-body">
+                            <div class="loader-path-row">
+                                <span class="loader-path-label">路径：</span>
+                                <input type="text" id="loaderGamePath" class="loader-path-input" readonly placeholder="尚未选择游戏目录">
+                                <button type="button" class="loader-mini-btn" id="loaderPickGameModify">修改</button>
                             </div>
-                        </div>
-                        <div class="loader-step">
-                            <div class="loader-step-no">2</div>
-                            <div class="loader-step-body">
-                                <div class="loader-step-title">选择「文档」文件夹</div>
-                                <div class="loader-step-sub" id="loaderDocsPath">未选择（资源包要写进 文档\TheLongDrive\Mods\Assets）</div>
-                                <div class="loader-step-btns">
-                                    <button type="button" class="f-btn" id="loaderPickDocs">选择文档目录</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="loader-step">
-                            <div class="loader-step-no">3</div>
-                            <div class="loader-step-body">
-                                <div class="loader-step-title">安装 / 卸载</div>
-                                <div class="loader-step-sub">当前状态：<span class="loader-state" id="loaderState">未检测</span></div>
-                                <div class="loader-step-btns">
-                                    <button type="button" class="f-btn primary" id="loaderInstallNew">安装新版加载器</button>
-                                    <button type="button" class="f-btn" id="loaderInstallOld">安装旧版加载器</button>
-                                    <button type="button" class="f-btn" id="loaderUninstall">卸载加载器</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="loader-log-wrap">
-                        <div class="loader-log-head">
-                            <span>执行日志</span>
-                            <button type="button" class="loader-log-clear" id="loaderLogClear">清空</button>
+                            <div class="loader-installed-row">
+                                <span>模组加载器是否安装：</span>
+                                <span class="loader-state" id="loaderState">未检测</span>
+                                <button type="button" class="loader-mini-btn" id="loaderRefreshState">刷新</button>
+                            </div>
+
+                            <div class="loader-group">
+                                <div class="loader-variant-row">
+                                    <button type="button" class="loader-variant-btn" id="loaderInstallOld">模组加载器旧版</button>
+                                    <button type="button" class="loader-variant-btn selected" id="loaderInstallNew">模组加载器新版</button>
+                                    <button type="button" class="loader-variant-btn" id="loaderUpdate">在线更新加载器</button>
+                                </div>
+                                <div class="loader-note" id="loaderVariantNote">说明：当前选择「新版」，点下方「安装模组加载器」开始安装；「在线更新」只重新拉取最新 TLDLoader.dll。</div>
+                                <pre class="loader-log" id="loaderLog">等待操作…</pre>
+                            </div>
+
+                            <div class="loader-btn-row">
+                                <button type="button" class="loader-btn" id="loaderScanSteam">寻找游戏路径</button>
+                                <button type="button" class="loader-btn primary" id="loaderInstallBtn">安装模组加载器</button>
+                                <button type="button" class="loader-btn" id="loaderUninstall">卸载模组加载器</button>
+                            </div>
+                            <div class="loader-btn-row">
+                                <button type="button" class="loader-btn" id="loaderPickGame">手动寻找路径</button>
+                                <button type="button" class="loader-btn" id="loaderExportPack">导出整合包</button>
+                                <button type="button" class="loader-btn" id="loaderAbout">关于软件</button>
+                            </div>
+
+                            <div class="loader-docs-row">
+                                <span>文档目录：</span>
+                                <span class="loader-docs-path" id="loaderDocsPath">未选择</span>
+                                <button type="button" class="loader-mini-btn" id="loaderPickDocs">一键定位文档目录</button>
+                            </div>
+
+                            <div class="loader-foot">
+                                <div>点击寻找，让你轻松完成模组一键安装</div>
+                                <div><a href="https://znine.fun" target="_blank" rel="noopener">点击进入官网</a></div>
+                                <div class="loader-foot-meta">作者：BENBAIJIE · 模组加载器网页版</div>
+                            </div>
                         </div>
-                        <pre class="loader-log" id="loaderLog">等待操作…</pre>
                     </div>
 
                     <div class="tip-warning">
@@ -390,6 +396,6 @@
     </div>
 </div>
 
-<script src="script.js?v=20261103c"></script>
+<script src="script.js?v=20261103f"></script>
 </body>
 </html>

@@ -2052,7 +2052,14 @@
     }
 
     function askDir(id, startIn) {
-        return window.showDirectoryPicker({ id: id, startIn: startIn || 'documents', mode: 'readwrite' });
+        // 部分旧版 Chrome 不支持 id / startIn 参数，失败时退回最简调用
+        return window.showDirectoryPicker({ id: id, startIn: startIn || 'documents', mode: 'readwrite' })
+            .catch(function(err) {
+                if (err && (err.name === 'TypeError' || err.name === 'NotSupportedError')) {
+                    return window.showDirectoryPicker({ mode: 'readwrite' });
+                }
+                throw err;
+            });
     }
 
     function ensurePermission(dir) {
