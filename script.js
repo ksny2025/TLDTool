@@ -151,18 +151,19 @@
     var subElem = document.querySelector('#home-page .home-sub');
     if (subElem) {
         var originalSub = subElem.innerText;
+        var _T = function(s) { return window.T ? window.T(s) : s; };
         setTimeout(function() {
-            subElem.innerText = T('长途旅行小助手（他能为你的长途旅行添加模组！）');
+            subElem.innerText = _T('长途旅行小助手（他能为你的长途旅行添加模组！）');
             subElem.classList.add('fade-in');
             setTimeout(function() { subElem.classList.remove('fade-in'); }, 700);
         }, 600);
         setTimeout(function() {
-            subElem.innerText = T(originalSub);
+            subElem.innerText = _T(originalSub);
             subElem.classList.add('fade-in');
             setTimeout(function() { subElem.classList.remove('fade-in'); }, 700);
         }, 6200);
         setTimeout(function() {
-            subElem.innerText = T('模组加载 | 助手工具 ');
+            subElem.innerText = _T('模组加载 | 助手工具 ');
             subElem.classList.add('fade-in');
             setTimeout(function() { subElem.classList.remove('fade-in'); }, 700);
         }, 9800);
@@ -1545,17 +1546,21 @@
 
 // ==================== 长途旅行模组下载（WorkshopTLD 社区库） ====================
 (function() {
-    var PAGE_SIZE = 24;
+    var PAGE_SIZE = 9;
     var mods = [];            // 全部模组
     var filtered = [];        // 搜索+分类过滤后
-    var shown = PAGE_SIZE;    // 当前已渲染数量
+    var page = 1;             // 当前页
     var activeCat = '全部';
     var loaded = false;
+    var imgSource = 'gitlab'; // 图片源：gitlab（默认）/ server（本站缓存）
+    var modSource = 'workshop-tld';
 
     var tabSite = document.getElementById('dlTabSite');
     var tabMods = document.getElementById('dlTabMods');
+    var tabLoader = document.getElementById('dlTabLoader');
     var viewSite = document.getElementById('siteResView');
     var viewMods = document.getElementById('tldModsView');
+    var viewLoader = document.getElementById('tldLoaderView');
     var siteTip = document.getElementById('siteTip');
     var grid = document.getElementById('tldGrid');
     var chips = document.getElementById('tldChips');
@@ -1563,8 +1568,9 @@
     var emptyEl = document.getElementById('tldEmpty');
     var searchInput = document.getElementById('tldSearchInput');
     var searchClear = document.getElementById('tldSearchClear');
-    var moreWrap = document.getElementById('tldMoreWrap');
-    var moreBtn = document.getElementById('tldMoreBtn');
+    var pager = document.getElementById('tldPager');
+    var imgSelect = document.getElementById('tldImgSelect');
+    var srcSelect = document.getElementById('tldSourceSelect');
     if (!tabMods || !grid) return;
 
     function T(s) { return window.T ? window.T(s) : s; }
@@ -1594,7 +1600,12 @@
     }
 
     function coverUrl(m) {
-        return m.PictureLink || '';
+        var u = m.PictureLink || '';
+        if (!u) return '';
+        if (imgSource === 'server') {
+            return '/api/tldimg?u=' + encodeURIComponent(u);
+        }
+        return u;
     }
 
     function renderChips() {
@@ -1625,29 +1636,34 @@
                 (m.Description || '').toLowerCase().indexOf(q) !== -1 ||
                 (m.FileName || '').toLowerCase().indexOf(q) !== -1;
         });
-        shown = PAGE_SIZE;
+        page = 1;
         renderGrid();
     }
 
     function renderGrid() {
-        var slice = filtered.slice(0, shown);
+        var totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+        if (page > totalPages) page = totalPages;
+        if (page < 1) page = 1;
+        var start = (page - 1) * PAGE_SIZE;
+        var slice = filtered.slice(start, start + PAGE_SIZE);
         totalEl.textContent = T('共 ') + filtered.length + T(' 个模组');
         if (!slice.length) {
             grid.innerHTML = '';
             emptyEl.style.display = 'flex';
-            moreWrap.style.display = 'none';
+            pager.innerHTML = '';
             return;
         }
         emptyEl.style.display = 'none';
         grid.innerHTML = slice.map(function(m, i) {
+            var idx = start + i;
             var cat = esc(String(m.Category || '').trim() || '未分类');
             var img = coverUrl(m);
             var imgHtml = img
-                ? '<img loading="lazy" src="' + escAttr(img) + '" alt="' + escAttr(m.Name) + '" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'noimg\')">'
+                ? '<img loading="lazy" src="' + escAttr(img) + '" data-fallback="' + escAttr(m.PictureLink || '') + '" alt="' + escAttr(m.Name) + '" onerror="var fb=this.getAttribute(\'data-fallback\');if(fb&&this.src.indexOf(\'/api/tldimg\')!==-1){this.src=fb;}else{this.style.display=\'none\';this.parentElement.classList.add(\'noimg\');}">'
                 : '';
             var date = esc(normDate(m.Date));
             var ver = esc(m.Version || '');
-            return '<div class="software-card tld-mod rising" style="animation-delay:' + Math.min(i % PAGE_SIZE, 12) * 40 + 'ms">' +
+            return '<div class="software-card tld-mod rising" style="animation-delay:' + Math.min(i, 12) * 40 + 'ms">' +
                 '<div class="software-img tld-img">' + imgHtml +
                     (img ? '' : '<span class="tld-noimg-text">🚗</span>') +
                     '<span class="tld-cat">' + cat + '</span>' +
@@ -1660,12 +1676,54 @@
                     (m.Dependency ? '<span>' + T('依赖 ') + esc(m.Dependency) + '</span>' : '') + '</div>' +
                     '<div class="tld-desc">' + esc(m.Description || '') + '</div>' +
                     '<div class="tld-actions">' +
-                        (m.Link ? '<button type="button" class="f-btn primary tld-dl" data-tlddl="' + i + '">' + T('下载模组') + '</button>' : '') +
+                        (m.Link ? '<button type="button" class="f-btn primary tld-dl" data-tlddl="' + idx + '">' + T('下载模组') + '</button>' : '') +
                     '</div>' +
                 '</div>' +
             '</div>';
         }).join('');
-        moreWrap.style.display = filtered.length > shown ? 'flex' : 'none';
+        renderPager(totalPages);
+    }
+
+    // ---- 分页控件 ----
+    function renderPager(totalPages) {
+        if (totalPages <= 1) { pager.innerHTML = ''; return; }
+        var html = '';
+        html += '<button type="button" class="tld-page-btn nav' + (page === 1 ? ' disabled' : '') + '" data-page="' + (page - 1) + '">' + T('上一页') + '</button>';
+        var nums = [];
+        var from = Math.max(1, page - 2);
+        var to = Math.min(totalPages, from + 4);
+        from = Math.max(1, to - 4);
+        for (var n = from; n <= to; n++) nums.push(n);
+        if (from > 1) {
+            nums.unshift(1);
+            if (from > 2) nums.splice(1, 0, 0);
+        }
+        if (to < totalPages) {
+            if (to < totalPages - 1) nums.push(0);
+            nums.push(totalPages);
+        }
+        nums.forEach(function(n) {
+            if (n === 0) {
+                html += '<span class="tld-page-gap">…</span>';
+            } else {
+                html += '<button type="button" class="tld-page-btn' + (n === page ? ' active' : '') + '" data-page="' + n + '">' + n + '</button>';
+            }
+        });
+        html += '<button type="button" class="tld-page-btn nav' + (page === totalPages ? ' disabled' : '') + '" data-page="' + (page + 1) + '">' + T('下一页') + '</button>';
+        pager.innerHTML = html;
+    }
+
+    if (pager) {
+        pager.addEventListener('click', function(e) {
+            var b = e.target.closest('.tld-page-btn');
+            if (!b || b.classList.contains('disabled')) return;
+            var p = parseInt(b.getAttribute('data-page'), 10);
+            if (!p) return;
+            page = p;
+            renderGrid();
+            var panel = document.getElementById('download-page');
+            if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
     }
 
     // ---- 下载方式弹窗（保存到 Mods 文件夹 / 普通下载） ----
@@ -1819,19 +1877,25 @@
     });
 
     // ---- Tab 切换 ----
-    function switchTab(mods_) {
-        var toMods = mods_ === 'mods';
-        tabSite.classList.toggle('active', !toMods);
+    function switchTab(which) {
+        var toMods = which === 'mods';
+        var toLoader = which === 'loader';
+        tabSite.classList.toggle('active', !toMods && !toLoader);
         tabMods.classList.toggle('active', toMods);
-        tabSite.setAttribute('aria-selected', String(!toMods));
+        tabLoader.classList.toggle('active', toLoader);
+        tabSite.setAttribute('aria-selected', String(!toMods && !toLoader));
         tabMods.setAttribute('aria-selected', String(toMods));
-        viewSite.style.display = toMods ? 'none' : '';
-        siteTip.style.display = toMods ? 'none' : '';
+        tabLoader.setAttribute('aria-selected', String(toLoader));
+        viewSite.style.display = (!toMods && !toLoader) ? '' : 'none';
+        siteTip.style.display = (!toMods && !toLoader) ? '' : 'none';
         viewMods.style.display = toMods ? '' : 'none';
+        viewLoader.style.display = toLoader ? '' : 'none';
         if (toMods && !loaded) loadMods();
+        if (toLoader && window.__loaderInit) window.__loaderInit();
     }
     tabSite.addEventListener('click', function() { switchTab('site'); });
     tabMods.addEventListener('click', function() { switchTab('mods'); });
+    if (tabLoader) tabLoader.addEventListener('click', function() { switchTab('loader'); });
 
     // ---- 搜索 ----
     var searchTimer = null;
@@ -1860,23 +1924,48 @@
         renderChips();
         applyFilter();
     });
-    moreBtn.addEventListener('click', function() {
-        shown += PAGE_SIZE;
-        renderGrid();
-    });
+
+    // ---- 图片源 / 模组源 切换 ----
+    if (imgSelect) {
+        imgSelect.value = imgSource;
+        imgSelect.addEventListener('change', function() {
+            imgSource = imgSelect.value === 'server' ? 'server' : 'gitlab';
+            if (loaded) renderGrid();
+        });
+    }
+    if (srcSelect) {
+        srcSelect.addEventListener('change', function() {
+            modSource = srcSelect.value || 'workshop-tld';
+            loaded = false;
+            loadMods();
+        });
+    }
 
     // ---- 加载数据 ----
     function loadMods() {
-        fetch('/api/tldmods').then(function(res) { return res.json(); }).then(function(res) {
-            if (res && res.ok && res.mods && res.mods.length) { mods = res.mods; ready(); return; }
-            throw new Error('no api');
-        }).catch(function() {
-            // 静态站兜底：仓库内缓存文件
-            fetch('data/tld_mods_cache.json').then(function(res) { return res.json(); }).then(function(c) {
-                mods = (c && (c.mods || c.Mods)) || [];
-                ready();
-            }).catch(function() { ready(); });
-        });
+        fetch('/api/tldmods?source=' + encodeURIComponent(modSource))
+            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (res && res.ok && res.mods && res.mods.length) {
+                    mods = res.mods;
+                    if (res.sources && srcSelect) {
+                        srcSelect.innerHTML = res.sources.map(function(s) {
+                            return '<option value="' + escAttr(s.id) + '">' + esc(s.label) + '</option>';
+                        }).join('');
+                        srcSelect.value = res.source || modSource;
+                    }
+                    ready();
+                    return;
+                }
+                throw new Error('no api');
+            })
+            .catch(function() {
+                // 静态站兜底：仓库内缓存文件
+                fetch('data/tld_mods_cache.json').then(function(res) { return res.json(); }).then(function(c) {
+                    mods = (c && (c.mods || c.Mods)) || [];
+                    ready();
+                }).catch(function() { ready(); });
+            });
     }
 
     function ready() {
@@ -1888,6 +1977,434 @@
     window.addEventListener('langchange', function() {
         if (loaded) { renderChips(); renderGrid(); }
     });
+})();
+
+// ==================== 模组加载器（TLDLoader 安装 / 卸载） ====================
+(function() {
+    var fsOk = !!(window.showDirectoryPicker && window.isSecureContext);
+    var gameDir = null;
+    var docsDir = null;
+    var info = null;
+    var variant = 'new';
+
+    var el = {
+        pickGame: document.getElementById('loaderPickGame'),
+        pickGameModify: document.getElementById('loaderPickGameModify'),
+        refreshState: document.getElementById('loaderRefreshState'),
+        scanSteam: document.getElementById('loaderScanSteam'),
+        pickDocs: document.getElementById('loaderPickDocs'),
+        installNew: document.getElementById('loaderInstallNew'),
+        installOld: document.getElementById('loaderInstallOld'),
+        update: document.getElementById('loaderUpdate'),
+        installBtn: document.getElementById('loaderInstallBtn'),
+        uninstall: document.getElementById('loaderUninstall'),
+        exportPack: document.getElementById('loaderExportPack'),
+        about: document.getElementById('loaderAbout'),
+        gamePath: document.getElementById('loaderGamePath'),
+        docsPath: document.getElementById('loaderDocsPath'),
+        state: document.getElementById('loaderState'),
+        note: document.getElementById('loaderVariantNote'),
+        log: document.getElementById('loaderLog')
+    };
+    if (!el.pickGame) return;
+
+    function T(s) { return window.T ? window.T(s) : s; }
+
+    function logLine(msg) {
+        var stamp = new Date().toLocaleTimeString();
+        if (el.log.textContent === '等待操作…') el.log.textContent = '';
+        el.log.textContent += '[' + stamp + '] ' + msg + '\n';
+        el.log.scrollTop = el.log.scrollHeight;
+    }
+
+    function setState(text, cls) {
+        el.state.textContent = text;
+        el.state.className = 'loader-state' + (cls ? ' ' + cls : '');
+    }
+
+    // ---- IndexedDB 记住目录句柄 ----
+    function idb() {
+        return new Promise(function(resolve, reject) {
+            var rq = indexedDB.open('tld-mods-db', 1);
+            rq.onupgradeneeded = function() { rq.result.createObjectStore('kv'); };
+            rq.onsuccess = function() { resolve(rq.result); };
+            rq.onerror = function() { reject(rq.error); };
+        });
+    }
+    function idbGet(key) {
+        return idb().then(function(db) {
+            return new Promise(function(resolve) {
+                var rq = db.transaction('kv', 'readonly').objectStore('kv').get(key);
+                rq.onsuccess = function() { resolve(rq.result || null); };
+                rq.onerror = function() { resolve(null); };
+            });
+        }).catch(function() { return null; });
+    }
+    function idbSet(key, val) {
+        return idb().then(function(db) {
+            return new Promise(function(resolve) {
+                var tx = db.transaction('kv', 'readwrite');
+                tx.objectStore('kv').put(val, key);
+                tx.oncomplete = function() { resolve(); };
+                tx.onerror = function() { resolve(); };
+            });
+        }).catch(function() {});
+    }
+
+    function askDir(id, startIn) {
+        return window.showDirectoryPicker({ id: id, startIn: startIn || 'documents', mode: 'readwrite' });
+    }
+
+    function ensurePermission(dir) {
+        if (!dir || !dir.queryPermission) return Promise.resolve(dir);
+        return Promise.resolve(dir.queryPermission({ mode: 'readwrite' })).then(function(p) {
+            if (p === 'granted') return dir;
+            return Promise.resolve(dir.requestPermission({ mode: 'readwrite' })).then(function(p2) {
+                return p2 === 'granted' ? dir : null;
+            });
+        });
+    }
+
+    function hasManaged(dir) {
+        // 校验目录里是否有 TheLongDrive_Data\Managed
+        var names = ['TheLongDrive_Data', 'thelongdrive_data', 'TheLongdrive_Data'];
+        var i = 0;
+        function tryNext() {
+            if (i >= names.length) return Promise.resolve(null);
+            var n = names[i++];
+            return dir.getDirectoryHandle(n).then(function(d) {
+                return d.getDirectoryHandle('Managed').then(function(m) { return m; }).catch(function() {
+                    var ml = ['managed', 'Managed'];
+                    return ml.reduce(function(p, name) {
+                        return p.catch(function() { return d.getDirectoryHandle(name); });
+                    }, Promise.reject());
+                });
+            }).catch(tryNext);
+        }
+        return tryNext();
+    }
+
+    function fetchBlob(url) {
+        return fetch(url).then(function(r) {
+            if (!r.ok) throw new Error('下载失败 HTTP ' + r.status);
+            return r.blob();
+        });
+    }
+
+    function writeFile(dir, name, blob) {
+        return dir.getFileHandle(name, { create: true }).then(function(fh) {
+            return fh.createWritable().then(function(w) {
+                return w.write(blob).then(function() { return w.close(); });
+            });
+        });
+    }
+
+    function writeFromUrl(dir, name, url, label) {
+        return fetchBlob(url).then(function(blob) {
+            return writeFile(dir, name, blob).then(function() {
+                logLine('安装：' + (label || name) + '（' + Math.round(blob.size / 1024) + ' KB）');
+            });
+        });
+    }
+
+    function removeIfExists(dir, name) {
+        if (!dir) return Promise.resolve();
+        return dir.removeEntry(name).then(function() {
+            logLine('删除：' + name);
+        }).catch(function() {});
+    }
+
+    // ---- 选择目录（返回 Promise，便于安装流程自动串起来） ----
+    function setGamePath(text) {
+        if (el.gamePath.value !== undefined) el.gamePath.value = text;
+        else el.gamePath.textContent = text;
+    }
+    function setDocsPath(text) {
+        el.docsPath.textContent = text;
+    }
+    function updateDocsText() {
+        setDocsPath(docsDir ? '已记住：' + docsDir.name : '未选择（点右侧按钮，打开的窗口已定位到「文档」，直接确认即可）');
+    }
+
+    function chooseGameDir() {
+        if (!fsOk) return Promise.reject(new Error('当前浏览器不支持目录写入（需 Chrome / Edge + https/localhost）'));
+        return askDir('tldGameDir', 'desktop').then(function(dir) {
+            return hasManaged(dir).then(function(managed) {
+                if (!managed) throw new Error('该目录不含 TheLongDrive_Data\\Managed，请选择游戏根目录（含 TheLongDrive.exe 的那个）');
+                gameDir = dir;
+                idbSet('gameDir', dir);
+                setGamePath(dir.name + '\\（TheLongDrive_Data\\Managed 已找到）');
+                logLine('游戏目录已就绪：' + dir.name);
+                checkState();
+                return dir;
+            });
+        });
+    }
+
+    function chooseDocsDir() {
+        if (!fsOk) return Promise.reject(new Error('当前浏览器不支持目录写入（需 Chrome / Edge + https/localhost）'));
+        logLine('已打开系统窗口并定位到「文档」，直接点「选择文件夹」即可');
+        return askDir('tldDocsDir', 'documents').then(function(dir) {
+            docsDir = dir;
+            idbSet('docsDir', dir);
+            updateDocsText();
+            logLine('文档目录已就绪：' + dir.name);
+            return dir;
+        });
+    }
+
+    // 安装时如果还没有目录，自动串联弹出选择框（用户只需点一次确认）
+    function ensureGame() {
+        if (gameDir) {
+            return ensurePermission(gameDir).then(function(g) {
+                gameDir = g || gameDir;
+                return g ? g : chooseGameDir();
+            });
+        }
+        return chooseGameDir();
+    }
+
+    function ensureDocs() {
+        if (docsDir) {
+            return ensurePermission(docsDir).then(function(d) {
+                docsDir = d || docsDir;
+                return d ? d : chooseDocsDir();
+            });
+        }
+        return chooseDocsDir();
+    }
+
+    function pickGame() {
+        chooseGameDir().catch(function(err) {
+            if (err && err.name === 'AbortError') return;
+            logLine('✗ ' + (err.message || err));
+        });
+    }
+
+    function pickDocs() {
+        chooseDocsDir().catch(function(err) {
+            if (err && err.name === 'AbortError') return;
+            logLine('✗ ' + (err.message || err));
+        });
+    }
+
+    function scanSteam() {
+        logLine('正在寻找游戏路径（扫描 Steam 库）…');
+        fetch('/api/loader/steam').then(function(r) { return r.json(); }).then(function(res) {
+            var paths = (res && res.paths) || [];
+            if (!paths.length) {
+                logLine('未在 Steam 标准目录找到 TheLongDrive，请点「手动寻找路径」选择游戏根目录。');
+                return;
+            }
+            paths.forEach(function(p) { logLine('找到：' + p); });
+            logLine('提示：浏览器不允许网页自行指定任意路径，请点「手动寻找路径」，在弹出的窗口里进入上面的目录。');
+            setGamePath('Steam 中检测到：' + paths[0]);
+        }).catch(function() { logLine('扫描失败：网站后端不可用'); });
+    }
+
+    // ---- 状态检测 ----
+    function checkState() {
+        if (!gameDir) { setState('未选择游戏目录', ''); return; }
+        hasManaged(gameDir).then(function(managed) {
+            if (!managed) { setState('目录无效', 'err'); return; }
+            return managed.getFileHandle('TLDLoader.dll').then(function() {
+                setState('已安装', 'ok');
+            }).catch(function() {
+                setState(gameDir ? '未安装' : '未检测', '');
+            });
+        });
+    }
+
+    // ---- 安装 ----
+    function ensureDirs() {
+        return ensureGame().then(function() { return ensureDocs(); });
+    }
+
+    function getInfo() {
+        return fetch('/api/loader/info').then(function(r) { return r.json(); }).then(function(res) {
+            var map = {};
+            (res.files || []).forEach(function(f) { map[f.key] = f; });
+            info = map;
+            return map;
+        });
+    }
+
+    function assetsStep(map) {
+        var docsRoot = docsDir;
+        var step = docsRoot.name === 'TheLongDrive'
+            ? Promise.resolve(docsRoot)
+            : docsRoot.getDirectoryHandle('TheLongDrive', { create: true });
+        return step.then(function(tld) {
+            return tld.getDirectoryHandle('Mods', { create: true });
+        }).then(function(mods) {
+            return mods.getDirectoryHandle('Assets', { create: true });
+        }).then(function(assets) {
+            return assets.getDirectoryHandle('TLDLoader_Core', { create: true }).then(function(core) {
+                return writeFromUrl(core, 'core.unity3d', map.core.url, 'Assets\\TLDLoader_Core\\core.unity3d');
+            }).then(function() {
+                return assets.getDirectoryHandle('TLDLoader_Settings', { create: true });
+            }).then(function(setDir) {
+                return writeFromUrl(setDir, 'settingsui.unity3d', map.settingsui.url, 'Assets\\TLDLoader_Settings\\settingsui.unity3d');
+            });
+        });
+    }
+
+    function install(v) {
+        v = v || variant;
+        if (!fsOk) { logLine('当前浏览器不支持（需 Chrome / Edge + https/localhost）'); return; }
+        logLine('开始安装' + (v === 'old' ? '旧版' : '新版') + '加载器…请先关闭游戏');
+        ensureDirs()
+            .then(function() { return getInfo(); })
+            .then(function(map) {
+                return hasManaged(gameDir).then(function(managed) {
+                    if (!managed) throw new Error('未找到 TheLongDrive_Data\\Managed');
+                    var loaderKey = v === 'old' ? 'loader_old' : 'loader_new';
+                    return writeFromUrl(managed, '0Harmony.dll', map.harmony.url, '0Harmony.dll')
+                        .then(function() { return writeFromUrl(managed, 'TLDLoader.dll', map[loaderKey].url, 'TLDLoader.dll'); })
+                        .then(function() { return writeFromUrl(managed, 'Assembly-CSharp.dll', map.assembly_patched.url, 'Assembly-CSharp.dll'); })
+                        .then(function() { return assetsStep(map); });
+                });
+            })
+            .then(function() {
+                logLine('✓ 加载器安装完毕，尽情添加模组吧！');
+                setState('已安装', 'ok');
+            })
+            .catch(function(err) {
+                if (err && err.name === 'AbortError') { logLine('已取消选择目录'); return; }
+                logLine('✗ 安装失败：' + (err && err.message ? err.message : err) + '（若提示占用，请先退出游戏）');
+            });
+    }
+
+    // ---- 在线更新：只重新拉取最新 TLDLoader.dll ----
+    function onlineUpdate() {
+        if (!fsOk) { logLine('当前浏览器不支持（需 Chrome / Edge + https/localhost）'); return; }
+        logLine('在线更新：重新拉取最新 TLDLoader.dll…');
+        ensureGame()
+            .then(function() { return getInfo(); })
+            .then(function(map) {
+                return hasManaged(gameDir).then(function(managed) {
+                    if (!managed) throw new Error('未找到 TheLongDrive_Data\\Managed');
+                    return writeFromUrl(managed, 'TLDLoader.dll', map.loader_new.url, 'TLDLoader.dll（最新）');
+                });
+            })
+            .then(function() {
+                logLine('✓ 在线更新完成');
+                setState('已安装', 'ok');
+            })
+            .catch(function(err) {
+                if (err && err.name === 'AbortError') { logLine('已取消选择目录'); return; }
+                logLine('✗ 更新失败：' + (err && err.message ? err.message : err));
+            });
+    }
+
+    function setVariant(v) {
+        variant = v;
+        el.installNew.classList.toggle('selected', v === 'new');
+        el.installOld.classList.toggle('selected', v === 'old');
+        el.note.textContent = v === 'old'
+            ? '说明：当前选择「旧版」，点下方「安装模组加载器」开始安装；兼容老版本游戏。'
+            : '说明：当前选择「新版」，点下方「安装模组加载器」开始安装；「在线更新」只重新拉取最新 TLDLoader.dll。';
+    }
+
+    function showAbout() {
+        logLine('长途旅行模组加载器（网页版）　By: BENBAIJIE');
+        logLine('功能：一键安装/卸载 TLDLoader、0Harmony 与资源包；支持旧版/新版/在线更新；可导出离线整合包。');
+        logLine('安装位置：游戏目录\\TheLongDrive_Data\\Managed 与 文档\\TheLongDrive\\Mods\\Assets');
+        logLine('官网：https://znine.fun');
+    }
+
+    function exportPack() {
+        logLine('开始导出整合包（含 TLDLoader / Harmony / 资源包 / 原版备份）…');
+        var a = document.createElement('a');
+        a.href = '/api/loader/pack';
+        a.download = 'TLD-Mod-Loader.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    }
+
+    // ---- 卸载 ----
+    function uninstall() {
+        if (!fsOk) { logLine('当前浏览器不支持'); return; }
+        if (!gameDir) { logLine('请先选择游戏目录'); return; }
+        logLine('开始卸载加载器…');
+        ensurePermission(gameDir).then(function(g) {
+            if (!g) throw new Error('游戏目录权限被拒绝');
+            gameDir = g;
+            return hasManaged(g);
+        }).then(function(managed) {
+            if (!managed) throw new Error('未找到 TheLongDrive_Data\\Managed');
+            return removeIfExists(managed, 'TLDLoader.dll')
+                .then(function() { return removeIfExists(managed, '0Harmony.dll'); })
+                .then(function() {
+                    return fetchBlob('/loader/restore/Assembly-CSharp.dll').then(function(blob) {
+                        return writeFile(managed, 'Assembly-CSharp.dll', blob).then(function() {
+                            logLine('还原：Assembly-CSharp.dll（原版）');
+                        });
+                    });
+                })
+                .then(function() {
+                    if (!docsDir) return;
+                    var step = docsDir.name === 'TheLongDrive'
+                        ? Promise.resolve(docsDir)
+                        : docsDir.getDirectoryHandle('TheLongDrive', { create: false });
+                    return step.then(function(tld) {
+                        return tld.getDirectoryHandle('Mods', { create: false });
+                    }).then(function(mods) {
+                        return mods.getDirectoryHandle('Assets', { create: false });
+                    }).then(function(assets) {
+                        return assets.getDirectoryHandle('TLDLoader_Core', { create: false }).then(function(d) {
+                            return removeIfExists(d, 'core.unity3d');
+                        }).then(function() {
+                            return assets.getDirectoryHandle('TLDLoader_Settings', { create: false });
+                        }).then(function(d) {
+                            return removeIfExists(d, 'settingsui.unity3d');
+                        });
+                    }).catch(function() {});
+                });
+        }).then(function() {
+            logLine('✓ 已卸载，Assembly-CSharp.dll 已还原');
+            setState('未安装', '');
+        }).catch(function(err) {
+            logLine('✗ 卸载失败：' + (err && err.message ? err.message : err) + '（若提示占用，请先退出游戏）');
+        });
+    }
+
+    el.pickGame.addEventListener('click', pickGame);
+    if (el.pickGameModify) el.pickGameModify.addEventListener('click', pickGame);
+    el.pickDocs.addEventListener('click', pickDocs);
+    el.scanSteam.addEventListener('click', scanSteam);
+    el.installNew.addEventListener('click', function() { setVariant('new'); });
+    el.installOld.addEventListener('click', function() { setVariant('old'); });
+    el.installBtn.addEventListener('click', function() { install(); });
+    if (el.update) el.update.addEventListener('click', onlineUpdate);
+    el.uninstall.addEventListener('click', uninstall);
+    if (el.exportPack) el.exportPack.addEventListener('click', exportPack);
+    if (el.about) el.about.addEventListener('click', showAbout);
+    if (el.refreshState) el.refreshState.addEventListener('click', function() {
+        logLine('刷新安装状态…');
+        checkState();
+    });
+
+    var inited = false;
+    window.__loaderInit = function() {
+        if (inited) return;
+        inited = true;
+        if (!fsOk) {
+            logLine('⚠ 当前环境不支持「写入文件夹」：请用 Chrome / Edge，并通过 https 或 localhost 访问');
+        }
+        getInfo().catch(function() {});
+        setVariant('new');
+        Promise.all([idbGet('gameDir'), idbGet('docsDir')]).then(function(res) {
+            gameDir = res[0];
+            docsDir = res[1];
+            if (gameDir) {
+                setGamePath('已记住：' + gameDir.name);
+                checkState();
+            }
+            updateDocsText();
+        });
+    };
 })();
 
 (function() {

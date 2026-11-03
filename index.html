@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BENBAIJIE 资源下载站</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20261103b">
 </head>
 <body>
 <div class="app-container">
@@ -74,7 +74,8 @@
             <div class="card-pane">
                 <div class="dl-tabs" role="tablist">
                     <button type="button" class="dl-tab active" id="dlTabSite" role="tab" aria-selected="true">网站资源</button>
-                    <button type="button" class="dl-tab" id="dlTabMods" role="tab" aria-selected="false">🚗 长途旅行模组下载</button>
+                    <button type="button" class="dl-tab" id="dlTabMods" role="tab" aria-selected="false">长途旅行模组下载</button>
+                    <button type="button" class="dl-tab" id="dlTabLoader" role="tab" aria-selected="false">🔧 模组加载器</button>
                 </div>
 
                 <div id="siteResView">
@@ -111,6 +112,17 @@
                         </div>
                         <span class="dl-total tld-total" id="tldTotal">共 0 个模组</span>
                     </div>
+                    <div class="tld-opts">
+                        <label class="tld-opt">模组源
+                            <select id="tldSourceSelect" aria-label="模组源"></select>
+                        </label>
+                        <label class="tld-opt">图片源
+                            <select id="tldImgSelect" aria-label="图片源">
+                                <option value="gitlab">GitLab（默认）</option>
+                                <option value="server">服务器（已缓存，更快）</option>
+                            </select>
+                        </label>
+                    </div>
                     <div class="tld-chips" id="tldChips"></div>
                     <div class="download-grid" id="tldGrid"></div>
                     <div class="dl-empty" id="tldEmpty" style="display:none;">
@@ -119,11 +131,64 @@
                         <div class="dl-empty-sub">换个关键词或分类试试</div>
                         <button type="button" class="f-btn" id="tldEmptyReset">清空筛选</button>
                     </div>
-                    <div class="tld-more-wrap" id="tldMoreWrap" style="display:none;">
-                        <button type="button" class="f-btn" id="tldMoreBtn">加载更多模组</button>
-                    </div>
+                    <div class="tld-pager" id="tldPager"></div>
                     <div class="tip-warning">
                         提示：模组来源于 WorkshopTLD 社区库（GitLab），点击「下载模组」直达 DLL 文件；下载后放入游戏目录 Mods 文件夹，配合模组加载器使用。列表每 6 小时自动同步一次。
+                    </div>
+                </div>
+
+                <div id="tldLoaderView" style="display:none;">
+                    <div class="loader-hero">
+                        <div class="loader-hero-title">长途旅行模组加载器</div>
+                        <div class="loader-hero-sub">在浏览器里一键往游戏里装 TLDLoader ，无需再下载第三方工具</div>
+                    </div>
+
+                    <div class="loader-steps">
+                        <div class="loader-step">
+                            <div class="loader-step-no">1</div>
+                            <div class="loader-step-body">
+                                <div class="loader-step-title">选择游戏目录</div>
+                                <div class="loader-step-sub" id="loaderGamePath">未选择（需要包含 TheLongDrive_Data 文件夹）</div>
+                                <div class="loader-step-btns">
+                                    <button type="button" class="f-btn primary" id="loaderPickGame">选择游戏目录</button>
+                                    <button type="button" class="f-btn" id="loaderScanSteam">扫描 Steam 目录</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="loader-step">
+                            <div class="loader-step-no">2</div>
+                            <div class="loader-step-body">
+                                <div class="loader-step-title">选择「文档」文件夹</div>
+                                <div class="loader-step-sub" id="loaderDocsPath">未选择（资源包要写进 文档\TheLongDrive\Mods\Assets）</div>
+                                <div class="loader-step-btns">
+                                    <button type="button" class="f-btn" id="loaderPickDocs">选择文档目录</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="loader-step">
+                            <div class="loader-step-no">3</div>
+                            <div class="loader-step-body">
+                                <div class="loader-step-title">安装 / 卸载</div>
+                                <div class="loader-step-sub">当前状态：<span class="loader-state" id="loaderState">未检测</span></div>
+                                <div class="loader-step-btns">
+                                    <button type="button" class="f-btn primary" id="loaderInstallNew">安装新版加载器</button>
+                                    <button type="button" class="f-btn" id="loaderInstallOld">安装旧版加载器</button>
+                                    <button type="button" class="f-btn" id="loaderUninstall">卸载加载器</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="loader-log-wrap">
+                        <div class="loader-log-head">
+                            <span>执行日志</span>
+                            <button type="button" class="loader-log-clear" id="loaderLogClear">清空</button>
+                        </div>
+                        <pre class="loader-log" id="loaderLog">等待操作…</pre>
+                    </div>
+
+                    <div class="tip-warning">
+                        提示：安装前请先关闭游戏（Steam 里退出 TheLongDrive），否则 DLL 被占用会写入失败。卸载会把 Assembly-CSharp.dll 还原成原版。此功能需要 Chrome / Edge，并且网站要通过 https 或 localhost 访问。
                     </div>
                 </div>
 
@@ -325,6 +390,6 @@
     </div>
 </div>
 
-<script src="script.js"></script>
+<script src="script.js?v=20261103c"></script>
 </body>
 </html>
