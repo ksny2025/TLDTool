@@ -1026,6 +1026,9 @@
     var searchClear = document.getElementById('dlSearchClear');
     var sortSelect = document.getElementById('dlSort');
     var uploadBtn = document.getElementById('dlUploadBtn');
+    var uploadAdminWrap = document.getElementById('dlUploadAdmin');
+    var uploadToggle = document.getElementById('dlUploadToggle');
+    var uploadOpen = false;
     var loginHint = document.getElementById('dlLoginHint');
     var loginLink = document.getElementById('dlLoginLink');
     var emptyBox = document.getElementById('dlEmpty');
@@ -1169,10 +1172,32 @@
         return h;
     }
 
+    function uploadAllowed() {
+        return isAdmin() || uploadOpen;
+    }
+
     function syncAuthUI() {
         var logged = !!getToken();
-        if (uploadBtn) uploadBtn.textContent = logged ? T('＋ 上传资源') : T('＋ 上传资源（需登录）');
-        if (loginHint) loginHint.style.display = logged ? 'none' : '';
+        if (uploadAdminWrap) uploadAdminWrap.style.display = isAdmin() ? '' : 'none';
+        if (uploadToggle) uploadToggle.checked = uploadOpen;
+        if (uploadBtn) {
+            var allowed = uploadAllowed();
+            uploadBtn.textContent = allowed
+                ? (logged ? T('＋ 上传资源') : T('＋ 上传资源（需登录）'))
+                : T('上传功能已关闭');
+            uploadBtn.disabled = !allowed;
+            uploadBtn.classList.toggle('is-off', !allowed);
+        }
+        if (loginHint) loginHint.style.display = (logged || !uploadOpen) ? 'none' : '';
+    }
+
+    function loadSettings() {
+        fetch('/api/settings').then(function(res) { return res.json(); }).then(function(res) {
+            if (res && res.ok) {
+                uploadOpen = !!res.upload_open;
+                syncAuthUI();
+            }
+        }).catch(function() {});
     }
 
     function render() {
@@ -1298,6 +1323,8 @@
             var el = document.getElementById(id);
             if (el) el.value = '';
         });
+        var swFileEl = document.getElementById('swFile');
+        if (swFileEl) swFileEl.value = '';
     }
 
     function openModal(item) {
@@ -1318,17 +1345,39 @@
                 imgPreview.style.display = 'flex';
             }
         } else {
-            document.getElementById('swAuthor').value = getUsername();
+            document.getElementById('swAuthor').value = isAdmin() ? 'BENBAIJIE' : getUsername();
             document.getElementById('swDate').value = todayStr();
         }
+        var linkFields = document.getElementById('swLinkFields');
+        var fileField = document.getElementById('swFileField');
+        if (linkFields) linkFields.style.display = isAdmin() ? '' : 'none';
+        if (fileField) fileField.style.display = isAdmin() ? 'none' : '';
         modal.style.display = 'flex';
     }
 
     function closeModal() { modal.style.display = 'none'; }
 
     if (uploadBtn) uploadBtn.addEventListener('click', function() {
+        if (!uploadAllowed()) { toast(T('上传功能已关闭，请联系管理员开启')); return; }
         if (!getToken()) { goLogin(); return; }
         openModal(null);
+    });
+
+    if (uploadToggle) uploadToggle.addEventListener('change', function() {
+        var want = !!uploadToggle.checked;
+        apiPost('/api/admin/settings', { upload_open: want }).then(function(res) {
+            if (res && res.ok) {
+                uploadOpen = !!res.upload_open;
+                toast(uploadOpen ? T('已开启用户上传资源') : T('已关闭用户上传资源'));
+            } else {
+                uploadToggle.checked = !want;
+                toast((res && res.error) || T('操作失败'));
+            }
+            syncAuthUI();
+        }).catch(function() {
+            uploadToggle.checked = !want;
+            toast(T('操作失败'));
+        });
     });
     if (loginLink) loginLink.addEventListener('click', goLogin);
     document.getElementById('swCancelBtn').addEventListener('click', closeModal);
@@ -1382,13 +1431,14 @@
         var name = document.getElementById('swName').value.trim();
         if (!name) { swError.textContent = '资源名称不能为空'; return; }
         if (!getToken()) { goLogin(); return; }
+        if (!uploadAllowed()) { swError.textContent = '上传功能已关闭，请联系管理员开启'; return; }
         var image;
         if (pendingImage === 'KEEP') image = 'keep';
         else if (pendingImage === 'CLEAR') image = '';
         else if (pendingImage && pendingImage.indexOf('DATA:') === 0) image = pendingImage.slice(5);
         else image = editingId ? 'keep' : '';
         saveBtn.disabled = true;
-        apiPost('/api/software_save', {
+        var payload = {
             token: getToken(),
             id: editingId || '',
             name: name,
@@ -1397,14 +1447,56 @@
             date: document.getElementById('swDate').value,
             size: document.getElementById('swSize').value,
             author: document.getElementById('swAuthor').value,
-            url: document.getElementById('swUrl').value,
-            pan: document.getElementById('swPan').value,
-            quark: document.getElementById('swQuark').value,
-            pan123: document.getElementById('swPan123').value,
-            baidu: document.getElementById('swBaidu').value,
+            url: '',
+            pan: '',
+            quark: '',
+            pan123: '',
+            baidu: '',
             image: image
-        }).then(function(res) {
+        };
+        if (isAdmin()) {
+            payload.url = document.getElementById('swUrl').value;
+            payload.pan = document.getElementById('swPan').value;
+            payload.quark = document.getElementById('swQuark').value;
+            payload.pan123 = document.getElementById('swPan123').value;
+            payload.baidu = document.getElementById('swBaidu').value;
+            submitResource(payload);
+            return;
+        }
+        var file = document.getElementById('swFile').files[0] || null;
+        if (!file && !editingId) { saveBtn.disabled = false; swError.textContent = '请选择要上传的文件'; return; }
+        if (!file) { submitResource(payload); return; }
+        saveBtn.textContent = T('上传中…');
+        fetch('/api/upload_file', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + getToken(),
+                'X-File-Name': encodeURIComponent(file.name)
+            },
+            body: file
+        }).then(function(r) {
+            return r.json().then(function(j) {
+                if (!r.ok || !j.ok) throw new Error(j.error || '文件上传失败');
+                return j;
+            });
+        }).then(function(j) {
+            payload.url = j.url;
+            if (!document.getElementById('swSize').value) {
+                document.getElementById('swSize').value = (j.size / 1048576).toFixed(2) + ' MB';
+                payload.size = document.getElementById('swSize').value;
+            }
+            submitResource(payload);
+        }).catch(function(err) {
             saveBtn.disabled = false;
+            saveBtn.textContent = T(editingId ? '保存修改' : '上传资源');
+            swError.textContent = err.message || '文件上传失败';
+        });
+    });
+
+    function submitResource(payload) {
+        apiPost('/api/software_save', payload).then(function(res) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = T(editingId ? '保存修改' : '上传资源');
             if (res.ok) {
                 var wasEdit = !!editingId;
                 closeModal();
@@ -1419,9 +1511,10 @@
             }
         }).catch(function() {
             saveBtn.disabled = false;
+            saveBtn.textContent = T(editingId ? '保存修改' : '上传资源');
             swError.textContent = '无法连接服务器';
         });
-    });
+    }
 
     // ---- 卡片操作 ----
     function handleAreaClick(e) {
@@ -1541,6 +1634,7 @@
         if (res && res.ok) { downloads = res.downloads || {}; if (list.length) render(); }
     }).catch(function() {});
 
+    loadSettings();
     load();
 })();
 

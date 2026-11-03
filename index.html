@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BENBAIJIE 资源下载站</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css?v=20261103f">
+    <link rel="stylesheet" href="style.css?v=20261103k">
 </head>
 <body>
 <div class="app-container">
@@ -92,6 +92,10 @@
                         <option value="name">按名称</option>
                     </select>
                     <button type="button" class="hero-search-btn dl-upload-btn" id="dlUploadBtn">＋ 上传资源</button>
+                    <label class="dl-admin-upload" id="dlUploadAdmin" style="display:none;">
+                        <input type="checkbox" id="dlUploadToggle">
+                        <span>允许用户上传资源</span>
+                    </label>
                 </div>
                 <div class="dl-login-hint" id="dlLoginHint">上传资源需要先登录，<button type="button" class="dl-login-link" id="dlLoginLink">点此登录 / 注册</button></div>
                 <div class="download-grid" id="downloadGrid"></div>
@@ -332,7 +336,7 @@
 <div class="dl-mask" id="dlModal" style="display:none;">
     <div class="dl-modal">
         <h3 id="dlModalTitle">上传资源</h3>
-        <div class="dl-upload-note">登录后即可上传资源，填好下载链接（本地文件名或完整链接）就能发布；封面图片可选。</div>
+        <div class="dl-upload-note">登录后即可上传资源，信息填写完成后即可发布；封面图片可选。</div>
         <div class="dl-content-warn">
             <div class="dl-warn-title">⚠ 上传内容须知（请务必阅读）</div>
             <ul>
@@ -365,22 +369,27 @@
                     <input type="text" id="swAuthor" maxlength="30" placeholder="作者">
                 </label>
             </div>
-            <label class="dl-field">直链下载 <span class="dl-img-hint">本地文件名或完整链接，留空则只显示网盘</span>
-                <input type="text" id="swUrl" maxlength="500" placeholder="如 BENBAIJIELoaderV1.0.exe 或 https://...">
+            <div id="swLinkFields">
+                <label class="dl-field">直链下载 <span class="dl-img-hint">本地文件名或完整链接，留空则只显示网盘</span>
+                    <input type="text" id="swUrl" maxlength="500" placeholder="如 BENBAIJIELoaderV1.0.exe 或 https://...">
+                </label>
+                <label class="dl-field">小飞机网盘链接 <span class="dl-img-hint">留空则不显示该项</span>
+                    <input type="text" id="swPan" maxlength="500" placeholder="https://share.feijipan.com/s/...">
+                </label>
+                <label class="dl-field">夸克网盘链接 <span class="dl-img-hint">留空则不显示</span>
+                    <input type="text" id="swQuark" maxlength="500" placeholder="https://pan.quark.cn/s/...">
+                </label>
+                <label class="dl-field">123网盘链接 <span class="dl-img-hint">留空则不显示</span>
+                    <input type="text" id="swPan123" maxlength="500" placeholder="https://...share.123pan.cn/...">
+                </label>
+                <label class="dl-field">百度网盘链接 <span class="dl-img-hint">留空则不显示</span>
+                    <input type="text" id="swBaidu" maxlength="500" placeholder="https://pan.baidu.com/s/...">
+                </label>
+            </div>
+            <label class="dl-field" id="swFileField">上传文件
+                <input type="file" id="swFile">
             </label>
-            <label class="dl-field">小飞机网盘链接 <span class="dl-img-hint">留空则不显示该项</span>
-                <input type="text" id="swPan" maxlength="500" placeholder="https://share.feijipan.com/s/...">
-            </label>
-            <label class="dl-field">夸克网盘链接 <span class="dl-img-hint">整合全部资源，留空则不显示</span>
-                <input type="text" id="swQuark" maxlength="500" placeholder="https://pan.quark.cn/s/...">
-            </label>
-            <label class="dl-field">123网盘链接 <span class="dl-img-hint">整合全部资源，留空则不显示</span>
-                <input type="text" id="swPan123" maxlength="500" placeholder="https://...share.123pan.cn/...">
-            </label>
-            <label class="dl-field">百度网盘链接 <span class="dl-img-hint">整合全部资源，留空则不显示</span>
-                <input type="text" id="swBaidu" maxlength="500" placeholder="https://pan.baidu.com/s/...">
-            </label>
-            <label class="dl-field">封面图片 <span class="dl-img-hint">png/jpg/gif/webp，最大10MB（管理员不限），可留空</span>
+            <label class="dl-field">封面图片 <span class="dl-img-hint">png/jpg/gif/webp，最大10MB，可留空</span>
                 <input type="file" id="swImage" accept="image/png,image/jpeg,image/gif,image/webp">
                 <div class="dl-img-preview" id="swImgPreview" style="display:none;">
                     <img id="swImgThumb" alt="预览">
@@ -396,6 +405,6 @@
     </div>
 </div>
 
-<script src="script.js?v=20261103f"></script>
+<script src="script.js?v=20261103k"></script>
 </body>
 </html>
