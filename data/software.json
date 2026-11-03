@@ -1,5 +1,20 @@
 [
  {
+  "id": "54afe728f0fdd1a5",
+  "image": "/dlimg/dl_54afe728f0fdd1a5.jpg",
+  "name": "求生之王",
+  "desc": "一款已经停服的游戏，现在将再现奇迹",
+  "version": "V1.0",
+  "date": "2026-10-25",
+  "size": "153 MB",
+  "author": "BENBAIJIE",
+  "url": "",
+  "pan": "https://share.feijipan.com/s/3CxzuU3y",
+  "quark": "",
+  "pan123": "",
+  "baidu": ""
+ },
+ {
   "id": "069ccfde3edce012",
   "image": "DLSS5.png",
   "name": "异环DLSS5",
@@ -33,7 +48,7 @@
   "name": "一键临时ROOT🔥",
   "desc": "该工具可以为iqoovivo手机进行临时ROOT",
   "version": "V1.0",
-  "date": "2026-08-25",
+  "date": "2026-10-18",
   "size": "11.34 MB",
   "author": "BENBAIJIE",
   "url": "https://share.feijipan.com/s/tq8BfpRQ",
@@ -92,9 +107,9 @@
  {
   "name": "长途旅行小助手🔥",
   "desc": "兼容模组加载器、加模组功能、一些小功能，目前没啥好更新的了，已是完全版。",
-  "version": "V1.40",
-  "date": "2026-08-11",
-  "size": "33.0 MB",
+  "version": "V1.41",
+  "date": "2026-10-18",
+  "size": "29.1 MB",
   "author": "BENBAIJIE",
   "url": "https://share.feijipan.com/s/YD4bQcp8",
   "image": "小助手.png",
