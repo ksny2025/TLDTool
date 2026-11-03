@@ -1543,6 +1543,353 @@
     load();
 })();
 
+// ==================== 长途旅行模组下载（WorkshopTLD 社区库） ====================
+(function() {
+    var PAGE_SIZE = 24;
+    var mods = [];            // 全部模组
+    var filtered = [];        // 搜索+分类过滤后
+    var shown = PAGE_SIZE;    // 当前已渲染数量
+    var activeCat = '全部';
+    var loaded = false;
+
+    var tabSite = document.getElementById('dlTabSite');
+    var tabMods = document.getElementById('dlTabMods');
+    var viewSite = document.getElementById('siteResView');
+    var viewMods = document.getElementById('tldModsView');
+    var siteTip = document.getElementById('siteTip');
+    var grid = document.getElementById('tldGrid');
+    var chips = document.getElementById('tldChips');
+    var totalEl = document.getElementById('tldTotal');
+    var emptyEl = document.getElementById('tldEmpty');
+    var searchInput = document.getElementById('tldSearchInput');
+    var searchClear = document.getElementById('tldSearchClear');
+    var moreWrap = document.getElementById('tldMoreWrap');
+    var moreBtn = document.getElementById('tldMoreBtn');
+    if (!tabMods || !grid) return;
+
+    function T(s) { return window.T ? window.T(s) : s; }
+
+    function toast(msg) {
+        var el = document.createElement('div');
+        el.className = 'site-toast';
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(function() { el.classList.add('out'); }, 2200);
+        setTimeout(function() { if (el.parentNode) el.remove(); }, 2800);
+    }
+
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    function escAttr(s) { return esc(s); }
+
+    function normDate(d) {
+        // 源格式 DD/MM/YYYY → YYYY-MM-DD
+        var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(d || '').trim());
+        if (m) return m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0');
+        return String(d || '');
+    }
+
+    function coverUrl(m) {
+        return m.PictureLink || '';
+    }
+
+    function renderChips() {
+        var counts = {};
+        mods.forEach(function(m) {
+            var c = String(m.Category || '').trim() || '未分类';
+            counts[c] = (counts[c] || 0) + 1;
+        });
+        var names = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; });
+        names.unshift('全部');
+        chips.innerHTML = names.map(function(c) {
+            var n = c === '全部' ? mods.length : counts[c];
+            return '<button type="button" class="tld-chip' + (c === activeCat ? ' active' : '') + '" data-cat="' + escAttr(c) + '">' +
+                esc(c) + ' <span>' + n + '</span></button>';
+        }).join('');
+    }
+
+    function applyFilter() {
+        var q = (searchInput.value || '').trim().toLowerCase();
+        filtered = mods.filter(function(m) {
+            if (activeCat !== '全部') {
+                var c = String(m.Category || '').trim() || '未分类';
+                if (c !== activeCat) return false;
+            }
+            if (!q) return true;
+            return (m.Name || '').toLowerCase().indexOf(q) !== -1 ||
+                (m.Author || '').toLowerCase().indexOf(q) !== -1 ||
+                (m.Description || '').toLowerCase().indexOf(q) !== -1 ||
+                (m.FileName || '').toLowerCase().indexOf(q) !== -1;
+        });
+        shown = PAGE_SIZE;
+        renderGrid();
+    }
+
+    function renderGrid() {
+        var slice = filtered.slice(0, shown);
+        totalEl.textContent = T('共 ') + filtered.length + T(' 个模组');
+        if (!slice.length) {
+            grid.innerHTML = '';
+            emptyEl.style.display = 'flex';
+            moreWrap.style.display = 'none';
+            return;
+        }
+        emptyEl.style.display = 'none';
+        grid.innerHTML = slice.map(function(m, i) {
+            var cat = esc(String(m.Category || '').trim() || '未分类');
+            var img = coverUrl(m);
+            var imgHtml = img
+                ? '<img loading="lazy" src="' + escAttr(img) + '" alt="' + escAttr(m.Name) + '" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'noimg\')">'
+                : '';
+            var date = esc(normDate(m.Date));
+            var ver = esc(m.Version || '');
+            return '<div class="software-card tld-mod rising" style="animation-delay:' + Math.min(i % PAGE_SIZE, 12) * 40 + 'ms">' +
+                '<div class="software-img tld-img">' + imgHtml +
+                    (img ? '' : '<span class="tld-noimg-text">🚗</span>') +
+                    '<span class="tld-cat">' + cat + '</span>' +
+                '</div>' +
+                '<div class="software-info">' +
+                    '<div class="tld-name-row"><span class="software-name tld-name">' + esc(m.Name || '未命名模组') + '</span>' +
+                    (ver ? '<span class="tld-ver">v' + esc(ver) + '</span>' : '') + '</div>' +
+                    '<div class="tld-meta"><span>' + T('作者 ') + esc(m.Author || '未知') + '</span>' +
+                    (date ? '<span>' + date + '</span>' : '') +
+                    (m.Dependency ? '<span>' + T('依赖 ') + esc(m.Dependency) + '</span>' : '') + '</div>' +
+                    '<div class="tld-desc">' + esc(m.Description || '') + '</div>' +
+                    '<div class="tld-actions">' +
+                        (m.Link ? '<button type="button" class="f-btn primary tld-dl" data-tlddl="' + i + '">' + T('下载模组') + '</button>' : '') +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+        moreWrap.style.display = filtered.length > shown ? 'flex' : 'none';
+    }
+
+    // ---- 下载方式弹窗（保存到 Mods 文件夹 / 普通下载） ----
+    var dlMask = document.createElement('div');
+    dlMask.className = 'dl-mask';
+    dlMask.id = 'tldDlMask';
+    dlMask.style.display = 'none';
+    dlMask.innerHTML =
+        '<div class="dl-modal dl-choice">' +
+            '<h3>' + T('选择下载方式') + '</h3>' +
+            '<div class="dl-choice-name" id="tldDlName"></div>' +
+            '<div class="dl-choice-list">' +
+                '<button type="button" class="f-btn dl-choice-btn primary" id="tldSaveMods">💾 ' + T('保存到游戏 Mods 文件夹') + '<em>' + T('默认 文档\\TheLongDrive\\Mods，选择一次后自动记住') + '</em></button>' +
+                '<button type="button" class="f-btn dl-choice-btn" id="tldSaveDl">⬇ ' + T('普通下载') + '<em>' + T('保存到浏览器下载目录') + '</em></button>' +
+            '</div>' +
+            '<div class="tld-dl-status" id="tldDlStatus"></div>' +
+            '<div class="tld-dl-tip" id="tldDlTip"></div>' +
+            '<div class="compose-btns"><button type="button" class="f-btn" id="tldDlCancel">' + T('取消') + '</button></div>' +
+        '</div>';
+    document.body.appendChild(dlMask);
+
+    var dlName = dlMask.querySelector('#tldDlName');
+    var dlStatus = dlMask.querySelector('#tldDlStatus');
+    var dlTip = dlMask.querySelector('#tldDlTip');
+    var saveModsBtn = dlMask.querySelector('#tldSaveMods');
+    var saveDlBtn = dlMask.querySelector('#tldSaveDl');
+    var currentMod = null;
+
+    function closeTldDl() { dlMask.style.display = 'none'; }
+
+    function openTldDl(m) {
+        currentMod = m;
+        dlName.textContent = (m.Name || '') + (m.Version ? ' · v' + m.Version : '') + (m.FileName ? '  →  ' + m.FileName : '');
+        dlStatus.textContent = '';
+        dlStatus.className = 'tld-dl-status';
+        var fsOk = !!(window.showDirectoryPicker && window.isSecureContext);
+        saveModsBtn.disabled = !fsOk;
+        dlTip.textContent = fsOk
+            ? T('提示：首次保存会请你选择 文档\\TheLongDrive\\Mods 文件夹，只选一次，之后所有模组自动写入')
+            : T('当前浏览器不支持直接保存到文件夹（需 Chrome / Edge），可先用普通下载');
+        dlMask.style.display = 'flex';
+    }
+
+    // IndexedDB 存目录句柄，记住用户选的 Mods 文件夹
+    function idb() {
+        return new Promise(function(resolve, reject) {
+            var rq = indexedDB.open('tld-mods-db', 1);
+            rq.onupgradeneeded = function() { rq.result.createObjectStore('kv'); };
+            rq.onsuccess = function() { resolve(rq.result); };
+            rq.onerror = function() { reject(rq.error); };
+        });
+    }
+    function idbGet(key) {
+        return idb().then(function(db) {
+            return new Promise(function(resolve, reject) {
+                var rq = db.transaction('kv', 'readonly').objectStore('kv').get(key);
+                rq.onsuccess = function() { resolve(rq.result || null); };
+                rq.onerror = function() { reject(rq.error); };
+            });
+        }).catch(function() { return null; });
+    }
+    function idbSet(key, val) {
+        return idb().then(function(db) {
+            return new Promise(function(resolve, reject) {
+                var tx = db.transaction('kv', 'readwrite');
+                tx.objectStore('kv').put(val, key);
+                tx.oncomplete = function() { resolve(); };
+                tx.onerror = function() { reject(tx.error); };
+            });
+        }).catch(function() {});
+    }
+    function idbDel(key) {
+        return idb().then(function(db) {
+            return new Promise(function(resolve) {
+                var tx = db.transaction('kv', 'readwrite');
+                tx.objectStore('kv')['delete'](key);
+                tx.oncomplete = function() { resolve(); };
+                tx.onerror = function() { resolve(); };
+            });
+        }).catch(function() {});
+    }
+
+    function saveToMods(m) {
+        dlStatus.className = 'tld-dl-status';
+        dlStatus.textContent = T('正在准备…');
+        idbGet('modsDir').then(function(dir) {
+            if (!dir) return null;
+            // 已记住的目录：确认权限（浏览器可能要求重新授权）
+            if (!dir.queryPermission) return dir;
+            return Promise.resolve(dir.queryPermission({ mode: 'readwrite' })).then(function(p) {
+                if (p === 'granted') return dir;
+                return Promise.resolve(dir.requestPermission({ mode: 'readwrite' })).then(function(p2) {
+                    if (p2 === 'granted') return dir;
+                    return null;
+                });
+            });
+        }).then(function(dir) {
+            var pick;
+            if (dir) {
+                pick = Promise.resolve(dir);
+            } else {
+                pick = window.showDirectoryPicker({ id: 'tldModsDir', startIn: 'documents', mode: 'readwrite' })
+                    .then(function(d) { idbSet('modsDir', d); return d; });
+            }
+            return pick.then(function(d) {
+                dlStatus.textContent = T('正在下载 ') + (m.FileName || 'mod') + ' …';
+                return fetch('/api/tldfile?u=' + encodeURIComponent(m.Link)).then(function(resp) {
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    return resp.blob();
+                }).then(function(blob) {
+                    return d.getFileHandle(m.FileName || 'mod.dll', { create: true }).then(function(fh) {
+                        return fh.createWritable().then(function(w) {
+                            return w.write(blob).then(function() { return w.close(); });
+                        });
+                    });
+                });
+            });
+        }).then(function() {
+            dlStatus.className = 'tld-dl-status ok';
+            dlStatus.textContent = '✓ ' + T('已保存到所选文件夹，进游戏即可生效');
+            setTimeout(closeTldDl, 1600);
+        }).catch(function(err) {
+            if (err && err.name === 'AbortError') { dlStatus.textContent = ''; return; } // 用户取消选目录
+            dlStatus.className = 'tld-dl-status err';
+            dlStatus.textContent = '✗ ' + ((err && err.message) || T('保存失败，可换普通下载'));
+        });
+    }
+
+    function plainDownload(m) {
+        var a = document.createElement('a');
+        a.href = '/api/tldfile?u=' + encodeURIComponent(m.Link);
+        a.download = m.FileName || 'mod.dll';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        closeTldDl();
+        toast(T('已开始下载到浏览器下载目录'));
+    }
+
+    saveModsBtn.addEventListener('click', function() { if (currentMod) saveToMods(currentMod); });
+    saveDlBtn.addEventListener('click', function() { if (currentMod) plainDownload(currentMod); });
+    dlMask.querySelector('#tldDlCancel').addEventListener('click', closeTldDl);
+    dlMask.addEventListener('click', function(e) { if (e.target === dlMask) closeTldDl(); });
+
+    grid.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-tlddl]');
+        if (!btn) return;
+        var idx = parseInt(btn.getAttribute('data-tlddl'), 10);
+        var m = filtered[idx];
+        if (m && m.Link) openTldDl(m);
+    });
+
+    // ---- Tab 切换 ----
+    function switchTab(mods_) {
+        var toMods = mods_ === 'mods';
+        tabSite.classList.toggle('active', !toMods);
+        tabMods.classList.toggle('active', toMods);
+        tabSite.setAttribute('aria-selected', String(!toMods));
+        tabMods.setAttribute('aria-selected', String(toMods));
+        viewSite.style.display = toMods ? 'none' : '';
+        siteTip.style.display = toMods ? 'none' : '';
+        viewMods.style.display = toMods ? '' : 'none';
+        if (toMods && !loaded) loadMods();
+    }
+    tabSite.addEventListener('click', function() { switchTab('site'); });
+    tabMods.addEventListener('click', function() { switchTab('mods'); });
+
+    // ---- 搜索 ----
+    var searchTimer = null;
+    searchInput.addEventListener('input', function() {
+        searchClear.style.display = searchInput.value ? 'block' : 'none';
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyFilter, 200);
+    });
+    searchClear.addEventListener('click', function() {
+        searchInput.value = '';
+        searchClear.style.display = 'none';
+        applyFilter();
+        searchInput.focus();
+    });
+    document.getElementById('tldEmptyReset').addEventListener('click', function() {
+        searchInput.value = '';
+        searchClear.style.display = 'none';
+        activeCat = '全部';
+        renderChips();
+        applyFilter();
+    });
+    chips.addEventListener('click', function(e) {
+        var b = e.target.closest('.tld-chip');
+        if (!b) return;
+        activeCat = b.getAttribute('data-cat') || '全部';
+        renderChips();
+        applyFilter();
+    });
+    moreBtn.addEventListener('click', function() {
+        shown += PAGE_SIZE;
+        renderGrid();
+    });
+
+    // ---- 加载数据 ----
+    function loadMods() {
+        fetch('/api/tldmods').then(function(res) { return res.json(); }).then(function(res) {
+            if (res && res.ok && res.mods && res.mods.length) { mods = res.mods; ready(); return; }
+            throw new Error('no api');
+        }).catch(function() {
+            // 静态站兜底：仓库内缓存文件
+            fetch('data/tld_mods_cache.json').then(function(res) { return res.json(); }).then(function(c) {
+                mods = (c && (c.mods || c.Mods)) || [];
+                ready();
+            }).catch(function() { ready(); });
+        });
+    }
+
+    function ready() {
+        loaded = true;
+        renderChips();
+        applyFilter();
+    }
+
+    window.addEventListener('langchange', function() {
+        if (loaded) { renderChips(); renderGrid(); }
+    });
+})();
+
 (function() {
     var cid = localStorage.getItem('site_cid');
     if (!cid) {
@@ -1619,6 +1966,22 @@
         '夸克网盘': 'Quark Drive', '123 网盘': '123 Drive', '百度网盘': 'Baidu Drive',
         '整合全部资源': 'All resources', '需登录百度账号': 'Baidu account required',
         '选择下载方式': 'Choose download source', '没有找到相关资源': 'No resources found',
+        '网站资源': 'Site Resources', '🚗 长途旅行模组下载': '🚗 TLD Mods',
+        '共 ': 'Total: ', ' 个模组': ' mods', ' 个资源': ' resources',
+        '搜索模组名称、简介、作者…': 'Search mods, authors, descriptions…',
+        '没有找到相关模组': 'No mods found', '换个关键词或分类试试': 'Try another keyword or category',
+        '清空筛选': 'Clear filters', '加载更多模组': 'Load more mods',
+        '下载模组': 'Download Mod', '作者 ': 'Author: ', '依赖 ': 'Requires: ',
+        '保存到游戏 Mods 文件夹': 'Save to game Mods folder',
+        '默认 文档\\TheLongDrive\\Mods，选择一次后自动记住': 'Defaults to Documents\\TheLongDrive\\Mods, remembered after first pick',
+        '普通下载': 'Normal download', '保存到浏览器下载目录': 'Saves to browser Downloads folder',
+        '提示：首次保存会请你选择 文档\\TheLongDrive\\Mods 文件夹，只选一次，之后所有模组自动写入': 'Tip: first save asks you to pick Documents\\TheLongDrive\\Mods — chosen once, reused afterwards',
+        '当前浏览器不支持直接保存到文件夹（需 Chrome / Edge），可先用普通下载': 'This browser cannot save to folders (needs Chrome / Edge). Use normal download instead.',
+        '正在准备…': 'Preparing…', '正在下载 ': 'Downloading ', ' …': ' …',
+        '已保存到所选文件夹，进游戏即可生效': 'Saved to the selected folder — ready in game',
+        '保存失败，可换普通下载': 'Save failed, try normal download', '取消': 'Cancel',
+        '已开始下载到浏览器下载目录': 'Download started to browser Downloads folder',
+        '提示：模组来源于 WorkshopTLD 社区库（GitLab），点击「下载模组」直达 DLL 文件；下载后放入游戏目录 Mods 文件夹，配合模组加载器使用。列表每 6 小时自动同步一次。': "Mods come from the WorkshopTLD community library (GitLab). Click \"Download Mod\" to get the DLL, put it into the game's Mods folder with a mod loader. The list syncs every 6 hours.",
         '换个关键词试试，或者清空搜索看看全部资源': 'Try another keyword or clear the search.',
         '清空搜索': 'Clear search', '资源名称不能为空': 'Resource name is required',
         '上传成功，感谢分享！': 'Uploaded successfully, thanks for sharing!',

@@ -72,6 +72,12 @@
                 <span class="dl-total" id="dlTotal">共 0 个资源</span>
             </div>
             <div class="card-pane">
+                <div class="dl-tabs" role="tablist">
+                    <button type="button" class="dl-tab active" id="dlTabSite" role="tab" aria-selected="true">网站资源</button>
+                    <button type="button" class="dl-tab" id="dlTabMods" role="tab" aria-selected="false">🚗 长途旅行模组下载</button>
+                </div>
+
+                <div id="siteResView">
                 <div class="dl-toolbar">
                     <div class="dl-search">
                         <span class="dl-search-icon">⌕</span>
@@ -94,7 +100,34 @@
                     <div class="dl-empty-sub">换个关键词试试，或者清空搜索看看全部资源</div>
                     <button type="button" class="f-btn" id="dlEmptyReset">清空搜索</button>
                 </div>
-                <div class="tip-warning">
+                </div>
+
+                <div id="tldModsView" style="display:none;">
+                    <div class="dl-toolbar tld-toolbar">
+                        <div class="dl-search">
+                            <span class="dl-search-icon">⌕</span>
+                            <input type="search" id="tldSearchInput" placeholder="搜索模组名称、简介、作者…" aria-label="搜索模组" autocomplete="off">
+                            <button type="button" class="dl-search-clear" id="tldSearchClear" title="清空搜索" style="display:none;">✕</button>
+                        </div>
+                        <span class="dl-total tld-total" id="tldTotal">共 0 个模组</span>
+                    </div>
+                    <div class="tld-chips" id="tldChips"></div>
+                    <div class="download-grid" id="tldGrid"></div>
+                    <div class="dl-empty" id="tldEmpty" style="display:none;">
+                        <div class="dl-empty-icon">⌕</div>
+                        <div class="dl-empty-title">没有找到相关模组</div>
+                        <div class="dl-empty-sub">换个关键词或分类试试</div>
+                        <button type="button" class="f-btn" id="tldEmptyReset">清空筛选</button>
+                    </div>
+                    <div class="tld-more-wrap" id="tldMoreWrap" style="display:none;">
+                        <button type="button" class="f-btn" id="tldMoreBtn">加载更多模组</button>
+                    </div>
+                    <div class="tip-warning">
+                        提示：模组来源于 WorkshopTLD 社区库（GitLab），点击「下载模组」直达 DLL 文件；下载后放入游戏目录 Mods 文件夹，配合模组加载器使用。列表每 6 小时自动同步一次。
+                    </div>
+                </div>
+
+                <div class="tip-warning" id="siteTip">
                     提示：点「下载」可选择直链、小飞机网盘、夸克 / 123 / 百度网盘等镜像——直链速度快，网盘不限速；后端掉线时直链会自动切到静态站文件，仍可正常下载。登录后还可以上传自己的资源！
                 </div>
             </div>
