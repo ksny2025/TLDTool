@@ -1214,8 +1214,8 @@
         if (emptyReset) emptyReset.style.display = query ? '' : 'none';
         if (totalLabel) {
             totalLabel.textContent = query
-                ? '找到 ' + filtered.length + ' 个（共 ' + list.length + ' 个资源）'
-                : '共 ' + list.length + ' 个资源';
+                ? T('找到 ') + filtered.length + T(' 个（共 ') + list.length + T(' 个资源）')
+                : T('共 ') + list.length + T(' 个资源');
         }
         if (statResources) statResources.textContent = String(list.length);
         if (searchClear) searchClear.style.display = query ? '' : 'none';
@@ -1277,11 +1277,15 @@
     function openChoice(s) {
         var ms = mirrors(s);
         if (!ms.length) return;
+        var h3 = choiceMask.querySelector('h3');
+        if (h3) h3.textContent = T('选择下载方式');
+        var cancel = choiceMask.querySelector('[data-cancel]');
+        if (cancel) cancel.textContent = T('取消');
         choiceName.textContent = s.name + (s.version ? ' · ' + s.version : '');
         choiceList.innerHTML = ms.map(function(m) {
             return '<button type="button" class="f-btn dl-choice-btn' + (m.kind === 'direct' ? ' primary' : '')
-                 + '" data-url="' + esc(m.url) + '">' + esc(m.label)
-                 + '<em>' + esc(m.sub) + '</em></button>';
+                 + '" data-url="' + esc(m.url) + '">' + esc(T(m.label))
+                 + '<em>' + esc(T(m.sub)) + '</em></button>';
         }).join('');
         choiceMask.style.display = 'flex';
     }
@@ -1582,9 +1586,9 @@
     var mobileQuery = window.matchMedia('(max-width: 640px)');
     function syncHeroPlaceholder() {
         if (!heroInput) return;
-        heroInput.placeholder = mobileQuery.matches
+        heroInput.placeholder = T(mobileQuery.matches
             ? '搜索资源名称或作者…'
-            : '搜索资源：模组加载器、小助手、工具…';
+            : '搜索资源：模组加载器、小助手、工具…');
     }
     syncHeroPlaceholder();
     if (mobileQuery.addEventListener) mobileQuery.addEventListener('change', syncHeroPlaceholder);
@@ -1649,6 +1653,7 @@
     var loaded = false;
     var imgSource = 'gitlab'; // 图片源：gitlab（默认）/ server（本站缓存）
     var modSource = 'workshop-tld';
+    var sourceList = [];
 
     var tabSite = document.getElementById('dlTabSite');
     var tabMods = document.getElementById('dlTabMods');
@@ -1703,6 +1708,14 @@
         return u;
     }
 
+    function fillSources() {
+        if (!srcSelect) return;
+        srcSelect.innerHTML = sourceList.map(function(s) {
+            return '<option value="' + escAttr(s.id) + '">' + esc(T(s.label)) + '</option>';
+        }).join('');
+        srcSelect.value = modSource;
+    }
+
     function renderChips() {
         var counts = {};
         mods.forEach(function(m) {
@@ -1714,7 +1727,7 @@
         chips.innerHTML = names.map(function(c) {
             var n = c === '全部' ? mods.length : counts[c];
             return '<button type="button" class="tld-chip' + (c === activeCat ? ' active' : '') + '" data-cat="' + escAttr(c) + '">' +
-                esc(c) + ' <span>' + n + '</span></button>';
+                esc(T(c)) + ' <span>' + n + '</span></button>';
         }).join('');
     }
 
@@ -1852,6 +1865,12 @@
 
     function openTldDl(m) {
         currentMod = m;
+        var h3 = dlMask.querySelector('h3');
+        if (h3) h3.textContent = T('选择下载方式');
+        saveModsBtn.innerHTML = '💾 ' + T('保存到游戏 Mods 文件夹') + '<em>' + T('默认 文档\\TheLongDrive\\Mods，选择一次后自动记住') + '</em>';
+        saveDlBtn.innerHTML = '⬇ ' + T('普通下载') + '<em>' + T('保存到浏览器下载目录') + '</em>';
+        var cancel = dlMask.querySelector('#tldDlCancel');
+        if (cancel) cancel.textContent = T('取消');
         dlName.textContent = (m.Name || '') + (m.Version ? ' · v' + m.Version : '') + (m.FileName ? '  →  ' + m.FileName : '');
         dlStatus.textContent = '';
         dlStatus.className = 'tld-dl-status';
@@ -2000,6 +2019,9 @@
 
     function openTldDetail(m) {
         detailMod = m;
+        detailDlBtn.textContent = T('下载模组');
+        var backBtn = detail.querySelector('#tldDetailBack');
+        if (backBtn) backBtn.textContent = T('返回列表');
         var ver = String(m.Version || '');
         detailName.textContent = (m.Name || '未命名模组');
         if (ver) {
@@ -2139,10 +2161,9 @@
                 if (res && res.ok && res.mods && res.mods.length) {
                     mods = res.mods;
                     if (res.sources && srcSelect) {
-                        srcSelect.innerHTML = res.sources.map(function(s) {
-                            return '<option value="' + escAttr(s.id) + '">' + esc(s.label) + '</option>';
-                        }).join('');
-                        srcSelect.value = res.source || modSource;
+                        sourceList = res.sources;
+                        modSource = res.source || modSource;
+                        fillSources();
                     }
                     ready();
                     return;
@@ -2165,6 +2186,7 @@
     }
 
     window.addEventListener('langchange', function() {
+        fillSources();
         if (loaded) { renderChips(); renderGrid(); }
     });
 })();
@@ -2175,7 +2197,7 @@
     var gameDir = null;
     var docsDir = null;
     var info = null;
-    var variant = 'new';
+    var variant = 'old';
 
     var el = {
         pickGame: document.getElementById('loaderPickGame'),
@@ -2183,12 +2205,10 @@
         refreshState: document.getElementById('loaderRefreshState'),
         scanSteam: document.getElementById('loaderScanSteam'),
         pickDocs: document.getElementById('loaderPickDocs'),
-        installNew: document.getElementById('loaderInstallNew'),
         installOld: document.getElementById('loaderInstallOld'),
         update: document.getElementById('loaderUpdate'),
         installBtn: document.getElementById('loaderInstallBtn'),
         uninstall: document.getElementById('loaderUninstall'),
-        exportPack: document.getElementById('loaderExportPack'),
         about: document.getElementById('loaderAbout'),
         gamePath: document.getElementById('loaderGamePath'),
         docsPath: document.getElementById('loaderDocsPath'),
@@ -2208,7 +2228,7 @@
     }
 
     function setState(text, cls) {
-        el.state.textContent = text;
+        el.state.textContent = T(text);
         el.state.className = 'loader-state' + (cls ? ' ' + cls : '');
     }
 
@@ -2317,10 +2337,10 @@
         else el.gamePath.textContent = text;
     }
     function setDocsPath(text) {
-        el.docsPath.textContent = text;
+        el.docsPath.textContent = T(text);
     }
     function updateDocsText() {
-        setDocsPath(docsDir ? '已记住：' + docsDir.name : '未选择（点右侧按钮，打开的窗口已定位到「文档」，直接确认即可）');
+        setDocsPath(docsDir ? T('已记住：') + docsDir.name : '未选择（点右侧按钮，打开的窗口已定位到「文档」，直接确认即可）');
     }
 
     function chooseGameDir() {
@@ -2496,11 +2516,10 @@
 
     function setVariant(v) {
         variant = v;
-        el.installNew.classList.toggle('selected', v === 'new');
         el.installOld.classList.toggle('selected', v === 'old');
-        el.note.textContent = v === 'old'
+        if (el.note) el.note.textContent = T(v === 'old'
             ? '说明：当前选择「旧版」，点下方「安装模组加载器」开始安装；兼容老版本游戏。'
-            : '说明：当前选择「新版」，点下方「安装模组加载器」开始安装；「在线更新」只重新拉取最新 TLDLoader.dll。';
+            : '说明：当前选择「新版」，点下方「安装模组加载器」开始安装；「在线更新」只重新拉取最新 TLDLoader.dll。');
     }
 
     function showAbout() {
@@ -2508,16 +2527,6 @@
         logLine('功能：一键安装/卸载 TLDLoader、0Harmony 与资源包；支持旧版/新版/在线更新；可导出离线整合包。');
         logLine('安装位置：游戏目录\\TheLongDrive_Data\\Managed 与 文档\\TheLongDrive\\Mods\\Assets');
         logLine('官网：https://znine.fun');
-    }
-
-    function exportPack() {
-        logLine('开始导出整合包（含 TLDLoader / Harmony / 资源包 / 原版备份）…');
-        var a = document.createElement('a');
-        a.href = '/api/loader/pack';
-        a.download = 'TLD-Mod-Loader.zip';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
     }
 
     // ---- 卸载 ----
@@ -2571,12 +2580,11 @@
     if (el.pickGameModify) el.pickGameModify.addEventListener('click', pickGame);
     el.pickDocs.addEventListener('click', pickDocs);
     el.scanSteam.addEventListener('click', scanSteam);
-    el.installNew.addEventListener('click', function() { setVariant('new'); });
     el.installOld.addEventListener('click', function() { setVariant('old'); });
     el.installBtn.addEventListener('click', function() { install(); });
     if (el.update) el.update.addEventListener('click', onlineUpdate);
     el.uninstall.addEventListener('click', uninstall);
-    if (el.exportPack) el.exportPack.addEventListener('click', exportPack);
+
     if (el.about) el.about.addEventListener('click', showAbout);
     if (el.refreshState) el.refreshState.addEventListener('click', function() {
         logLine('刷新安装状态…');
@@ -2665,6 +2673,7 @@
     var STORE_KEY = 'site_lang';
     var DICT = {
         '主页': 'Home', '下载': 'Download', '公告🔥': 'News🔥', '聊天💬': 'Chat💬',
+        '聊天': 'Chat', '公告': 'News', '上传功能已关闭': 'Uploads disabled', '允许用户上传资源': 'Allow user uploads',
         '欢迎来到长途旅行下载站！': 'Welcome to the TLD download site!',
         '长途旅行小助手（他能为你的长途旅行添加模组！）': 'TLD Helper (adds mods to your game!)',
         '模组加载 | 助手工具 ': 'Mod Loader | Helper Tools ',
@@ -2752,24 +2761,124 @@
         '发布': 'Publish', '保存': 'Save', '移除图片': 'Remove Image',
         '软件名称': 'Software name', '软件简介...': 'Description...',
         '如 V1.0': 'e.g. V1.0', '如 2026-10-10': 'e.g. 2026-10-10', '如 3.75 MB': 'e.g. 3.75 MB',
-        '网盘链接或本地文件名': 'Download link or local file'
+        '网盘链接或本地文件名': 'Download link or local file',
+        // 站点首页 / 资源库
+        '资源下载站': 'Download Center',
+        'BENBAIJIE · 官方资源站': 'BENBAIJIE · Official Site',
+        '长途旅行 · 模组加载器 · 实用工具，所有资源一站直达': 'The Long Drive · Mod Loader · Utilities, all in one place',
+        '搜索资源：模组加载器、小助手、工具…': 'Search: mod loader, helper, tools…',
+        '搜索资源名称或作者…': 'Search resource name or author…',
+        '搜索资源名称、简介、作者…': 'Search name, description, author…',
+        '搜索模组名称、简介、作者…': 'Search mod name, description, author…',
+        '长途旅行模组下载': 'TLD Mods',
+        '默认排序': 'Default order', '最新发布': 'Newest', '下载最多': 'Most downloaded', '按名称': 'By name',
+        '找到 ': 'Found ', ' 个（共 ': ' (total ', ' 个资源）': ' resources)',
+        '上传资源需要先登录，': 'Login is required to upload. ',
+        '点此登录 / 注册': 'Login / Sign up',
+        '模组源': 'Mod source', '图片源': 'Image source',
+        'GitLab（默认）': 'GitLab (default)', '服务器（已缓存，更稳定）': 'Server (cached, more stable)',
+        '提示：模组来源于汉化作者B站：“网飞NetFei”（GitLab），点击「下载模组」直达 DLL 文件；下载后放入游戏目录 Mods 文件夹，配合模组加载器使用。列表每 6 小时自动同步一次。': 'Tip: mods come from the WorkshopTLD library (GitLab, localized by NetFei). Click "Download Mod" to get the DLL, then put it into the game Mods folder and use it with the mod loader. The list syncs every 6 hours.',
+        '提示：点「下载」可选择直链、小飞机网盘、夸克 / 123 / 百度网盘等镜像——直链速度快，网盘不限速；后端掉线时直链会自动切到静态站文件，仍可正常下载。登录后还可以上传自己的资源！': 'Tip: "Download" offers direct links plus Feijipan, Quark, 123 and Baidu mirrors. Direct links are fast; cloud drives have no speed limits. If the backend is offline, direct links fall back to static files. Log in to upload your own resources!',
+        // 模组加载器
+        '路径：': 'Path: ',
+        '修改': 'Change',
+        '模组加载器是否安装：': 'Loader installed: ',
+        '未检测': 'Not checked', '刷新': 'Refresh',
+        '模组加载器旧版': 'Mod Loader (Old)', '模组加载器新版': 'Mod Loader (New)',
+        '在线更新加载器': 'Update Loader Online',
+        '说明：当前选择「新版」，点下方「安装模组加载器」开始安装；「在线更新」只重新拉取最新 TLDLoader.dll。': 'Note: "New" is selected. Click "Install Mod Loader" below; "Update Loader Online" only re-downloads the latest TLDLoader.dll.',
+        '说明：当前选择「旧版」，点下方「安装模组加载器」开始安装；兼容老版本游戏。': 'Note: "Old" is selected. Click "Install Mod Loader" below; compatible with older game versions.',
+        '等待操作…': 'Waiting…',
+        '寻找游戏路径': 'Find Game Path', '安装模组加载器': 'Install Mod Loader',
+        '卸载模组加载器': 'Uninstall Mod Loader', '手动寻找路径': 'Choose Path Manually',
+'关于软件': 'About',
+        '文档目录：': 'Documents: ', '未选择': 'Not selected',
+        '一键定位文档目录': 'Auto Locate Documents',
+        '点击寻找，让你轻松完成模组一键安装': 'Click to find the game and install mods in one step',
+        '点击进入官网': 'Visit official site',
+        '作者：BENBAIJIE · 模组加载器网页版': 'By BENBAIJIE · Mod Loader Web Edition',
+        '提示：安装前请先关闭游戏（Steam 里退出 TheLongDrive），否则 DLL 被占用会写入失败。卸载会把 Assembly-CSharp.dll 还原成原版。此功能需要 Chrome / Edge，并且网站要通过 https 或 localhost 访问。': 'Tip: close the game first (exit TheLongDrive in Steam), otherwise the DLL is locked and writing fails. Uninstall restores the original Assembly-CSharp.dll. Requires Chrome / Edge and https or localhost.',
+        '已安装': 'Installed', '未安装': 'Not installed', '未选择': 'Not selected',
+        '已记住：': 'Saved: ',
+        '未选择（点右侧按钮，打开的窗口已定位到「文档」，直接确认即可）': 'Not selected (click the button; the dialog already opens at Documents)',
+        // 上传资源弹窗
+        '登录后即可上传资源，信息填写完成后即可发布；封面图片可选。': 'Log in to upload, fill in the details and publish. Cover image is optional.',
+        '⚠ 上传内容须知（请务必阅读）': '⚠ Upload rules (please read)',
+        '严禁发布色情、暴力、血腥恶心、赌博、诈骗及任何违法违规内容。': 'No pornographic, violent, gory, gambling, scam or illegal content.',
+        '严禁上传带病毒、木马、恶意脚本的文件或链接。': 'No files or links containing viruses, trojans or malicious scripts.',
+        '违规资源一经发现立即删除，违规账号将被封禁并拉黑邮箱。': 'Violating resources are removed immediately; offending accounts are banned and blacklisted.',
+        '我已确认资源符合以上要求，并愿意承担上传责任': 'I confirm this resource meets the rules and I take upload responsibility',
+        '资源名称': 'Resource name', '简介': 'Description',
+        '版本': 'Version', '日期': 'Date', '大小': 'Size', '作者': 'Author',
+        '小飞机网盘链接': 'Feijipan link', '夸克网盘链接': 'Quark link',
+        '123网盘链接': '123 Drive link', '百度网盘链接': 'Baidu Drive link',
+        '上传文件': 'Upload file', '封面图片': 'Cover image',
+        '本地文件名或完整链接，留空则只显示网盘': 'Local file name or full URL; leave empty to show only cloud drives',
+        '留空则不显示该项': 'Leave empty to hide this option', '留空则不显示': 'Leave empty to hide',
+        'png/jpg/gif/webp，最大10MB，可留空': 'png/jpg/gif/webp, max 10MB, optional',
+        '如：长途旅行模组加载器': 'e.g. TLD Mod Loader',
+        '简单介绍这个资源的用途...': 'Briefly describe what this resource does...',
+        '如 BENBAIJIELoaderV1.0.exe 或 https://...': 'e.g. BENBAIJIELoaderV1.0.exe or https://...',
+        '尚未选择游戏目录': 'No game folder selected',
+        '注册并登录': 'Sign up & login', '重置密码': 'Reset password', '返回登录': 'Back to login',
+        '邮箱验证码': 'Email code', '密码（至少6位）': 'Password (min 6)',
+        '注册时用的邮箱': 'Email used at sign-up',
+        // 音乐播放器
+        '歌单': 'Playlist', '暂无播放': 'Nothing playing', '未命名': 'Untitled',
+        '待添加': 'TBA', '待添加音频文件': 'Audio file missing',
+        '歌单还没有歌曲': 'No songs yet',
+        '示例歌曲 1': 'Sample Song 1', '示例歌曲 2': 'Sample Song 2', '示例歌曲 3': 'Sample Song 3',
+        // 下载方式 / 模组分类
+        '直链下载': 'Direct link',
+        '速度快，推荐': 'Fast, recommended', '不限速，无需登录': 'No speed limit, no login',
+        '小飞机网盘': 'Feijipan', '夸克网盘': 'Quark Drive', '123 网盘': '123 Drive', '百度网盘': 'Baidu Drive',
+        '上一页': 'Prev', '下一页': 'Next', '清空筛选': 'Clear filter',
+        'WorkshopTLD 主库': 'WorkshopTLD (Main)',
+        '全部': 'All', '未分类': 'Uncategorized',
+        '物品': 'Items', '游戏玩法': 'Gameplay', '生活质量': 'Quality of Life',
+        '车辆': 'Vehicles', '发动机': 'Engines', '武器': 'Weapons', '遗产': 'Legacy',
+        '非玩家角色': 'NPCs', '图形': 'Graphics', '作弊': 'Cheats', '模组的模组': 'Mods of Mods',
+        '建筑物': 'Buildings', '图形用户界面': 'GUI', '模组库': 'Mod Library',
+        '性能': 'Performance', '美容': 'Cosmetics',
+        // 模组加载器（步骤版）
+        '选择游戏目录': 'Choose Game Folder', '加载器版本': 'Loader Version', '一键安装': 'One-Click Install',
+        '自动寻找（Steam）': 'Auto Find (Steam)', '手动选择文件夹': 'Pick Folder Manually', '更换': 'Change',
+        '旧版': 'Old', '兼容老版本游戏': 'For older game versions',
+        '已装过？点这里在线更新到最新版': 'Already installed? Click to update online',
+        '安装模组加载器': 'Install Mod Loader', '卸载': 'Uninstall', '刷新': 'Refresh',
+        '定位文档目录': 'Locate Documents', '关于': 'About', '尚未选择游戏目录': 'No game folder selected',
+        '等待操作…': 'Waiting…', '未检测': 'Not checked', '已安装': 'Installed', '未安装': 'Not installed'
     };
-    var TEXT_SEL = '.nav-item, .page-title, .social-btn, .software-name, .software-desc, .download-btn, .tip-warning, .home-sub, .group-btn, .auth-tab, .auth-submit, .code-btn, .chat-send, .auth-link, .field-hint, #newPostBtn, #cancelPostBtn, .compose-btns .f-btn, #changePwdBtn, #logoutBtn, .featured-title, .hero-tag, .dl-upload-btn, .dl-empty-title, #dlEmptyReset, #viewAllBtn, .dl-empty-sub';
+    var TEXT_SEL = '.nav-item, .page-title, .social-btn, .software-name, .software-desc, .download-btn, .tip-warning, .home-sub, .home-title, .home-eyebrow, .hero-search-btn, .group-btn, .auth-tab, .auth-submit, .code-btn, .chat-send, .auth-link, .field-hint, #newPostBtn, #cancelPostBtn, .compose-btns .f-btn, #changePwdBtn, #logoutBtn, .featured-title, .hero-tag, .dl-upload-btn, .dl-empty-title, #dlEmptyReset, #viewAllBtn, .dl-empty-sub, .dl-tab, .dl-login-link, .dl-upload-note, .dl-warn-title, .dl-content-warn li, .dl-img-hint, .dl-img-clear, .dl-sort option, .tld-opt option, .dl-admin-upload span, #tldEmptyReset, .loader-step-title, .loader-variant-btn b, .loader-variant-btn span, .loader-update-link, .loader-btn, .loader-mini-btn, .music-list-head';
+    var NODE_SEL = '.dl-field, .tld-opt, .dl-warn-agree, .dl-login-hint, .loader-docs-row';
 
     window.T = function(s) {
         if ((localStorage.getItem(STORE_KEY) || 'zh') !== 'en') return s;
         return DICT[s] || s;
     };
 
+    function applyNodeText(root, toEn) {
+        root.querySelectorAll(NODE_SEL).forEach(function(el) {
+            el.childNodes.forEach(function(node) {
+                if (node.nodeType !== 3) return;
+                var key = node.nodeValue.trim();
+                if (!key) return;
+                if (!node._zh) node._zh = key;
+                node.nodeValue = toEn ? (DICT[node._zh] || node._zh) : node._zh;
+            });
+        });
+    }
+
     function applyLang(lang) {
         localStorage.setItem(STORE_KEY, lang);
         document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
         var toEn = lang === 'en';
         document.querySelectorAll(TEXT_SEL).forEach(function(el) {
-            if (!el.dataset.zh) el.dataset.zh = el.textContent;
+            if (!el.dataset.zh) el.dataset.zh = el.textContent.trim();
             var zh = el.dataset.zh;
             el.textContent = toEn ? (DICT[zh] || zh) : zh;
         });
+        applyNodeText(document, toEn);
         document.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(function(el) {
             if (!el.dataset.zhPh) el.dataset.zhPh = el.getAttribute('placeholder');
             var zh = el.dataset.zhPh;
@@ -2792,6 +2901,7 @@
         });
         var btn = document.getElementById('langBtn');
         if (btn) btn.textContent = toEn ? '中文' : 'EN';
+        document.title = toEn ? 'BENBAIJIE Download Center' : 'BENBAIJIE 资源下载站';
         window.dispatchEvent(new Event('langchange'));
     }
 
@@ -2800,10 +2910,11 @@
         if (!root) return;
         var toEn = (localStorage.getItem(STORE_KEY) || 'zh') === 'en';
         root.querySelectorAll(TEXT_SEL).forEach(function(el) {
-            if (!el.dataset.zh) el.dataset.zh = el.textContent;
+            if (!el.dataset.zh) el.dataset.zh = el.textContent.trim();
             var zh = el.dataset.zh;
             el.textContent = toEn ? (DICT[zh] || zh) : zh;
         });
+        applyNodeText(root, toEn);
         root.querySelectorAll('.version-meta').forEach(function(el) {
             el.childNodes.forEach(function(node) {
                 if (node.nodeType !== 3) return;
@@ -2822,4 +2933,177 @@
         });
     }
     applyLang(localStorage.getItem(STORE_KEY) || 'zh');
+})();
+
+/* ===== 左上角音乐播放器 ===== */
+(function () {
+    var MUSIC_TRACKS = [
+        { title: '示例歌曲 1', artist: '待添加', src: 'music/1.mp3', cover: 'music/1.jpg' },
+        { title: '示例歌曲 2', artist: '待添加', src: 'music/2.mp3', cover: 'music/2.jpg' },
+        { title: '示例歌曲 3', artist: '待添加', src: 'music/3.mp3', cover: 'music/3.jpg' }
+    ];
+
+    var player = document.getElementById('musicPlayer');
+    if (!player) return;
+
+    var disc = document.getElementById('musicDisc');
+    var discImg = document.getElementById('musicDiscImg');
+    var note = document.getElementById('musicNote');
+    var panel = document.getElementById('musicPanel');
+    var coverEl = document.getElementById('musicCover');
+    var titleEl = document.getElementById('musicTitle');
+    var artistEl = document.getElementById('musicArtist');
+    var listEl = document.getElementById('musicList');
+    var playBtn = document.getElementById('musicPlay');
+    var prevBtn = document.getElementById('musicPrev');
+    var nextBtn = document.getElementById('musicNext');
+    var closeBtn = document.getElementById('musicClose');
+
+    var PREF_KEY = 'znine_music_paused';
+    var audio = new Audio();
+    audio.preload = 'metadata';
+    var current = 0;
+    var audioError = false;
+
+    function pausedBefore() {
+        try { return localStorage.getItem(PREF_KEY) === '1'; } catch (e) { return false; }
+    }
+    function rememberPaused() {
+        try { localStorage.setItem(PREF_KEY, '1'); } catch (e) {}
+    }
+    function asset(p) {
+        return window.__apiUrl ? window.__apiUrl('/' + p) : p;
+    }
+
+    function setPlayingUI(on) {
+        disc.classList.toggle('playing', on);
+        playBtn.classList.toggle('music-playing', on);
+        playBtn.setAttribute('aria-label', on ? '暂停' : '播放');
+    }
+
+    function setCover(src) {
+        discImg.onerror = function () {
+            discImg.style.display = 'none';
+            discImg.removeAttribute('src');
+            note.style.display = '';
+            coverEl.style.backgroundImage = '';
+        };
+        if (src) {
+            discImg.src = src;
+            discImg.style.display = 'block';
+            note.style.display = 'none';
+            coverEl.style.backgroundImage = 'url("' + src + '")';
+        } else {
+            discImg.removeAttribute('src');
+            discImg.style.display = 'none';
+            note.style.display = '';
+            coverEl.style.backgroundImage = '';
+        }
+    }
+
+    function renderList() {
+        listEl.innerHTML = '';
+        if (!MUSIC_TRACKS.length) {
+            var empty = document.createElement('li');
+            empty.className = 'music-list-empty';
+            empty.textContent = T('歌单还没有歌曲');
+            listEl.appendChild(empty);
+            return;
+        }
+        MUSIC_TRACKS.forEach(function (t, i) {
+            var li = document.createElement('li');
+            li.className = 'music-item' + (i === current ? ' active' : '');
+            li.setAttribute('data-mi', String(i));
+            var idx = document.createElement('span');
+            idx.className = 'mi-index';
+            idx.textContent = String(i + 1);
+            var tt = document.createElement('span');
+            tt.className = 'mi-title';
+            tt.textContent = T(t.title || '未命名');
+            var dot = document.createElement('span');
+            dot.className = 'mi-dot';
+            li.appendChild(idx);
+            li.appendChild(tt);
+            li.appendChild(dot);
+            listEl.appendChild(li);
+        });
+    }
+
+    function load(i, autoPlay) {
+        if (!MUSIC_TRACKS.length) return;
+        current = (i + MUSIC_TRACKS.length) % MUSIC_TRACKS.length;
+        var t = MUSIC_TRACKS[current];
+        titleEl.textContent = T(t.title || '未命名');
+        artistEl.textContent = T(t.artist || '');
+        setCover(t.cover ? asset(t.cover) : '');
+        audioError = false;
+        audio.src = asset(t.src);
+        renderList();
+        if (autoPlay) play();
+    }
+
+    function play() {
+        if (!MUSIC_TRACKS.length) return;
+        var p = audio.play();
+        if (p && p.catch) p.catch(function () { setPlayingUI(false); });
+    }
+
+    audio.addEventListener('playing', function () { setPlayingUI(true); });
+    audio.addEventListener('pause', function () { setPlayingUI(false); });
+    audio.addEventListener('ended', function () { load(current + 1, true); });
+    audio.addEventListener('error', function () {
+        audioError = true;
+        setPlayingUI(false);
+        if (MUSIC_TRACKS.length) artistEl.textContent = T('待添加音频文件');
+    });
+
+    function refreshMusicText() {
+        if (MUSIC_TRACKS.length) {
+            var t = MUSIC_TRACKS[current];
+            titleEl.textContent = T(t.title || '未命名');
+            artistEl.textContent = audioError ? T('待添加音频文件') : T(t.artist || '');
+        }
+        renderList();
+    }
+    window.addEventListener('langchange', refreshMusicText);
+
+    playBtn.addEventListener('click', function () {
+        if (audio.paused) {
+            play();
+        } else {
+            audio.pause();
+            rememberPaused();
+        }
+    });
+    prevBtn.addEventListener('click', function () { load(current - 1, true); });
+    nextBtn.addEventListener('click', function () { load(current + 1, true); });
+
+    listEl.addEventListener('click', function (e) {
+        var li = e.target.closest('[data-mi]');
+        if (!li) return;
+        load(parseInt(li.getAttribute('data-mi'), 10), true);
+    });
+
+    disc.addEventListener('click', function (e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+    });
+    closeBtn.addEventListener('click', function () {
+        panel.classList.remove('open');
+    });
+    document.addEventListener('click', function (e) {
+        if (panel.classList.contains('open') && !player.contains(e.target)) {
+            panel.classList.remove('open');
+        }
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') panel.classList.remove('open');
+    });
+
+    renderList();
+    if (MUSIC_TRACKS.length) {
+        load(0, false);
+        // 上次暂停过就不再自动播放；否则尝试自动播放（浏览器可能拦截，拦截后保持暂停）
+        if (!pausedBefore()) play();
+    }
 })();
