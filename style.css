@@ -2026,7 +2026,7 @@ body {
 }
 
 .tld-mod .tld-img {
-    cursor: default;
+    cursor: pointer;
 }
 
 .tld-img img {
@@ -2096,7 +2096,7 @@ body {
     line-height: 1.65;
     color: var(--text-muted);
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     margin-bottom: 14px;
@@ -2118,11 +2118,137 @@ body {
     flex: 1;
 }
 
+.tld-detail-btn {
+    flex: 0 0 auto;
+    padding: 0 16px;
+}
+
 .tld-more-wrap {
     display: flex;
     justify-content: center;
     margin: 18px 0 8px;
 }
+
+/* ---- 模组详情页 ---- */
+.tld-detail-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(4px);
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.tld-detail {
+    width: 100%;
+    max-width: 680px;
+    max-height: 92vh;
+    overflow-y: auto;
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    position: relative;
+}
+
+.tld-detail-cover {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: rgba(6, 16, 28, 0.8);
+    border-radius: 18px 18px 0 0;
+    overflow: hidden;
+}
+
+.tld-detail-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.tld-detail-cover.noimg .tld-noimg-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tld-detail-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(6, 16, 28, 0.75);
+    color: #e5edf7;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.tld-detail-body {
+    padding: 20px 24px 24px;
+}
+
+.tld-detail-name {
+    font-size: 1.32rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 10px;
+    line-height: 1.35;
+}
+
+.tld-detail-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tld-detail-meta b {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.tld-detail-desc {
+    font-size: 14px;
+    line-height: 1.85;
+    color: var(--text-muted);
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 20px;
+}
+
+.tld-detail-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tld-detail-actions .f-btn {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+}
+
+@media (max-width: 640px) {
+    .tld-detail-mask { padding: 10px; }
+    .tld-detail { max-height: 94vh; border-radius: 14px; }
+    .tld-detail-cover { aspect-ratio: 16 / 10; border-radius: 14px 14px 0 0; }
+    .tld-detail-body { padding: 16px 16px 20px; }
+    .tld-detail-name { font-size: 1.15rem; }
+}
+
 
 /* ---- 模组下载方式弹窗 ---- */
 .tld-dl-status {

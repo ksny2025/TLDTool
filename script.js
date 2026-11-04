@@ -173,6 +173,7 @@
     document.addEventListener('click', function(e) {
         var container = e.target.closest('.software-img');
         if (!container) return;
+        if (container.closest('.tld-mod')) return; // 模组卡片点图片=打开详情页，不弹大图
         var imgElement = container.querySelector('img');
         if (imgElement && imgElement.src) {
             window.open(imgElement.src, '_blank');
@@ -1757,7 +1758,7 @@
                 : '';
             var date = esc(normDate(m.Date));
             var ver = esc(m.Version || '');
-            return '<div class="software-card tld-mod rising" style="animation-delay:' + Math.min(i, 12) * 40 + 'ms">' +
+            return '<div class="software-card tld-mod rising" data-tldopen="' + idx + '" style="animation-delay:' + Math.min(i, 12) * 40 + 'ms">' +
                 '<div class="software-img tld-img">' + imgHtml +
                     (img ? '' : '<span class="tld-noimg-text">🚗</span>') +
                     '<span class="tld-cat">' + cat + '</span>' +
@@ -1771,6 +1772,7 @@
                     '<div class="tld-desc">' + esc(m.Description || '') + '</div>' +
                     '<div class="tld-actions">' +
                         (m.Link ? '<button type="button" class="f-btn primary tld-dl" data-tlddl="' + idx + '">' + T('下载模组') + '</button>' : '') +
+                        '<button type="button" class="f-btn tld-detail-btn" data-tldopen="' + idx + '">' + T('详情') + '</button>' +
                     '</div>' +
                 '</div>' +
             '</div>';
@@ -1962,12 +1964,106 @@
     dlMask.querySelector('#tldDlCancel').addEventListener('click', closeTldDl);
     dlMask.addEventListener('click', function(e) { if (e.target === dlMask) closeTldDl(); });
 
+    // ---- 模组详情页 ----
+    var detail = document.createElement('div');
+    detail.className = 'tld-detail-mask';
+    detail.id = 'tldDetailMask';
+    detail.style.display = 'none';
+    detail.innerHTML =
+        '<div class="tld-detail" role="dialog" aria-modal="true">' +
+            '<div class="tld-detail-cover" id="tldDetailCover">' +
+                '<button type="button" class="tld-detail-close" id="tldDetailClose">✕</button>' +
+            '</div>' +
+            '<div class="tld-detail-body">' +
+                '<div class="tld-detail-name" id="tldDetailName"></div>' +
+                '<div class="tld-detail-meta" id="tldDetailMeta"></div>' +
+                '<div class="tld-detail-desc" id="tldDetailDesc"></div>' +
+                '<div class="tld-detail-actions">' +
+                    '<button type="button" class="f-btn primary" id="tldDetailDl">' + T('下载模组') + '</button>' +
+                    '<button type="button" class="f-btn" id="tldDetailBack">' + T('返回列表') + '</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(detail);
+
+    var detailCover = detail.querySelector('#tldDetailCover');
+    var detailName = detail.querySelector('#tldDetailName');
+    var detailMeta = detail.querySelector('#tldDetailMeta');
+    var detailDesc = detail.querySelector('#tldDetailDesc');
+    var detailDlBtn = detail.querySelector('#tldDetailDl');
+    var detailMod = null;
+
+    function closeTldDetail() {
+        detail.style.display = 'none';
+        detailMod = null;
+    }
+
+    function openTldDetail(m) {
+        detailMod = m;
+        var ver = String(m.Version || '');
+        detailName.textContent = (m.Name || '未命名模组');
+        if (ver) {
+            var vspan = document.createElement('span');
+            vspan.className = 'tld-ver';
+            vspan.textContent = 'v' + ver;
+            detailName.appendChild(document.createTextNode(' '));
+            detailName.appendChild(vspan);
+        }
+        var meta = [];
+        meta.push('<span>' + T('作者 ') + '<b>' + esc(m.Author || '未知') + '</b></span>');
+        var d = normDate(m.Date);
+        if (d) meta.push('<span><b>' + esc(d) + '</b></span>');
+        if (m.Dependency) meta.push('<span>' + T('依赖 ') + '<b>' + esc(m.Dependency) + '</b></span>');
+        if (m.FileName) meta.push('<span>' + esc(m.FileName) + '</span>');
+        detailMeta.innerHTML = meta.join('');
+        detailDesc.textContent = m.Description || T('（暂无简介）');
+
+        var oldImg = detailCover.querySelector('img');
+        if (oldImg) oldImg.remove();
+        var img = coverUrl(m);
+        detailCover.className = 'tld-detail-cover' + (img ? '' : ' noimg');
+        if (img) {
+            var im = document.createElement('img');
+            im.alt = m.Name || '';
+            im.onerror = function() {
+                if (m.PictureLink && im.src.indexOf('/api/tldimg') !== -1) { im.src = m.PictureLink; return; }
+                im.style.display = 'none';
+                detailCover.classList.add('noimg');
+            };
+            im.src = img;
+            detailCover.appendChild(im);
+        }
+        detailDlBtn.style.display = m.Link ? '' : 'none';
+        detail.style.display = 'flex';
+        detail.querySelector('.tld-detail').scrollTop = 0;
+    }
+
+    detail.querySelector('#tldDetailClose').addEventListener('click', closeTldDetail);
+    detail.querySelector('#tldDetailBack').addEventListener('click', closeTldDetail);
+    detailDlBtn.addEventListener('click', function() {
+        var m = detailMod;
+        if (!m) return;
+        closeTldDetail();
+        openTldDl(m);
+    });
+    detail.addEventListener('click', function(e) { if (e.target === detail) closeTldDetail(); });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && detail.style.display === 'flex') closeTldDetail();
+    });
+
     grid.addEventListener('click', function(e) {
         var btn = e.target.closest('[data-tlddl]');
-        if (!btn) return;
-        var idx = parseInt(btn.getAttribute('data-tlddl'), 10);
-        var m = filtered[idx];
-        if (m && m.Link) openTldDl(m);
+        if (btn) {
+            var idx = parseInt(btn.getAttribute('data-tlddl'), 10);
+            var m = filtered[idx];
+            if (m && m.Link) openTldDl(m);
+            return;
+        }
+        var openEl = e.target.closest('[data-tldopen]');
+        if (openEl) {
+            var oi = parseInt(openEl.getAttribute('data-tldopen'), 10);
+            if (filtered[oi]) openTldDetail(filtered[oi]);
+        }
     });
 
     // ---- Tab 切换 ----
@@ -2590,6 +2686,7 @@
         '没有找到相关模组': 'No mods found', '换个关键词或分类试试': 'Try another keyword or category',
         '清空筛选': 'Clear filters', '加载更多模组': 'Load more mods',
         '下载模组': 'Download Mod', '作者 ': 'Author: ', '依赖 ': 'Requires: ',
+        '详情': 'Details', '返回列表': 'Back to list', '（暂无简介）': '(No description)',
         '保存到游戏 Mods 文件夹': 'Save to game Mods folder',
         '默认 文档\\TheLongDrive\\Mods，选择一次后自动记住': 'Defaults to Documents\\TheLongDrive\\Mods, remembered after first pick',
         '普通下载': 'Normal download', '保存到浏览器下载目录': 'Saves to browser Downloads folder',
