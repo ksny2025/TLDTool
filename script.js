@@ -1640,7 +1640,7 @@
 
 // ==================== 长途旅行模组下载（WorkshopTLD 社区库） ====================
 (function() {
-    var PAGE_SIZE = 9;
+    var PAGE_SIZE = 12;
     var mods = [];            // 全部模组
     var filtered = [];        // 搜索+分类过滤后
     var page = 1;             // 当前页
