@@ -3694,3 +3694,24 @@ body {
     }
 }
 
+/* 站点说明（同时供搜索引擎抓取关键词） */
+.seo-footer {
+    max-width: 1100px;
+    margin: 28px auto 40px;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.seo-footer p {
+    margin: 0 0 6px;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text-dim);
+    opacity: 0.85;
+}
+
+.seo-footer strong {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
