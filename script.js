@@ -88,6 +88,7 @@
         download: document.getElementById('download-page'),
         announcement: document.getElementById('announcement-page'),
         chat: document.getElementById('chat-page'),
+        profile: document.getElementById('profile-page'),
         about: document.getElementById('about-page')
     };
 
@@ -113,6 +114,7 @@
     }
 
     function switchPage(pageId, clickedBtn) {
+        if (pageId !== 'profile' && typeof closeProfileManage === 'function') closeProfileManage();
         for (var key in pages) {
             if (pages[key]) pages[key].classList.remove('active-page');
         }
@@ -298,16 +300,12 @@
     var chatMessages = document.getElementById('chatMessages');
     var chatForm = document.getElementById('chatForm');
     var chatInput = document.getElementById('chatInput');
-    var accountInfo = document.getElementById('accountInfo');
     var logoutBtn = document.getElementById('logoutBtn');
     var forgotLink = document.getElementById('forgotLink');
     var backToLogin = document.getElementById('backToLogin');
     var regCodeRow = document.getElementById('regCodeRow');
     var regCodeBtn = document.getElementById('regCodeBtn');
     var resetCodeBtn = document.getElementById('resetCodeBtn');
-    var changePwdBtn = document.getElementById('changePwdBtn');
-    var changePwdForm = document.getElementById('changePwdForm');
-    var pwdError = document.getElementById('pwdError');
 
     var lastId = 0;
     var pollTimer = null;
@@ -498,46 +496,21 @@
         });
     });
 
-    changePwdBtn.addEventListener('click', function() {
-        var showing = changePwdForm.style.display !== 'none';
-        changePwdForm.style.display = showing ? 'none' : 'flex';
-        pwdError.textContent = '';
-    });
-
-    changePwdForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        pwdError.textContent = '';
-        apiPost('/api/change_password', {
-            token: getToken(),
-            old_password: document.getElementById('oldPwd').value,
-            new_password: document.getElementById('newPwd').value
-        }).then(function(res) {
-            if (res.ok) {
-                changePwdForm.style.display = 'none';
-                changePwdForm.reset();
-            } else {
-                pwdError.textContent = res.error || '修改失败';
-            }
-        }).catch(function() {
-            pwdError.textContent = '无法连接服务器';
-        });
-    });
-
     logoutBtn.addEventListener('click', function() {
         apiPost('/api/logout', { token: getToken() });
         localStorage.removeItem('chat_token');
         localStorage.removeItem('chat_username');
         localStorage.removeItem('chat_admin');
         setAuthVisible(true);
+        window.dispatchEvent(new Event('authchange'));
     });
 
     function enterChat(username) {
-        accountInfo.textContent = T('当前账号：') + username + (isAdmin() ? T('（管理员）') : '');
+        window.dispatchEvent(new Event('authchange'));
         setAuthVisible(false);
         lastId = 0;
         chatMessages.innerHTML = '';
         loadMessages();
-        loadProfile();
     }
 
     function escapeHtml(str) {
@@ -660,9 +633,6 @@
     var forumList = document.getElementById('forumList');
     var forumSearch = document.getElementById('forumSearch');
     var postForm = document.getElementById('postForm');
-    var avatarInput = document.getElementById('avatarInput');
-    var avatarMsg = document.getElementById('avatarMsg');
-    var accountStats = document.getElementById('accountStats');
     var postDetail = document.getElementById('postDetail');
     var newPostBtn = document.getElementById('newPostBtn');
     var postsCache = [];
@@ -792,7 +762,6 @@
                 postForm.reset();
                 postForm.style.display = 'none';
                 loadPosts();
-                loadProfile();
             }
         }).catch(function() {});
     });
@@ -855,51 +824,6 @@
         apiPost('/api/post_reply', { token: getToken(), id: pid, content: content }).then(function(res) {
             if (res.ok) loadPosts(pid);
         }).catch(function() {});
-    });
-
-    function setMyAvatar(url) {
-        var el = document.getElementById('myAvatar');
-        if (!el) return;
-        var name = localStorage.getItem('chat_username') || '?';
-        if (url) {
-            el.outerHTML = '<img class="avatar avatar-lg" id="myAvatar" src="' + url + '?t=' + Date.now() + '" alt="">';
-        } else {
-            el.textContent = name.charAt(0).toUpperCase();
-        }
-    }
-
-    function loadProfile() {
-        fetch('/api/me', { headers: authHeaders() }).then(function(res) { return res.json(); }).then(function(res) {
-            if (!res.ok) return;
-            setMyAvatar(res.avatar);
-            accountStats.textContent = T('关注 ') + res.following + T(' · 粉丝 ') + res.followers + T(' · 发帖 ') + res.posts;
-        }).catch(function() {});
-    }
-
-    avatarInput.addEventListener('change', function() {
-        var file = avatarInput.files[0];
-        avatarInput.value = '';
-        if (!file) return;
-        if (file.size > 5 * 1024 * 1024) {
-            avatarMsg.textContent = '图片太大（最大5MB）';
-            return;
-        }
-        var reader = new FileReader();
-        reader.onload = function() {
-            apiPost('/api/avatar', { token: getToken(), image: reader.result }).then(function(res) {
-                if (res.ok) {
-                    setMyAvatar(res.avatar);
-                    avatarMsg.style.color = '#7be3a8';
-                    avatarMsg.textContent = '头像已更新';
-                    setTimeout(function() { avatarMsg.textContent = ''; avatarMsg.style.color = ''; }, 3000);
-                } else {
-                    avatarMsg.textContent = res.error || '上传失败';
-                }
-            }).catch(function() {
-                avatarMsg.textContent = '无法连接服务器';
-            });
-        };
-        reader.readAsDataURL(file);
     });
 
     var annList = document.getElementById('annList');
@@ -990,11 +914,7 @@
 
     window.addEventListener('langchange', function() {
         loadAnnouncements();
-        if (getToken()) {
-            loadPosts();
-            var name = localStorage.getItem('chat_username') || '';
-            if (name) accountInfo.textContent = T('当前账号：') + name + (isAdmin() ? T('（管理员）') : '');
-        }
+        if (getToken()) loadPosts();
     });
 
     loadAnnouncements();
@@ -1012,6 +932,7 @@
                     localStorage.removeItem('chat_token');
                     localStorage.removeItem('chat_username');
                     localStorage.removeItem('chat_admin');
+                    window.dispatchEvent(new Event('authchange'));
                 }
             })
             .catch(function() {});
@@ -1038,6 +959,26 @@
     var statResources = document.getElementById('statResources');
     var viewAllBtn = document.getElementById('viewAllBtn');
 
+    // 我的（个人中心）：收藏 / 点赞 / 上传 / 回复
+    var profilePage = document.getElementById('profile-page');
+    var profileCard = document.getElementById('profileCard');
+    var profileManagePane = document.getElementById('profileManagePane');
+    var profileListCard = document.getElementById('profileListCard');
+    var profileTabs = document.getElementById('profileTabs');
+    var profileGrid = document.getElementById('profileGrid');
+    var profileEmpty = document.getElementById('profileEmpty');
+    var profileEmptyTitle = document.getElementById('profileEmptyTitle');
+    var profileEmptySub = document.getElementById('profileEmptySub');
+    var profileGoLibrary = document.getElementById('profileGoLibrary');
+    var profileTab = 'fav';
+    var profileMe = null;
+    var pmAvatar = document.getElementById('pmAvatar');
+    var pmAvatarInput = document.getElementById('pmAvatarInput');
+    var pmAvatarMsg = document.getElementById('pmAvatarMsg');
+    var pmAccountStats = document.getElementById('pmAccountStats');
+    var pmChangePwdForm = document.getElementById('pmChangePwdForm');
+    var pmPwdError = document.getElementById('pmPwdError');
+
     var modal = document.getElementById('dlModal');
     var modalTitle = document.getElementById('dlModalTitle');
     var swError = document.getElementById('swError');
@@ -1053,6 +994,14 @@
     var sortMode = 'default';
     var editingId = null;
     var pendingImage = null; // 'KEEP' 保持原图 | 'CLEAR' 移除 | 'DATA:...' 新图 | null 无操作
+    var activeCat = '全部';
+    var CATS = ['模组加载器', '小助手', '游戏本体', '工具', '模组', 'ROOT', '其他'];
+    var viewedIds = {};
+
+    function num(v) { return typeof v === 'number' ? v : ((v && v.length) || 0); }
+    function heat(s) {
+        return (downloads[s.name] || 0) * 3 + num(s.likes) * 5 + num(s.favs) * 4 + num(s.views) + ((s.replies || []).length) * 2;
+    }
 
     function isAdmin() { return localStorage.getItem('chat_admin') === '1'; }
     function getToken() { return localStorage.getItem('chat_token') || ''; }
@@ -1109,6 +1058,7 @@
 
     // ---- 搜索 / 排序 ----
     function matches(s) {
+        if (activeCat !== '全部' && (s.category || '其他') !== activeCat) return false;
         if (!query) return true;
         var hay = [s.name, s.desc, s.author, s.version, s.uploader].join(' ').toLowerCase();
         return query.toLowerCase().split(/\s+/).filter(Boolean).every(function(term) {
@@ -1123,6 +1073,8 @@
         } else if (sortMode === 'new') {
             out.sort(function(a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
         } else if (sortMode === 'hot') {
+            out.sort(function(a, b) { return heat(b) - heat(a); });
+        } else if (sortMode === 'dl') {
             out.sort(function(a, b) { return (downloads[b.name] || 0) - (downloads[a.name] || 0); });
         }
         return out;
@@ -1138,7 +1090,7 @@
         return { src: raw, fb: '' };
     }
 
-    function cardHtml(s, withTools) {
+    function cardHtml(s, withTools, isHot) {
         var im = imgSrc(s);
         var h = '<div class="software-card" data-id="' + esc(s.id) + '" data-name="' + esc(s.name) + '">';
         h += '<div class="software-img"' + (im ? ' data-img-src="' + esc(im.src) + '"' : '') + '>';
@@ -1146,6 +1098,8 @@
             h += '<img src="' + esc(im.src) + '" alt="' + esc(s.name) + '"'
                + (im.fb ? ' data-fb="' + esc(im.fb) + '"' : '') + '>';
         }
+        h += '<span class="dl-cat-badge">' + esc(T(s.category || '其他')) + '</span>';
+        if (isHot) h += '<span class="dl-hot-badge">' + T('热门') + '</span>';
         h += '</div><div class="software-info">';
         h += '<div class="software-name">' + esc(s.name) + '</div>';
         h += '<div class="software-desc">' + esc(s.desc) + '</div>';
@@ -1156,6 +1110,12 @@
         if (s.uploader) h += ' | 上传 ' + esc(s.uploader);
         h += '<span class="dl-count" data-soft="' + esc(s.name) + '">' + T(' · 下载 ')
            + (downloads[s.name] || 0) + T(' 次') + '</span></div>';
+        h += '<div class="dl-mini-stats">'
+           + '<span>' + T('点赞') + ' ' + num(s.likes) + '</span>'
+           + '<span>' + T('收藏') + ' ' + num(s.favs) + '</span>'
+           + '<span>' + T('回复') + ' ' + (s.replies || []).length + '</span>'
+           + '<span>' + T('浏览') + ' ' + num(s.views) + '</span>'
+           + '</div>';
         if (mirrors(s).length) {
             h += '<button type="button" class="download-btn" data-id="' + esc(s.id) + '">' + T('下载') + '</button>';
         }
@@ -1201,14 +1161,45 @@
         }).catch(function() {});
     }
 
+    var chipsBox = document.getElementById('dlChips');
+
+    function renderChips() {
+        if (!chipsBox) return;
+        var counts = {};
+        list.forEach(function(s) {
+            var c = s.category || '其他';
+            counts[c] = (counts[c] || 0) + 1;
+        });
+        var cats = ['全部'].concat(CATS);
+        chipsBox.innerHTML = cats.map(function(c) {
+            var n = (c === '全部') ? list.length : (counts[c] || 0);
+            return '<button type="button" class="tld-chip' + (activeCat === c ? ' active' : '')
+                 + '" data-cat="' + esc(c) + '">' + esc(T(c)) + ' <span>' + n + '</span></button>';
+        }).join('');
+    }
+
+    if (chipsBox) {
+        chipsBox.addEventListener('click', function(e) {
+            var chip = e.target.closest('.tld-chip');
+            if (!chip) return;
+            activeCat = chip.getAttribute('data-cat') || '全部';
+            render();
+        });
+    }
+
     function render() {
+        renderChips();
         var filtered = sorted(list.filter(matches));
-        grid.innerHTML = filtered.map(function(s) { return cardHtml(s, true); }).join('');
+        var hotIds = {};
+        list.slice().sort(function(a, b) { return heat(b) - heat(a); })
+            .filter(function(s) { return heat(s) > 0; }).slice(0, 3)
+            .forEach(function(s) { hotIds[s.id] = 1; });
+        grid.innerHTML = filtered.map(function(s) { return cardHtml(s, true, !!hotIds[s.id]); }).join('');
         if (homeFeatured) {
             var featured = list.slice().sort(function(a, b) {
                 return String(b.date || '').localeCompare(String(a.date || ''));
             }).slice(0, 4);
-            homeFeatured.innerHTML = featured.map(function(s) { return cardHtml(s, false); }).join('');
+            homeFeatured.innerHTML = featured.map(function(s) { return cardHtml(s, false, !!hotIds[s.id]); }).join('');
         }
         if (emptyBox) emptyBox.style.display = filtered.length ? 'none' : '';
         if (emptyReset) emptyReset.style.display = query ? '' : 'none';
@@ -1222,6 +1213,141 @@
         syncAuthUI();
         if (window.__bindCardFx) { window.__bindCardFx(grid); if (homeFeatured) window.__bindCardFx(homeFeatured); }
         if (window.__applyLangText) { window.__applyLangText(grid); if (homeFeatured) window.__applyLangText(homeFeatured); }
+        if (profileActive()) renderProfile();
+    }
+
+    // ---- 我的（个人中心）----
+    function profileActive() {
+        return !!(profilePage && profilePage.classList.contains('active-page'));
+    }
+
+    function myResources(kind) {
+        var uname = getUsername();
+        var arr;
+        if (kind === 'like') {
+            arr = list.filter(function(s) { return !!s.liked; });
+        } else if (kind === 'mine') {
+            arr = uname ? list.filter(function(s) { return s.uploader === uname; }) : [];
+        } else if (kind === 'reply') {
+            arr = list.filter(function(s) {
+                return (s.replies || []).some(function(r) { return !!r.mine; });
+            });
+        } else {
+            arr = list.filter(function(s) { return !!s.fav; });
+        }
+        return arr.slice().sort(function(a, b) {
+            return String(b.date || '').localeCompare(String(a.date || ''));
+        });
+    }
+
+    function profileCounts() {
+        var uname = getUsername();
+        return {
+            fav: myResources('fav').length,
+            like: myResources('like').length,
+            mine: myResources('mine').length,
+            reply: myResources('reply').length,
+            uploader: uname
+        };
+    }
+
+    function renderProfile() {
+        if (!profilePage || !profileCard) return;
+        var logged = !!getToken();
+        if (!logged) {
+            profileCard.innerHTML = '<div class="profile-guest">' +
+                '<div class="profile-guest-icon">👤</div>' +
+                '<div class="profile-guest-title">' + T('登录后查看你的收藏、点赞和上传') + '</div>' +
+                '<div class="profile-guest-sub">' + T('收藏的资源会集中显示在这里，方便下次快速找到。') + '</div>' +
+                '<button type="button" class="f-btn primary" data-pact="login">' + T('登录 / 注册') + '</button>' +
+                '</div>';
+            if (profileListCard) profileListCard.style.display = 'none';
+            return;
+        }
+        if (profileListCard) profileListCard.style.display = '';
+        var name = (profileMe && profileMe.username) || getUsername() || '?';
+        var avatar = '';
+        if (profileMe && profileMe.avatar) {
+            var av = window.__apiUrl ? window.__apiUrl(profileMe.avatar) : profileMe.avatar;
+            avatar = '<img class="avatar avatar-lg" src="' + esc(av) + '" alt="">';
+        } else {
+            avatar = '<span class="avatar avatar-lg avatar-letter">' + esc(name.charAt(0).toUpperCase()) + '</span>';
+        }
+        var sub = [];
+        if (profileMe && profileMe.email) sub.push(esc(profileMe.email));
+        if (profileMe && profileMe.is_admin) sub.push(T('管理员'));
+        profileCard.innerHTML = '<div class="profile-head">' +
+            '<div class="profile-avatar">' + avatar + '</div>' +
+            '<div class="profile-id"><div class="profile-name">' + esc(name) + '</div>' +
+            '<div class="profile-sub">' + (sub.length ? sub.join(' · ') : T('BENBAIJIE 资源站用户')) + '</div></div>' +
+            '<div class="profile-actions">' +
+            '<button type="button" class="f-btn" data-pact="account">' + T('账号管理') + '</button>' +
+            '<button type="button" class="f-btn" data-pact="logout">' + T('退出登录') + '</button>' +
+            '</div></div>' +
+            '<div class="profile-stats">' +
+            '<div class="profile-stat"><b>' + profileCounts().fav + '</b><span>' + T('我的收藏') + '</span></div>' +
+            '<div class="profile-stat"><b>' + profileCounts().like + '</b><span>' + T('我的点赞') + '</span></div>' +
+            '<div class="profile-stat"><b>' + profileCounts().mine + '</b><span>' + T('我上传的') + '</span></div>' +
+            '<div class="profile-stat"><b>' + profileCounts().reply + '</b><span>' + T('我回复的') + '</span></div>' +
+            '</div>';
+        var counts = profileCounts();
+        var tabs = [
+            ['fav', '我的收藏'],
+            ['like', '我的点赞'],
+            ['mine', '我上传的'],
+            ['reply', '我回复的']
+        ];
+        if (profileTabs) {
+            profileTabs.innerHTML = tabs.map(function(t) {
+                return '<button type="button" class="dl-tab' + (profileTab === t[0] ? ' active' : '') + '" data-ptab="' + t[0] + '">' +
+                    T(t[1]) + ' <span>' + counts[t[0]] + '</span></button>';
+            }).join('');
+        }
+        var items = myResources(profileTab);
+        if (profileGrid) {
+            profileGrid.innerHTML = items.map(function(s) {
+                return cardHtml(s, profileTab === 'mine' && canManage(s), false);
+            }).join('');
+            if (window.__bindCardFx) window.__bindCardFx(profileGrid);
+            if (window.__applyLangText) window.__applyLangText(profileGrid);
+        }
+        if (profileEmpty) {
+            profileEmpty.style.display = items.length ? 'none' : '';
+            if (!items.length) {
+                var msg = profileTab === 'like'
+                    ? ['还没有点赞任何资源', '喜欢的资源点个赞，下次好找回来']
+                    : profileTab === 'mine'
+                        ? ['还没有上传过资源', '点击资源库的「上传资源」分享你的作品']
+                        : profileTab === 'reply'
+                            ? ['还没有回复过资源', '在资源详情里参与讨论，回复会显示在这里']
+                            : ['还没有收藏任何资源', '在资源详情点「收藏」，资源就会出现在这里'];
+                profileEmptyTitle.textContent = T(msg[0]);
+                profileEmptySub.textContent = T(msg[1]);
+            }
+        }
+    }
+
+    function loadProfileMe() {
+        var tk = getToken();
+        if (!tk) {
+            profileMe = null;
+            if (profileManagePane && profileManagePane.style.display !== 'none') closeProfileManage();
+            if (profileActive()) renderProfile();
+            return;
+        }
+        fetch('/api/me', { headers: { 'Authorization': 'Bearer ' + tk } }).then(function(res) {
+            return res.json();
+        }).then(function(res) {
+            if (res && res.ok) {
+                profileMe = res;
+                // 同步账号管理面板的头像 / 关注等统计
+                setPmAvatar(res.avatar);
+                if (pmAccountStats) {
+                    pmAccountStats.textContent = T('关注 ') + res.following + T(' · 粉丝 ') + res.followers + T(' · 发帖 ') + res.posts;
+                }
+                if (profileActive()) renderProfile();
+            }
+        }).catch(function() {});
     }
 
     function applyQuery(q) {
@@ -1328,6 +1454,8 @@
             var el = document.getElementById(id);
             if (el) el.value = '';
         });
+        var catReset = document.getElementById('swCat');
+        if (catReset) catReset.value = '其他';
         var swFileEl = document.getElementById('swFile');
         if (swFileEl) swFileEl.value = '';
     }
@@ -1343,6 +1471,8 @@
             });
             modalTitle.textContent = T('编辑资源');
             saveBtn.textContent = T('保存修改');
+            var catEl = document.getElementById('swCat');
+            if (catEl) catEl.value = CATS.indexOf(item.category) !== -1 ? item.category : '其他';
             if (item.image) {
                 pendingImage = 'KEEP';
                 var im = imgSrc(item);
@@ -1457,6 +1587,7 @@
             quark: '',
             pan123: '',
             baidu: '',
+            category: (document.getElementById('swCat') || {}).value || '其他',
             image: image
         };
         if (isAdmin()) {
@@ -1521,6 +1652,232 @@
         });
     }
 
+    // ---- 资源详情（帖子样式：点赞 / 收藏 / 回复 / 浏览量）----
+    var swDetail = document.createElement('div');
+    swDetail.className = 'tld-detail-mask';
+    swDetail.id = 'swDetailMask';
+    swDetail.style.display = 'none';
+    swDetail.innerHTML =
+        '<div class="tld-detail sw-detail" role="dialog" aria-modal="true">' +
+            '<div class="tld-detail-cover" id="swDetailCover">' +
+                '<button type="button" class="tld-detail-close" id="swDetailClose">✕</button>' +
+            '</div>' +
+            '<div class="tld-detail-body">' +
+                '<div class="tld-detail-name" id="swDetailName"></div>' +
+                '<div class="tld-detail-meta" id="swDetailMeta"></div>' +
+                '<div class="sw-stat-row" id="swDetailStats"></div>' +
+                '<div class="tld-detail-desc" id="swDetailDesc"></div>' +
+                '<div class="tld-detail-actions">' +
+                    '<button type="button" class="f-btn primary" id="swDetailDl"></button>' +
+                    '<button type="button" class="f-btn sw-react" id="swLikeBtn"></button>' +
+                    '<button type="button" class="f-btn sw-react" id="swFavBtn"></button>' +
+                '</div>' +
+                '<div class="sw-reply-sec">' +
+                    '<div class="sw-reply-head" id="swReplyHead"></div>' +
+                    '<div class="sw-reply-list" id="swReplyList"></div>' +
+                    '<div class="sw-reply-box" id="swReplyBox">' +
+                        '<textarea id="swReplyInput" maxlength="500" rows="2"></textarea>' +
+                        '<button type="button" class="f-btn primary" id="swReplySend"></button>' +
+                    '</div>' +
+                    '<div class="sw-reply-login" id="swReplyLogin"></div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(swDetail);
+
+    var detailItem = null;
+
+    function closeSwDetail() {
+        swDetail.style.display = 'none';
+        detailItem = null;
+    }
+
+    function fmtTime(ts) {
+        if (!ts) return '';
+        var d = new Date(ts * 1000);
+        function p(n) { return (n < 10 ? '0' : '') + n; }
+        return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    }
+
+    function updateReactBtns() {
+        if (!detailItem) return;
+        var likeBtn = swDetail.querySelector('#swLikeBtn');
+        var favBtn = swDetail.querySelector('#swFavBtn');
+        likeBtn.innerHTML = (detailItem.liked ? T('已点赞') : T('点赞')) + ' <b>' + num(detailItem.likes) + '</b>';
+        likeBtn.classList.toggle('on', !!detailItem.liked);
+        favBtn.innerHTML = (detailItem.fav ? T('已收藏') : T('收藏')) + ' <b>' + num(detailItem.favs) + '</b>';
+        favBtn.classList.toggle('on', !!detailItem.fav);
+    }
+
+    function updateDetailStats() {
+        if (!detailItem) return;
+        swDetail.querySelector('#swDetailStats').innerHTML =
+            '<span>' + T('下载') + ' ' + (downloads[detailItem.name] || 0) + '</span>' +
+            '<span>' + T('浏览') + ' ' + num(detailItem.views) + '</span>' +
+            '<span>' + T('点赞') + ' ' + num(detailItem.likes) + '</span>' +
+            '<span>' + T('收藏') + ' ' + num(detailItem.favs) + '</span>';
+    }
+
+    function renderReplies() {
+        var arr = (detailItem && detailItem.replies) || [];
+        swDetail.querySelector('#swReplyHead').textContent = T('回复') + '（' + arr.length + '）';
+        var listEl = swDetail.querySelector('#swReplyList');
+        if (!arr.length) {
+            listEl.innerHTML = '<div class="sw-reply-empty">' + T('暂无回复，来说两句吧') + '</div>';
+            return;
+        }
+        listEl.innerHTML = arr.map(function(r) {
+            var can = isAdmin() || r.mine;
+            return '<div class="sw-reply-item" data-rid="' + esc(r.id) + '">' +
+                '<div class="sw-reply-top">' +
+                    '<span class="sw-reply-user">' + esc(r.username || '?') + '</span>' +
+                    '<span class="sw-reply-time">' + esc(fmtTime(r.time)) + '</span>' +
+                    (can ? '<button type="button" class="sw-reply-del">' + T('删除') + '</button>' : '') +
+                '</div>' +
+                '<div class="sw-reply-text">' + esc(r.text) + '</div>' +
+            '</div>';
+        }).join('');
+        listEl.scrollTop = listEl.scrollHeight;
+    }
+
+    function refreshSwDetail() {
+        var s = detailItem;
+        if (!s) return;
+        var cover = swDetail.querySelector('#swDetailCover');
+        var oldImg = cover.querySelector('img');
+        if (oldImg) oldImg.remove();
+        var im = imgSrc(s);
+        cover.className = 'tld-detail-cover' + (im ? '' : ' noimg');
+        if (im) {
+            var img = document.createElement('img');
+            img.alt = s.name || '';
+            if (im.fb) img.setAttribute('data-fb', im.fb);
+            img.src = im.src;
+            cover.appendChild(img);
+        }
+        swDetail.querySelector('#swDetailName').innerHTML = esc(s.name)
+            + ' <span class="dl-cat-badge sw-detail-cat">' + esc(T(s.category || '其他')) + '</span>';
+        var meta = [];
+        if (s.version) meta.push('<span>' + T('版本') + ' <b>' + esc(s.version) + '</b></span>');
+        if (s.date) meta.push('<span>' + T('日期') + ' <b>' + esc(s.date) + '</b></span>');
+        if (s.size) meta.push('<span>' + T('大小') + ' <b>' + esc(s.size) + '</b></span>');
+        if (s.author) meta.push('<span>' + T('作者') + ' <b>' + esc(s.author) + '</b></span>');
+        if (s.uploader) meta.push('<span>' + T('上传') + ' <b>' + esc(s.uploader) + '</b></span>');
+        swDetail.querySelector('#swDetailMeta').innerHTML = meta.join('');
+        updateDetailStats();
+        swDetail.querySelector('#swDetailDesc').textContent = s.desc || T('（暂无简介）');
+        var dlBtn = swDetail.querySelector('#swDetailDl');
+        dlBtn.textContent = T('下载');
+        dlBtn.style.display = mirrors(s).length ? '' : 'none';
+        updateReactBtns();
+        var logged = !!getToken();
+        swDetail.querySelector('#swReplyBox').style.display = logged ? '' : 'none';
+        var loginEl = swDetail.querySelector('#swReplyLogin');
+        loginEl.style.display = logged ? 'none' : '';
+        loginEl.innerHTML = T('登录后即可点赞、收藏和回复，')
+            + '<button type="button" id="swReplyLoginLink">' + T('点此登录') + '</button>';
+        swDetail.querySelector('#swReplyInput').setAttribute('placeholder', T('写下你的回复...'));
+        swDetail.querySelector('#swReplySend').textContent = T('发表回复');
+        renderReplies();
+    }
+
+    function openSwDetail(item) {
+        detailItem = item;
+        refreshSwDetail();
+        swDetail.style.display = 'flex';
+        swDetail.querySelector('.tld-detail').scrollTop = 0;
+        if (!viewedIds[item.id]) {
+            viewedIds[item.id] = true;
+            apiPost('/api/resource_view', { id: item.id }).then(function(res) {
+                if (res && res.ok) {
+                    item.views = res.views;
+                    if (detailItem === item) updateDetailStats();
+                    render();
+                }
+            }).catch(function() {});
+        }
+    }
+
+    function doReact(action) {
+        if (!detailItem) return;
+        if (!getToken()) { goLogin(); return; }
+        apiPost('/api/resource_react', { token: getToken(), id: detailItem.id, action: action }).then(function(res) {
+            if (res && res.ok) {
+                detailItem.likes = res.likes;
+                detailItem.favs = res.favs;
+                detailItem.liked = res.liked;
+                detailItem.fav = res.fav;
+                updateReactBtns();
+                updateDetailStats();
+                render();
+            } else if (res && res.error && res.error.indexOf('登录') !== -1) {
+                localStorage.removeItem('chat_token');
+                goLogin();
+            } else {
+                toast((res && res.error) || T('操作失败'));
+            }
+        }).catch(function() { toast(T('无法连接服务器')); });
+    }
+
+    swDetail.querySelector('#swDetailClose').addEventListener('click', closeSwDetail);
+    swDetail.addEventListener('click', function(e) { if (e.target === swDetail) closeSwDetail(); });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && swDetail.style.display === 'flex') closeSwDetail();
+    });
+    swDetail.querySelector('#swDetailDl').addEventListener('click', function() {
+        var s = detailItem;
+        if (!s) return;
+        closeSwDetail();
+        openChoice(s);
+    });
+    swDetail.querySelector('#swLikeBtn').addEventListener('click', function() { doReact('like'); });
+    swDetail.querySelector('#swFavBtn').addEventListener('click', function() { doReact('fav'); });
+    swDetail.querySelector('#swReplySend').addEventListener('click', function() {
+        if (!detailItem) return;
+        if (!getToken()) { goLogin(); return; }
+        var input = swDetail.querySelector('#swReplyInput');
+        var text = input.value.trim();
+        if (!text) { toast(T('回复内容不能为空')); return; }
+        var btn = swDetail.querySelector('#swReplySend');
+        btn.disabled = true;
+        apiPost('/api/resource_reply', { token: getToken(), id: detailItem.id, text: text }).then(function(res) {
+            btn.disabled = false;
+            if (res && res.ok) {
+                detailItem.replies = res.replies || [];
+                input.value = '';
+                renderReplies();
+                render();
+            } else {
+                toast((res && res.error) || T('回复失败'));
+            }
+        }).catch(function() { btn.disabled = false; toast(T('无法连接服务器')); });
+    });
+    swDetail.querySelector('#swReplyLogin').addEventListener('click', function(e) {
+        if (e.target.closest('#swReplyLoginLink')) goLogin();
+    });
+    // 手机端键盘弹出时，把回复输入框滚到可视区域，避免被键盘 / 浏览器工具栏挡住
+    swDetail.querySelector('#swReplyInput').addEventListener('focus', function() {
+        var input = this;
+        setTimeout(function() {
+            if (input.scrollIntoView) input.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 300);
+    });
+    swDetail.querySelector('#swReplyList').addEventListener('click', function(e) {
+        var del = e.target.closest('.sw-reply-del');
+        if (!del || !detailItem) return;
+        var rid = del.closest('.sw-reply-item').getAttribute('data-rid');
+        if (!confirm(T('确定删除这条回复吗？'))) return;
+        apiPost('/api/resource_reply_del', { token: getToken(), id: detailItem.id, rid: rid }).then(function(res) {
+            if (res && res.ok) {
+                detailItem.replies = res.replies || [];
+                renderReplies();
+                render();
+            } else {
+                toast((res && res.error) || T('删除失败'));
+            }
+        }).catch(function() {});
+    });
+
     // ---- 卡片操作 ----
     function handleAreaClick(e) {
         var card = e.target.closest('.software-card');
@@ -1547,14 +1904,130 @@
         }
         var up = e.target.closest('.dl-up');
         var down = e.target.closest('.dl-down');
-        if ((up || down) && isAdmin()) {
-            apiPost('/api/software_move', { token: getToken(), id: id, dir: up ? 'up' : 'down' }).then(function(res) {
-                if (res.ok) load();
-            }).catch(function() {});
+        if (up || down) {
+            if (isAdmin()) {
+                apiPost('/api/software_move', { token: getToken(), id: id, dir: up ? 'up' : 'down' }).then(function(res) {
+                    if (res.ok) load();
+                }).catch(function() {});
+            }
+            return;
         }
+        if (e.target.closest('.software-img')) return; // 点图片 = 看大图
+        openSwDetail(item);
     }
     grid.addEventListener('click', handleAreaClick);
     if (homeFeatured) homeFeatured.addEventListener('click', handleAreaClick);
+    if (profileGrid) profileGrid.addEventListener('click', handleAreaClick);
+
+    // ---- 我的：页面交互 ----
+    function openProfileManage() {
+        if (!profileManagePane) return;
+        profileManagePane.style.display = '';
+        loadProfileMe();
+        if (profileListCard) {
+            profileListCard.style.display = 'none';
+            // 记住：关掉账号管理时要还原列表
+            profileManagePane._restoreList = true;
+        }
+    }
+    function closeProfileManage() {
+        if (!profileManagePane) return;
+        profileManagePane.style.display = 'none';
+        if (profileManagePane._restoreList && profileListCard) {
+            profileListCard.style.display = '';
+            profileManagePane._restoreList = false;
+        }
+    }
+    if (profileCard) {
+        profileCard.addEventListener('click', function(e) {
+            var btn = e.target.closest('[data-pact]');
+            if (!btn) return;
+            var act = btn.getAttribute('data-pact');
+            if (act === 'login') { goLogin(); return; }
+            if (act === 'account') { openProfileManage(); return; }
+            if (act === 'logout') {
+                var out = document.getElementById('logoutBtn');
+                if (out) out.click();
+            }
+        });
+    }
+    if (profileManagePane) {
+        profileManagePane.addEventListener('click', function(e) {
+            var btn = e.target.closest('[data-pact]');
+            if (btn && btn.getAttribute('data-pact') === 'manage-close') closeProfileManage();
+        });
+    }
+    if (profileTabs) {
+        profileTabs.addEventListener('click', function(e) {
+            var tab = e.target.closest('.dl-tab');
+            if (!tab) return;
+            profileTab = tab.getAttribute('data-ptab') || 'fav';
+            renderProfile();
+        });
+    }
+    if (profileGoLibrary) profileGoLibrary.addEventListener('click', goLibrary);
+
+    // ---- 我的：账号管理（头像上传 + 修改密码）----
+    function setPmAvatar(url) {
+        if (!pmAvatar) return;
+        var name = (profileMe && profileMe.username) || getUsername() || '?';
+        if (url) {
+            pmAvatar.outerHTML = '<img class="avatar avatar-lg" id="pmAvatar" src="' + url + '?t=' + Date.now() + '" alt="">';
+        } else {
+            pmAvatar.textContent = name.charAt(0).toUpperCase();
+        }
+    }
+    if (pmAvatarInput) {
+        pmAvatarInput.addEventListener('change', function() {
+            var file = pmAvatarInput.files[0];
+            pmAvatarInput.value = '';
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                pmAvatarMsg.textContent = '图片太大（最大5MB）';
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function() {
+                apiPost('/api/avatar', { token: getToken(), image: reader.result }).then(function(res) {
+                    if (res.ok) {
+                        setPmAvatar(res.avatar);
+                        if (pmAvatarMsg) {
+                            pmAvatarMsg.style.color = '#7be3a8';
+                            pmAvatarMsg.textContent = '头像已更新';
+                            setTimeout(function() { pmAvatarMsg.textContent = ''; pmAvatarMsg.style.color = ''; }, 3000);
+                        }
+                        loadProfileMe();
+                    } else {
+                        pmAvatarMsg.textContent = res.error || '上传失败';
+                    }
+                }).catch(function() {
+                    pmAvatarMsg.textContent = '无法连接服务器';
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+    if (pmChangePwdForm) {
+        pmChangePwdForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (pmPwdError) pmPwdError.textContent = '';
+            apiPost('/api/change_password', {
+                token: getToken(),
+                old_password: document.getElementById('pmOldPwd').value,
+                new_password: document.getElementById('pmNewPwd').value
+            }).then(function(res) {
+                if (res.ok) {
+                    pmChangePwdForm.reset();
+                    if (pmPwdError) { pmPwdError.style.color = '#7be3a8'; pmPwdError.textContent = '密码修改成功'; }
+                    setTimeout(function() { if (pmPwdError) { pmPwdError.textContent = ''; pmPwdError.style.color = ''; } }, 3000);
+                } else {
+                    if (pmPwdError) pmPwdError.textContent = res.error || '修改失败';
+                }
+            }).catch(function() {
+                if (pmPwdError) pmPwdError.textContent = '无法连接服务器';
+            });
+        });
+    }
 
     // ---- 搜索框 / 排序 ----
     if (searchInput) {
@@ -1611,16 +2084,31 @@
 
     document.querySelectorAll('.nav-item').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            if (btn.getAttribute('data-page') === 'download') load();
+            var page = btn.getAttribute('data-page');
+            if (page === 'download') load();
+            if (page === 'profile') {
+                renderProfile();
+                loadProfileMe();
+                load();
+            }
         });
     });
 
-    window.addEventListener('langchange', function() { render(); syncAuthUI(); });
+    window.addEventListener('langchange', function() { render(); syncAuthUI(); if (detailItem) refreshSwDetail(); });
+
+    // 登录 / 退出后同步「我的」与收藏状态
+    window.addEventListener('authchange', function() {
+        profileMe = null;
+        loadProfileMe();
+        load();
+        if (profileActive()) renderProfile();
+    });
 
     // ---- 加载数据 ----
     function load() {
         function applyList(arr) { list = arr || []; render(); }
-        fetch('/api/software').then(function(res) { return res.json(); }).then(function(res) {
+        var tk = getToken();
+        fetch('/api/software' + (tk ? '?token=' + encodeURIComponent(tk) : '')).then(function(res) { return res.json(); }).then(function(res) {
             if (res && res.ok) { applyList(res.software); return; }
             throw new Error('no api');
         }).catch(function() {
@@ -2712,7 +3200,7 @@
         '提示：网盘是小飞机网盘支持不登录直链下载，并且还不限速，但是我还是建议进群下载，因为群内的消息绝对是最新的！': 'Tip: Feijipan supports direct downloads without login or speed limits, but joining the QQ group is recommended for the latest updates!',
         '最新公告': 'Announcements',
         '登录': 'Login', '注册': 'Register', '忘记密码？': 'Forgot password?', '返回上一步': 'Back',
-        '获取验证码': 'Get Code', '账号管理': 'Account', '退出登录': 'Logout',
+        '获取验证码': 'Get Code', '账号管理': 'Account', '修改密码': 'Change Password', '退出登录': 'Logout',
         '发送': 'Send', '聊天室': 'Chat Room', '论坛': 'Forum', '＋ 发帖': '+ New Post',
         '取消': 'Cancel', '发布': 'Post', '发布公告': 'Publish', '保存修改': 'Save',
         '邮箱格式不正确': 'Invalid email format',
@@ -2840,6 +3328,30 @@
         '非玩家角色': 'NPCs', '图形': 'Graphics', '作弊': 'Cheats', '模组的模组': 'Mods of Mods',
         '建筑物': 'Buildings', '图形用户界面': 'GUI', '模组库': 'Mod Library',
         '性能': 'Performance', '美容': 'Cosmetics',
+        // 资源分区 / 详情互动
+        '分区': 'Category', '热门': 'Hot', '其他': 'Other', '模组': 'Mods',
+        '点赞': 'Like', '已点赞': 'Liked', '收藏': 'Favorite', '已收藏': 'Favorited',
+        '浏览': 'Views', '发表回复': 'Post reply', '上传': 'Uploaded by',
+        '暂无回复，来说两句吧': 'No replies yet — say something',
+        '登录后即可点赞、收藏和回复，': 'Log in to like, favorite and reply. ', '点此登录': 'Log in',
+        '回复内容不能为空': 'Reply cannot be empty', '回复失败': 'Reply failed',
+        '确定删除这条回复吗？': 'Delete this reply?', '删除失败': 'Delete failed',
+        '操作失败': 'Operation failed',
+        // 我的（个人中心）
+        '我的': 'Me', '管理员': 'Admin', 'BENBAIJIE 资源站用户': 'BENBAIJIE user',
+        '我的收藏': 'My Favorites', '我的点赞': 'My Likes', '我上传的': 'My Uploads', '我回复的': 'My Replies',
+        '登录后查看你的收藏、点赞和上传': 'Log in to see your favorites, likes and uploads',
+        '收藏的资源会集中显示在这里，方便下次快速找到。': 'Favorited resources are collected here so you can find them again quickly.',
+        '登录 / 注册': 'Log in / Sign up',
+        '还没有收藏任何资源': 'No favorites yet',
+        '在资源详情点「收藏」，资源就会出现在这里': 'Tap "Favorite" in a resource detail and it will appear here.',
+        '还没有点赞任何资源': 'No likes yet',
+        '喜欢的资源点个赞，下次好找回来': 'Like a resource to find it again easily.',
+        '还没有上传过资源': 'No uploads yet',
+        '点击资源库的「上传资源」分享你的作品': 'Use "Upload Resource" in the library to share your work.',
+        '还没有回复过资源': 'No replies yet',
+        '在资源详情里参与讨论，回复会显示在这里': 'Join the discussion in a resource detail; your replies show up here.',
+        '去资源库逛逛': 'Browse the library',
         // 模组加载器（步骤版）
         '选择游戏目录': 'Choose Game Folder', '加载器版本': 'Loader Version', '一键安装': 'One-Click Install',
         '自动寻找（Steam）': 'Auto Find (Steam)', '手动选择文件夹': 'Pick Folder Manually', '更换': 'Change',
@@ -2849,7 +3361,7 @@
         '定位文档目录': 'Locate Documents', '关于': 'About', '尚未选择游戏目录': 'No game folder selected',
         '等待操作…': 'Waiting…', '未检测': 'Not checked', '已安装': 'Installed', '未安装': 'Not installed'
     };
-    var TEXT_SEL = '.nav-item, .page-title, .social-btn, .software-name, .software-desc, .download-btn, .tip-warning, .home-sub, .home-title, .home-eyebrow, .hero-search-btn, .group-btn, .auth-tab, .auth-submit, .code-btn, .chat-send, .auth-link, .field-hint, #newPostBtn, #cancelPostBtn, .compose-btns .f-btn, #changePwdBtn, #logoutBtn, .featured-title, .hero-tag, .dl-upload-btn, .dl-empty-title, #dlEmptyReset, #viewAllBtn, .dl-empty-sub, .dl-tab, .dl-login-link, .dl-upload-note, .dl-warn-title, .dl-content-warn li, .dl-img-hint, .dl-img-clear, .dl-sort option, .tld-opt option, .dl-admin-upload span, #tldEmptyReset, .loader-step-title, .loader-variant-btn b, .loader-variant-btn span, .loader-update-link, .loader-btn, .loader-mini-btn, .music-list-head';
+    var TEXT_SEL = '.nav-item, .page-title, .social-btn, .software-name, .software-desc, .download-btn, .tip-warning, .home-sub, .home-title, .home-eyebrow, .hero-search-btn, .group-btn, .auth-tab, .auth-submit, .code-btn, .chat-send, .auth-link, .field-hint, #newPostBtn, #cancelPostBtn, .compose-btns .f-btn, #logoutBtn, .featured-title, .hero-tag, .dl-upload-btn, .dl-empty-title, #dlEmptyReset, #viewAllBtn, .dl-empty-sub, .dl-tab, .dl-login-link, .dl-upload-note, .dl-warn-title, .dl-content-warn li, .dl-img-hint, .dl-img-clear, .dl-sort option, .tld-opt option, #swCat option, .dl-admin-upload span, #tldEmptyReset, .loader-step-title, .loader-variant-btn b, .loader-variant-btn span, .loader-update-link, .loader-btn, .loader-mini-btn, .music-list-head, #profileGoLibrary, .pm-title, .pm-sub';
     var NODE_SEL = '.dl-field, .tld-opt, .dl-warn-agree, .dl-login-hint, .loader-docs-row';
 
     window.T = function(s) {
