@@ -2,10 +2,34 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BENBAIJIE 资源下载站</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BENBAIJIE 资源下载站 - 模组加载器 / 游戏资源下载</title>
+    <meta name="description" content="BENBAIJIE 资源下载站，提供模组加载器、游戏辅助工具与资源下载，包括长途旅行、后室、森林之子、森林科技等模组资源，支持点赞、收藏与评论。">
+    <meta name="keywords" content="BENBAIJIE,模组加载器,游戏资源下载,长途旅行模组,后室模组,森林之子模组,森林科技,植物大战僵尸辅助,TLDLoader">
+    <meta name="author" content="BENBAIJIE">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://znine.fun/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="BENBAIJIE 资源下载站">
+    <meta property="og:title" content="BENBAIJIE 资源下载站 - 模组加载器 / 游戏资源下载">
+    <meta property="og:description" content="提供模组加载器、游戏辅助工具与资源下载，包括长途旅行、后室、森林之子、森林科技等模组资源。">
+    <meta property="og:url" content="https://znine.fun/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="BENBAIJIE 资源下载站">
+    <meta name="twitter:description" content="模组加载器 / 游戏资源下载站，支持点赞、收藏与评论。">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "BENBAIJIE 资源下载站",
+      "alternateName": "BENBAIJIE",
+      "url": "https://znine.fun/",
+      "description": "提供模组加载器、游戏辅助工具与资源下载，包括长途旅行、后室、森林之子、森林科技等模组资源。",
+      "inLanguage": "zh-CN"
+    }
+    </script>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css?v=20261104j">
+    <link rel="stylesheet" href="style.css?v=20261105d">
 </head>
 <body>
 <div class="app-container">
@@ -53,6 +77,7 @@
             <button class="nav-item" data-page="download">资源库</button>
             <button class="nav-item" data-page="announcement">公告</button>
             <button class="nav-item" data-page="chat">聊天</button>
+            <button class="nav-item" data-page="profile">我的</button>
             <div class="nav-slider" id="navSlider"></div>
         </div>
     </aside>
@@ -120,8 +145,9 @@
                     </div>
                     <select class="dl-sort" id="dlSort" aria-label="排序方式">
                         <option value="default">默认排序</option>
+                        <option value="hot">热门</option>
                         <option value="new">最新发布</option>
-                        <option value="hot">下载最多</option>
+                        <option value="dl">下载最多</option>
                         <option value="name">按名称</option>
                     </select>
                     <button type="button" class="hero-search-btn dl-upload-btn" id="dlUploadBtn">＋ 上传资源</button>
@@ -131,6 +157,7 @@
                     </label>
                 </div>
                 <div class="dl-login-hint" id="dlLoginHint">上传资源需要先登录，<button type="button" class="dl-login-link" id="dlLoginLink">点此登录 / 注册</button></div>
+                <div class="tld-chips dl-cat-chips" id="dlChips"></div>
                 <div class="download-grid" id="downloadGrid"></div>
                 <div class="dl-empty" id="dlEmpty" style="display:none;">
                     <div class="dl-empty-icon">⌕</div>
@@ -303,26 +330,9 @@
             <div class="card-pane chat-pane" id="chatPane" style="display:none;">
                 <div class="chat-header">
                     <div class="chat-header-btns">
-                        <button class="chat-logout" id="changePwdBtn" type="button">账号管理</button>
                         <button class="chat-logout" id="logoutBtn" type="button">退出登录</button>
                     </div>
                 </div>
-                <form class="auth-form change-pwd-form" id="changePwdForm" style="display:none;">
-                    <div class="account-info" id="accountInfo"></div>
-                    <div class="avatar-row">
-                        <span class="avatar avatar-lg avatar-letter" id="myAvatar">?</span>
-                        <div class="avatar-side">
-                            <label class="code-btn avatar-upload-btn" for="avatarInput">上传头像</label>
-                            <input type="file" id="avatarInput" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
-                            <div class="account-stats" id="accountStats"></div>
-                        </div>
-                    </div>
-                    <div class="auth-error" id="avatarMsg"></div>
-                    <input type="password" id="oldPwd" placeholder="当前密码" required autocomplete="current-password">
-                    <input type="password" id="newPwd" placeholder="新密码（至少6位）" minlength="6" required autocomplete="new-password">
-                    <button type="submit" class="auth-submit">确认修改</button>
-                    <div class="auth-error" id="pwdError"></div>
-                </form>
                 <div class="chat-subtabs">
                     <button class="auth-tab active" id="tabChat" type="button">聊天室</button>
                     <button class="auth-tab" id="tabForum" type="button">论坛</button>
@@ -350,6 +360,42 @@
                     </form>
                     <div class="forum-list" id="forumList"></div>
                     <div class="post-detail" id="postDetail" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="profile-page" class="page-view">
+            <h2 class="page-title">我的</h2>
+            <div class="card-pane" id="profileCard"></div>
+            <div class="card-pane" id="profileManagePane" style="display:none;">
+                <div class="pm-head">
+                    <div class="pm-title">账号管理</div>
+                    <button type="button" class="pm-close" data-pact="manage-close">✕</button>
+                </div>
+                <div class="pm-avatar-row">
+                    <span class="avatar avatar-lg avatar-letter" id="pmAvatar">?</span>
+                    <div class="avatar-side">
+                        <label class="code-btn avatar-upload-btn" for="pmAvatarInput">上传头像</label>
+                        <input type="file" id="pmAvatarInput" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
+                        <div class="account-stats" id="pmAccountStats"></div>
+                    </div>
+                </div>
+                <div class="auth-error" id="pmAvatarMsg"></div>
+                <div class="pm-sub">修改密码</div>
+                <form class="auth-form change-pwd-form" id="pmChangePwdForm">
+                    <input type="password" id="pmOldPwd" placeholder="当前密码" required autocomplete="current-password">
+                    <input type="password" id="pmNewPwd" placeholder="新密码（至少6位）" minlength="6" required autocomplete="new-password">
+                    <button type="submit" class="auth-submit">确认修改</button>
+                    <div class="auth-error" id="pmPwdError"></div>
+                </form>
+            </div>
+            <div class="card-pane" id="profileListCard" style="display:none;">
+                <div class="dl-tabs" id="profileTabs"></div>
+                <div class="download-grid" id="profileGrid"></div>
+                <div class="profile-empty" id="profileEmpty" style="display:none;">
+                    <div class="dl-empty-title" id="profileEmptyTitle"></div>
+                    <div class="dl-empty-sub" id="profileEmptySub"></div>
+                    <button type="button" class="f-btn" id="profileGoLibrary">去资源库逛逛</button>
                 </div>
             </div>
         </div>
@@ -398,6 +444,19 @@
                     <input type="text" id="swAuthor" maxlength="30" placeholder="作者">
                 </label>
             </div>
+            <div class="dl-row">
+                <label class="dl-field">分区
+                    <select id="swCat">
+                        <option value="其他">其他</option>
+                        <option value="模组加载器">模组加载器</option>
+                        <option value="小助手">小助手</option>
+                        <option value="游戏本体">游戏本体</option>
+                        <option value="工具">工具</option>
+                        <option value="模组">模组</option>
+                        <option value="ROOT">ROOT</option>
+                    </select>
+                </label>
+            </div>
             <div id="swLinkFields">
                 <label class="dl-field">直链下载 <span class="dl-img-hint">本地文件名或完整链接，留空则只显示网盘</span>
                     <input type="text" id="swUrl" maxlength="500" placeholder="如 BENBAIJIELoaderV1.0.exe 或 https://...">
@@ -434,6 +493,6 @@
     </div>
 </div>
 
-<script src="script.js?v=20261104j"></script>
+<script src="script.js?v=20261105d"></script>
 </body>
 </html>
