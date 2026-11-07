@@ -32,7 +32,7 @@
     }
     </script>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css?v=20261107i">
+    <link rel="stylesheet" href="style.css?v=20261107j">
 </head>
 <body>
 <div class="app-container">
@@ -198,6 +198,7 @@
                     <button type="button" class="dl-tab active" id="dlTabSite" role="tab" aria-selected="true">网站资源</button>
                     <button type="button" class="dl-tab" id="dlTabMods" role="tab" aria-selected="false">长途旅行模组下载</button>
                     <button type="button" class="dl-tab" id="dlTabLoader" role="tab" aria-selected="false">模组加载器</button>
+                    <button type="button" class="dl-tab" id="dlTabShare" role="tab" aria-selected="false">玩家分享</button>
                 </div>
 
                 <div id="siteResView">
@@ -222,7 +223,6 @@
                 </div>
                 <div class="dl-login-hint" id="dlLoginHint">上传资源需要先登录，<button type="button" class="dl-login-link" id="dlLoginLink">点此登录 / 注册</button></div>
                 <div class="tld-chips dl-cat-chips" id="dlChips"></div>
-                <div class="tld-chips dl-sub-chips" id="dlSubChips" style="display:none;"></div>
                 <div class="download-grid" id="downloadGrid"></div>
                 <div class="dl-empty" id="dlEmpty" style="display:none;">
                     <div class="dl-empty-icon">⌕</div>
@@ -321,6 +321,28 @@
                     </div>
 
                     <pre class="loader-log" id="loaderLog">等待操作…</pre>
+                </div>
+
+                <div id="shareResView" style="display:none;">
+                    <div class="dl-toolbar">
+                        <div class="dl-search">
+                            <span class="dl-search-icon">⌕</span>
+                            <input type="search" id="shareSearchInput" placeholder="搜索玩家分享的模组、存档…" aria-label="搜索玩家分享" autocomplete="off">
+                            <button type="button" class="dl-search-clear" id="shareSearchClear" title="清空搜索" style="display:none;">✕</button>
+                        </div>
+                        <span class="dl-total" id="shareTotal">共 0 个分享</span>
+                        <button type="button" class="hero-search-btn dl-upload-btn" id="shareUploadBtn">＋ 上传模组 / 存档</button>
+                    </div>
+                    <div class="tld-chips" id="shareChips"></div>
+                    <div class="download-grid" id="shareGrid"></div>
+                    <div class="dl-empty" id="shareEmpty" style="display:none;">
+                        <div class="dl-empty-icon">⌕</div>
+                        <div class="dl-empty-title">还没有玩家分享</div>
+                        <div class="dl-empty-sub">登录后上传你的模组或存档，审核通过就会显示在这里</div>
+                    </div>
+                    <div class="tip-warning">
+                        提示：这里的内容由玩家上传，审核通过后公开；官方模组请到「长途旅行模组下载」标签查看。存档一般放在游戏存档目录，模组放入 Mods 文件夹并配合模组加载器使用。
+                    </div>
                 </div>
 
                 <div class="tip-warning" id="siteTip">
@@ -572,6 +594,6 @@
     <p lang="en">BENBAIJIE Resource Hub offers Long Drive mods, Long Drive Helper, TLDLoader and game mod downloads for players worldwide.</p>
 </footer>
 
-<script src="script.js?v=20261107i"></script>
+<script src="script.js?v=20261107j"></script>
 </body>
 </html>
