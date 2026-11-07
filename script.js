@@ -21,10 +21,14 @@
     // 后端图片加载失败时回退到 GitHub 静态图（捕获阶段委托，动态渲染的卡片也生效）
     document.addEventListener('error', function (e) {
         var t = e.target;
-        if (t && t.tagName === 'IMG' && t.getAttribute && t.getAttribute('data-fb')) {
+        if (!t || t.tagName !== 'IMG' || !t.getAttribute) return;
+        if (t.getAttribute('data-fb')) {
             var fb = t.getAttribute('data-fb');
             t.removeAttribute('data-fb');
             t.src = fb;
+        } else {
+            // 没有备用图时直接隐藏破图，避免 alt 文字撑坏卡片布局
+            t.style.display = 'none';
         }
     }, true);
 })();
@@ -1137,6 +1141,38 @@
         return isAdmin() || uploadOpen;
     }
 
+    function homeCompactHtml(s) {
+        var im = imgSrc(s);
+        var h = '<div class="software-card home-card-item" data-id="' + esc(s.id) + '" data-name="' + esc(s.name) + '">';
+        h += '<div class="software-img"' + (im ? ' data-img-src="' + esc(im.src) + '"' : '') + '>';
+        h += '<span class="hc-fallback">' + esc(String(s.name || '?').charAt(0)) + '</span>';
+        if (im) {
+            h += '<img src="' + esc(im.src) + '" alt="' + esc(s.name) + '"'
+               + (im.fb ? ' data-fb="' + esc(im.fb) + '"' : '') + '>';
+        }
+        h += '</div><div class="hc-body">';
+        h += '<div class="hc-name">' + esc(s.name) + '</div>';
+        h += '<div class="hc-desc">' + esc(s.desc) + '</div>';
+        h += '<div class="hc-meta">v' + esc(s.version || '-')
+           + ' · ' + esc(s.size || '-')
+           + ' · ' + esc(T('下载')) + ' ' + (downloads[s.name] || 0) + '</div>';
+        h += '</div>';
+        if (mirrors(s).length) {
+            h += '<button type="button" class="download-btn hc-dl" data-id="' + esc(s.id) + '">' + T('下载') + '</button>';
+        }
+        h += '</div>';
+        return h;
+    }
+
+    function hotRowHtml(s, index) {
+        return '<button type="button" class="hot-row" data-id="' + esc(s.id) + '">'
+             + '<span class="hot-rank">' + (index + 1) + '</span>'
+             + '<span class="hot-name">' + esc(s.name) + '</span>'
+             + '<span class="hot-meta">↓ ' + (downloads[s.name] || 0) + '</span>'
+             + '</button>';
+    }
+
+
     function syncAuthUI() {
         var logged = !!getToken();
         if (uploadAdminWrap) uploadAdminWrap.style.display = isAdmin() ? '' : 'none';
@@ -1187,6 +1223,8 @@
         });
     }
 
+    var hotOffset = 0;
+
     function render() {
         renderChips();
         var filtered = sorted(list.filter(matches));
@@ -1199,8 +1237,49 @@
             var featured = list.slice().sort(function(a, b) {
                 return String(b.date || '').localeCompare(String(a.date || ''));
             }).slice(0, 4);
-            homeFeatured.innerHTML = featured.map(function(s) { return cardHtml(s, false, !!hotIds[s.id]); }).join('');
+            homeFeatured.innerHTML = featured.map(function(s) { return homeCompactHtml(s); }).join('');
         }
+
+        var homeCats = document.getElementById('homeCatList');
+        var homeCatTotal = document.getElementById('homeCatTotal');
+        var homeHot = document.getElementById('homeHotList');
+        if (homeCats) {
+            var groups = [
+                { label: '模组加载器', q: '加载器' },
+                { label: '小助手', q: '小助手' },
+                { label: '游戏本体', q: '本体' },
+                { label: '实用工具', q: '工具' },
+                { label: '模组资源', q: '模组' },
+                { label: 'ROOT', q: 'ROOT' },
+                { label: '后室', q: '后室' },
+                { label: '森林之子', q: '森林' }
+            ];
+            homeCats.innerHTML = '<button type="button" class="portal-cat" data-q="">'
+                + '<span>' + T('全部') + '</span><b>' + list.length + '</b></button>'
+                + groups.map(function(g) {
+                    var kw = g.q.toLowerCase();
+                    var n = list.filter(function(s) {
+                        return String(s.name || '').toLowerCase().indexOf(kw) >= 0;
+                    }).length;
+                    return '<button type="button" class="portal-cat" data-q="' + esc(g.q) + '">'
+                         + '<span>' + esc(T(g.label)) + '</span><b>' + n + '</b></button>';
+                }).join('');
+        }
+        if (homeCatTotal) homeCatTotal.textContent = String(list.length);
+        if (homeHot) {
+            var hotSorted = list.slice().sort(function(a, b) {
+                return (heat(b) - heat(a)) || (num(b.views) - num(a.views));
+            });
+            var hotList = hotSorted;
+            if (hotOffset && hotSorted.length > 1) {
+                hotList = hotSorted.slice(hotOffset).concat(hotSorted.slice(0, hotOffset));
+            }
+            hotList = hotList.slice(0, 6);
+            homeHot.innerHTML = hotList.length
+                ? hotList.map(function(s, i) { return hotRowHtml(s, i); }).join('')
+                : '<div class="home-hot-empty">' + T('暂无资源') + '</div>';
+        }
+
         if (emptyBox) emptyBox.style.display = filtered.length ? 'none' : '';
         if (emptyReset) emptyReset.style.display = query ? '' : 'none';
         if (totalLabel) {
@@ -2072,12 +2151,42 @@
             goLibrary();
         });
     }
-    document.querySelectorAll('.hero-tag').forEach(function(tag) {
+    document.querySelectorAll('.hero-tag, .portal-icon').forEach(function(tag) {
         tag.addEventListener('click', function() {
             applyQuery(tag.getAttribute('data-q') || '');
             goLibrary();
         });
     });
+    var homeCatListEl = document.getElementById('homeCatList');
+    if (homeCatListEl) {
+        homeCatListEl.addEventListener('click', function(e) {
+            var btn = e.target.closest('.portal-cat');
+            if (!btn) return;
+            applyQuery(btn.getAttribute('data-q') || '');
+            goLibrary();
+        });
+    }
+    var homeHotListEl = document.getElementById('homeHotList');
+    if (homeHotListEl) {
+        homeHotListEl.addEventListener('click', function(e) {
+            var row = e.target.closest('.hot-row');
+            if (!row) return;
+            var id = row.getAttribute('data-id');
+            for (var i = 0; i < list.length; i++) {
+                if (String(list[i].id) === String(id)) {
+                    openSwDetail(list[i]);
+                    return;
+                }
+            }
+        });
+    }
+    var hotShuffleEl = document.getElementById('hotShuffle');
+    if (hotShuffleEl) {
+        hotShuffleEl.addEventListener('click', function() {
+            hotOffset = (hotOffset + 6) % Math.max(1, list.length);
+            render();
+        });
+    }
     if (viewAllBtn) {
         viewAllBtn.addEventListener('click', function() { applyQuery(''); goLibrary(); });
     }
