@@ -4509,3 +4509,44 @@ main.main-content {
 .dl-drop-input {
     display: none;
 }
+
+/* 长途旅行子类型 / 待审核徽标与审核按钮 */
+.dl-sub-badge {
+    position: absolute;
+    top: 10px;
+    left: 78px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #0b1220;
+    background: linear-gradient(135deg, #5eead4, #6ab8ff);
+    pointer-events: none;
+}
+.dl-pending-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1a1206;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.45);
+    pointer-events: none;
+}
+.dl-approve, .dl-reject {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+.dl-approve { background: rgba(94, 234, 212, 0.18); color: #5eead4; }
+.dl-reject { background: rgba(248, 113, 113, 0.16); color: #f87171; }
+.dl-approve:hover, .dl-reject:hover { transform: translateY(-1px); filter: brightness(1.15); }
+.dl-sub-chips { margin-top: 8px; }
+.tld-chip.sub { font-size: 12px; padding: 5px 12px; opacity: 0.9; }
