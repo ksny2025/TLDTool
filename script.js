@@ -1111,7 +1111,7 @@
            + ' | 日期 ' + esc(s.date || '-')
            + ' | 大小 ' + esc(s.size || '-')
            + ' | 作者 ' + esc(s.author || '-');
-        if (s.uploader) h += ' | 上传 ' + esc(s.uploader);
+        if (s.uploader && !s.uploader_admin) h += ' | 上传 ' + esc(s.uploader);
         h += '<span class="dl-count" data-soft="' + esc(s.name) + '">' + T(' · 下载 ')
            + (downloads[s.name] || 0) + T(' 次') + '</span></div>';
         h += '<div class="dl-mini-stats">'
@@ -1914,7 +1914,7 @@
         if (s.date) meta.push('<span>' + T('日期') + ' <b>' + esc(s.date) + '</b></span>');
         if (s.size) meta.push('<span>' + T('大小') + ' <b>' + esc(s.size) + '</b></span>');
         if (s.author) meta.push('<span>' + T('作者') + ' <b>' + esc(s.author) + '</b></span>');
-        if (s.uploader) meta.push('<span>' + T('上传') + ' <b>' + esc(s.uploader) + '</b></span>');
+        if (s.uploader && !s.uploader_admin) meta.push('<span>' + T('上传') + ' <b>' + esc(s.uploader) + '</b></span>');
         swDetail.querySelector('#swDetailMeta').innerHTML = meta.join('');
         updateDetailStats();
         swDetail.querySelector('#swDetailDesc').textContent = s.desc || T('（暂无简介）');
