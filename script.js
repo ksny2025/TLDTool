@@ -1160,7 +1160,8 @@
         h += '</div><div class="hc-body">';
         h += '<div class="hc-name">' + esc(s.name) + '</div>';
         h += '<div class="hc-desc">' + esc(s.desc) + '</div>';
-        h += '<div class="hc-meta">v' + esc(s.version || '-')
+        var hcVer = String(s.version || '-').replace(/^v\s*/i, '');
+        h += '<div class="hc-meta">v' + esc(hcVer)
            + ' · ' + esc(s.size || '-')
            + ' · ' + esc(T('下载')) + ' ' + (downloads[s.name] || 0) + '</div>';
         h += '</div>';
