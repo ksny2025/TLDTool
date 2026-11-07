@@ -2762,7 +2762,9 @@
 
     function plainDownload(m) {
         var a = document.createElement('a');
-        a.href = '/api/tldfile?u=' + encodeURIComponent(m.Link);
+        var fileUrl = '/api/tldfile?u=' + encodeURIComponent(m.Link);
+        // 线上必须走后端隧道的绝对地址，否则会打到 GitHub Pages 静态站（404，浏览器提示「无法下载 - 没有文件」）
+        a.href = window.__apiUrl ? window.__apiUrl(fileUrl) : fileUrl;
         a.download = m.FileName || 'mod.dll';
         document.body.appendChild(a);
         a.click();
