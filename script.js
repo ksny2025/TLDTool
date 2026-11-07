@@ -999,7 +999,7 @@
     var editingId = null;
     var pendingImage = null; // 'KEEP' 保持原图 | 'CLEAR' 移除 | 'DATA:...' 新图 | null 无操作
     var activeCat = '全部';
-    var CATS = ['模组加载器', '小助手', '游戏本体', '工具', '模组', 'ROOT', '其他'];
+    var CATS = ['工具', '游戏', 'apk', '文件', '软件'];
     var viewedIds = {};
 
     function num(v) { return typeof v === 'number' ? v : ((v && v.length) || 0); }
@@ -1244,25 +1244,12 @@
         var homeCatTotal = document.getElementById('homeCatTotal');
         var homeHot = document.getElementById('homeHotList');
         if (homeCats) {
-            var groups = [
-                { label: '模组加载器', q: '加载器' },
-                { label: '小助手', q: '小助手' },
-                { label: '游戏本体', q: '本体' },
-                { label: '实用工具', q: '工具' },
-                { label: '模组资源', q: '模组' },
-                { label: 'ROOT', q: 'ROOT' },
-                { label: '后室', q: '后室' },
-                { label: '森林之子', q: '森林' }
-            ];
-            homeCats.innerHTML = '<button type="button" class="portal-cat" data-q="">'
+            homeCats.innerHTML = '<button type="button" class="portal-cat" data-cat="">'
                 + '<span>' + T('全部') + '</span><b>' + list.length + '</b></button>'
-                + groups.map(function(g) {
-                    var kw = g.q.toLowerCase();
-                    var n = list.filter(function(s) {
-                        return String(s.name || '').toLowerCase().indexOf(kw) >= 0;
-                    }).length;
-                    return '<button type="button" class="portal-cat" data-q="' + esc(g.q) + '">'
-                         + '<span>' + esc(T(g.label)) + '</span><b>' + n + '</b></button>';
+                + CATS.map(function(c) {
+                    var n = list.filter(function(s) { return (s.category || '') === c; }).length;
+                    return '<button type="button" class="portal-cat" data-cat="' + esc(c) + '">'
+                         + '<span>' + esc(T(c)) + '</span><b>' + n + '</b></button>';
                 }).join('');
         }
         if (homeCatTotal) homeCatTotal.textContent = String(list.length);
@@ -1435,6 +1422,13 @@
         render();
     }
 
+    function applyCat(c) {
+        activeCat = CATS.indexOf(c) !== -1 ? c : '全部';
+        query = '';
+        if (searchInput) searchInput.value = '';
+        render();
+    }
+
     function goLibrary() {
         var nav = document.querySelector('.nav-item[data-page="download"]');
         if (nav) nav.click();
@@ -1551,7 +1545,7 @@
             modalTitle.textContent = T('编辑资源');
             saveBtn.textContent = T('保存修改');
             var catEl = document.getElementById('swCat');
-            if (catEl) catEl.value = CATS.indexOf(item.category) !== -1 ? item.category : '其他';
+            if (catEl) catEl.value = CATS.indexOf(item.category) !== -1 ? item.category : CATS[0];
             if (item.image) {
                 pendingImage = 'KEEP';
                 var im = imgSrc(item);
@@ -2140,7 +2134,7 @@
         if (!heroInput) return;
         heroInput.placeholder = T(mobileQuery.matches
             ? '搜索资源名称或作者…'
-            : '搜索资源：模组加载器、小助手、工具…');
+            : '搜索资源：工具、游戏、apk、软件…');
     }
     syncHeroPlaceholder();
     if (mobileQuery.addEventListener) mobileQuery.addEventListener('change', syncHeroPlaceholder);
@@ -2153,7 +2147,9 @@
     }
     document.querySelectorAll('.hero-tag, .portal-icon').forEach(function(tag) {
         tag.addEventListener('click', function() {
-            applyQuery(tag.getAttribute('data-q') || '');
+            var c = tag.getAttribute('data-cat');
+            if (c !== null && c !== '') { applyCat(c); }
+            else { applyQuery(tag.getAttribute('data-q') || ''); }
             goLibrary();
         });
     });
@@ -2162,7 +2158,7 @@
         homeCatListEl.addEventListener('click', function(e) {
             var btn = e.target.closest('.portal-cat');
             if (!btn) return;
-            applyQuery(btn.getAttribute('data-q') || '');
+            applyCat(btn.getAttribute('data-cat') || '');
             goLibrary();
         });
     }
@@ -3281,6 +3277,7 @@
         '＋ 上传资源': '+ Upload', '＋ 上传资源（需登录）': '+ Upload (login required)',
         '上传资源': 'Upload Resource', '编辑资源': 'Edit Resource', '保存修改': 'Save Changes',
         '模组加载器': 'Mod Loaders', '小助手': 'Helpers', '游戏本体': 'Game Files', '工具': 'Tools',
+        '游戏': 'Games', 'apk': 'APK', '文件': 'Files', '软件': 'Software',
         '直链下载': 'Direct Download', '速度快，推荐': 'Fast, recommended',
         '小飞机网盘': 'Feijipan', '不限速，无需登录': 'No speed limit, no login',
         '夸克网盘': 'Quark Drive', '123 网盘': '123 Drive', '百度网盘': 'Baidu Drive',
@@ -3363,7 +3360,7 @@
         '资源下载站': 'Download Center',
         'BENBAIJIE · 官方资源站': 'BENBAIJIE · Official Site',
         '长途旅行 · 模组加载器 · 实用工具，所有资源一站直达': 'The Long Drive · Mod Loader · Utilities, all in one place',
-        '搜索资源：模组加载器、小助手、工具…': 'Search: mod loader, helper, tools…',
+        '搜索资源：工具、游戏、apk、软件…': 'Search: tools, games, APK, software…',
         '搜索资源名称或作者…': 'Search resource name or author…',
         '搜索资源名称、简介、作者…': 'Search name, description, author…',
         '搜索模组名称、简介、作者…': 'Search mod name, description, author…',
