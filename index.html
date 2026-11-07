@@ -32,7 +32,7 @@
     }
     </script>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css?v=20261107h">
+    <link rel="stylesheet" href="style.css?v=20261107i">
 </head>
 <body>
 <div class="app-container">
@@ -222,6 +222,7 @@
                 </div>
                 <div class="dl-login-hint" id="dlLoginHint">上传资源需要先登录，<button type="button" class="dl-login-link" id="dlLoginLink">点此登录 / 注册</button></div>
                 <div class="tld-chips dl-cat-chips" id="dlChips"></div>
+                <div class="tld-chips dl-sub-chips" id="dlSubChips" style="display:none;"></div>
                 <div class="download-grid" id="downloadGrid"></div>
                 <div class="dl-empty" id="dlEmpty" style="display:none;">
                     <div class="dl-empty-icon">⌕</div>
@@ -523,6 +524,13 @@
                         <option value="apk">apk</option>
                         <option value="文件">文件</option>
                         <option value="软件">软件</option>
+                        <option value="长途旅行">长途旅行</option>
+                    </select>
+                </label>
+                <label class="dl-field" id="swSubField" style="display:none;">类型
+                    <select id="swSub">
+                        <option value="模组">模组</option>
+                        <option value="存档">存档</option>
                     </select>
                 </label>
             </div>
@@ -564,6 +572,6 @@
     <p lang="en">BENBAIJIE Resource Hub offers Long Drive mods, Long Drive Helper, TLDLoader and game mod downloads for players worldwide.</p>
 </footer>
 
-<script src="script.js?v=20261107h"></script>
+<script src="script.js?v=20261107i"></script>
 </body>
 </html>
