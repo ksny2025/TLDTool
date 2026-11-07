@@ -1528,9 +1528,15 @@
             if (el) el.value = '';
         });
         var catReset = document.getElementById('swCat');
-        if (catReset) catReset.value = '其他';
+        if (catReset) catReset.value = CATS[0];
         var swFileEl = document.getElementById('swFile');
         if (swFileEl) swFileEl.value = '';
+        pendingDropFile = null;
+        var swDropReset = document.getElementById('swDrop');
+        if (swDropReset) {
+            swDropReset.classList.remove('has-file');
+            document.getElementById('swDropText').textContent = T('点击选择文件，或直接把文件拖到这里');
+        }
     }
 
     function openModal(item) {
@@ -1559,7 +1565,7 @@
         var linkFields = document.getElementById('swLinkFields');
         var fileField = document.getElementById('swFileField');
         if (linkFields) linkFields.style.display = isAdmin() ? '' : 'none';
-        if (fileField) fileField.style.display = isAdmin() ? 'none' : '';
+        if (fileField) fileField.style.display = '';
         modal.style.display = 'flex';
     }
 
@@ -1621,6 +1627,72 @@
         imgThumb.removeAttribute('src');
     });
 
+    // ---- 文件拖拽：拖进来 = 选择文件 ----
+    var swFileInput = document.getElementById('swFile');
+    var swDrop = document.getElementById('swDrop');
+    var swDropText = document.getElementById('swDropText');
+    var pendingDropFile = null;
+
+    function fmtFileSize(b) {
+        var mb = b / 1048576;
+        return mb >= 1 ? mb.toFixed(2) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+    }
+
+    function setSwFile(f) {
+        if (!f || !swFileInput) return;
+        try {
+            var dt = new DataTransfer();
+            dt.items.add(f);
+            swFileInput.files = dt.files;
+            pendingDropFile = null;
+        } catch (e) { pendingDropFile = f; }
+        swDropText.textContent = f.name + '（' + fmtFileSize(f.size) + '）';
+        swDrop.classList.add('has-file');
+        var nameEl = document.getElementById('swName');
+        if (nameEl && !nameEl.value.trim()) nameEl.value = f.name.replace(/\.[^.]+$/, '');
+        var sizeEl = document.getElementById('swSize');
+        if (sizeEl && !sizeEl.value.trim()) sizeEl.value = fmtFileSize(f.size);
+    }
+
+    if (swFileInput && swDrop) {
+        swFileInput.addEventListener('change', function() {
+            if (swFileInput.files && swFileInput.files[0]) setSwFile(swFileInput.files[0]);
+        });
+        ['dragenter', 'dragover'].forEach(function(ev) {
+            swDrop.addEventListener(ev, function(e) { e.preventDefault(); swDrop.classList.add('dragover'); });
+        });
+        ['dragleave', 'drop'].forEach(function(ev) {
+            swDrop.addEventListener(ev, function(e) { e.preventDefault(); swDrop.classList.remove('dragover'); });
+        });
+        swDrop.addEventListener('drop', function(e) {
+            var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if (f) setSwFile(f);
+        });
+        // 拖到弹窗任意位置也算
+        var dlModalBox = document.querySelector('#dlModal .dl-modal');
+        if (dlModalBox) {
+            dlModalBox.addEventListener('dragover', function(e) { e.preventDefault(); });
+            dlModalBox.addEventListener('drop', function(e) {
+                e.preventDefault();
+                var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                if (f) setSwFile(f);
+            });
+        }
+    }
+
+    // 把文件拖到页面任意处：直接打开上传弹窗并选中该文件（同时防止浏览器把文件打开）
+    document.addEventListener('dragover', function(e) { e.preventDefault(); });
+    document.addEventListener('drop', function(e) {
+        e.preventDefault();
+        if (modal.style.display === 'flex') return; // 弹窗开着，交给弹窗自己的处理
+        var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (!f) return;
+        if (!uploadAllowed()) { toast(T('上传功能已关闭，请联系管理员开启')); return; }
+        if (!getToken()) { toast(T('请先登录后再上传资源')); goLogin(); return; }
+        openModal(null);
+        setSwFile(f);
+    });
+
     function toast(msg) {
         var el = document.createElement('div');
         el.className = 'site-toast';
@@ -1660,7 +1732,7 @@
             quark: '',
             pan123: '',
             baidu: '',
-            category: (document.getElementById('swCat') || {}).value || '其他',
+            category: (document.getElementById('swCat') || {}).value || CATS[0],
             image: image
         };
         if (isAdmin()) {
@@ -1669,12 +1741,19 @@
             payload.quark = document.getElementById('swQuark').value;
             payload.pan123 = document.getElementById('swPan123').value;
             payload.baidu = document.getElementById('swBaidu').value;
+            var aFile = document.getElementById('swFile').files[0] || pendingDropFile || null;
+            if (aFile) { uploadAndSubmit(aFile, payload); return; }
             submitResource(payload);
             return;
         }
-        var file = document.getElementById('swFile').files[0] || null;
+        var file = document.getElementById('swFile').files[0] || pendingDropFile || null;
         if (!file && !editingId) { saveBtn.disabled = false; swError.textContent = '请选择要上传的文件'; return; }
         if (!file) { submitResource(payload); return; }
+        uploadAndSubmit(file, payload);
+    });
+
+    // 先把文件传到 /api/upload_file，拿到本站直链后再提交资源
+    function uploadAndSubmit(file, payload) {
         saveBtn.textContent = T('上传中…');
         fetch('/api/upload_file', {
             method: 'POST',
@@ -1700,7 +1779,7 @@
             saveBtn.textContent = T(editingId ? '保存修改' : '上传资源');
             swError.textContent = err.message || '文件上传失败';
         });
-    });
+    }
 
     function submitResource(payload) {
         apiPost('/api/software_save', payload).then(function(res) {
@@ -3276,6 +3355,8 @@
         '浏览全部资源 →': 'Browse all →', '资源总数': 'Resources',
         '＋ 上传资源': '+ Upload', '＋ 上传资源（需登录）': '+ Upload (login required)',
         '上传资源': 'Upload Resource', '编辑资源': 'Edit Resource', '保存修改': 'Save Changes',
+        '点击选择文件，或直接把文件拖到这里': 'Click to choose a file, or drag it here',
+        '请先登录后再上传资源': 'Please log in before uploading',
         '模组加载器': 'Mod Loaders', '小助手': 'Helpers', '游戏本体': 'Game Files', '工具': 'Tools',
         '游戏': 'Games', 'apk': 'APK', '文件': 'Files', '软件': 'Software',
         '直链下载': 'Direct Download', '速度快，推荐': 'Fast, recommended',
