@@ -999,8 +999,7 @@
     var editingId = null;
     var pendingImage = null; // 'KEEP' 保持原图 | 'CLEAR' 移除 | 'DATA:...' 新图 | null 无操作
     var activeCat = '全部';
-    var activeSub = '全部';
-    var CATS = ['工具', '游戏', 'apk', '文件', '软件', '长途旅行'];
+    var CATS = ['工具', '游戏', 'apk', '文件', '软件'];
     var TLD_SUBS = ['模组', '存档'];
     var viewedIds = {};
 
@@ -1065,7 +1064,6 @@
     // ---- 搜索 / 排序 ----
     function matches(s) {
         if (activeCat !== '全部' && (s.category || '其他') !== activeCat) return false;
-        if (activeCat === '长途旅行' && activeSub !== '全部' && (s.sub || '') !== activeSub) return false;
         if (!query) return true;
         var hay = [s.name, s.desc, s.author, s.version, s.uploader].join(' ').toLowerCase();
         return query.toLowerCase().split(/\s+/).filter(Boolean).every(function(term) {
@@ -1207,41 +1205,26 @@
     }
 
     var chipsBox = document.getElementById('dlChips');
-    var subChipsBox = document.getElementById('dlSubChips');
+
+    // 网站资源榜单排除「长途旅行」（那部分归到「玩家分享」标签）
+    function siteItems() {
+        return list.filter(function(s) { return (s.category || '') !== '长途旅行'; });
+    }
 
     function renderChips() {
         if (!chipsBox) return;
+        var items = siteItems();
         var counts = {};
-        list.forEach(function(s) {
+        items.forEach(function(s) {
             var c = s.category || '其他';
             counts[c] = (counts[c] || 0) + 1;
         });
         var cats = ['全部'].concat(CATS);
         chipsBox.innerHTML = cats.map(function(c) {
-            var n = (c === '全部') ? list.length : (counts[c] || 0);
+            var n = (c === '全部') ? items.length : (counts[c] || 0);
             return '<button type="button" class="tld-chip' + (activeCat === c ? ' active' : '')
                  + '" data-cat="' + esc(c) + '">' + esc(T(c)) + ' <span>' + n + '</span></button>';
         }).join('');
-        // 长途旅行的子分类（模组/存档）
-        if (subChipsBox) {
-            if (activeCat === '长途旅行') {
-                var subCounts = {};
-                list.forEach(function(s) {
-                    if ((s.category || '') !== '长途旅行') return;
-                    var sb = s.sub || '';
-                    subCounts[sb] = (subCounts[sb] || 0) + 1;
-                });
-                var total = counts['长途旅行'] || 0;
-                subChipsBox.innerHTML = ['全部'].concat(TLD_SUBS).map(function(sb) {
-                    var n = (sb === '全部') ? total : (subCounts[sb] || 0);
-                    return '<button type="button" class="tld-chip sub' + (activeSub === sb ? ' active' : '')
-                         + '" data-sub="' + esc(sb) + '">' + esc(T(sb)) + ' <span>' + n + '</span></button>';
-                }).join('');
-                subChipsBox.style.display = '';
-            } else {
-                subChipsBox.style.display = 'none';
-            }
-        }
     }
 
     if (chipsBox) {
@@ -1249,16 +1232,70 @@
             var chip = e.target.closest('.tld-chip');
             if (!chip) return;
             activeCat = chip.getAttribute('data-cat') || '全部';
-            activeSub = '全部';
             render();
         });
     }
-    if (subChipsBox) {
-        subChipsBox.addEventListener('click', function(e) {
+
+    // ---- 玩家分享（长途旅行 · 模组 / 存档）----
+    var shareGrid = document.getElementById('shareGrid');
+    var shareChips = document.getElementById('shareChips');
+    var shareEmpty = document.getElementById('shareEmpty');
+    var shareTotal = document.getElementById('shareTotal');
+    var shareSearchInput = document.getElementById('shareSearchInput');
+    var shareSearchClear = document.getElementById('shareSearchClear');
+    var shareQuery = '';
+    var shareSub = '全部';
+
+    function shareItems() {
+        return list.filter(function(s) { return (s.category || '') === '长途旅行'; });
+    }
+
+    function renderShare() {
+        if (!shareGrid) return;
+        var items = shareItems();
+        var counts = { '模组': 0, '存档': 0 };
+        items.forEach(function(s) { if (s.sub && counts[s.sub] !== undefined) counts[s.sub]++; });
+        if (shareChips) {
+            shareChips.innerHTML = ['全部'].concat(TLD_SUBS).map(function(sb) {
+                var n = (sb === '全部') ? items.length : (counts[sb] || 0);
+                return '<button type="button" class="tld-chip' + (shareSub === sb ? ' active' : '')
+                     + '" data-sub="' + esc(sb) + '">' + esc(T(sb)) + ' <span>' + n + '</span></button>';
+            }).join('');
+        }
+        var q = shareQuery.toLowerCase();
+        var out = items.filter(function(s) {
+            if (shareSub !== '全部' && (s.sub || '') !== shareSub) return false;
+            if (!q) return true;
+            return [s.name, s.desc, s.author, s.uploader].join(' ').toLowerCase().indexOf(q) !== -1;
+        }).sort(function(a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
+        shareGrid.innerHTML = out.map(function(s) { return cardHtml(s, true, false); }).join('');
+        if (shareEmpty) shareEmpty.style.display = out.length ? 'none' : '';
+        if (shareTotal) shareTotal.textContent = T('共 ') + items.length + T(' 个分享');
+        if (window.__bindCardFx) window.__bindCardFx(shareGrid);
+        if (window.__applyLangText) window.__applyLangText(shareGrid);
+    }
+
+    if (shareChips) {
+        shareChips.addEventListener('click', function(e) {
             var chip = e.target.closest('.tld-chip');
             if (!chip) return;
-            activeSub = chip.getAttribute('data-sub') || '全部';
-            render();
+            shareSub = chip.getAttribute('data-sub') || '全部';
+            renderShare();
+        });
+    }
+    if (shareSearchInput) {
+        shareSearchInput.addEventListener('input', function() {
+            shareQuery = shareSearchInput.value.trim();
+            if (shareSearchClear) shareSearchClear.style.display = shareQuery ? 'block' : 'none';
+            renderShare();
+        });
+    }
+    if (shareSearchClear) {
+        shareSearchClear.addEventListener('click', function() {
+            shareSearchInput.value = '';
+            shareQuery = '';
+            shareSearchClear.style.display = 'none';
+            renderShare();
         });
     }
 
@@ -1266,14 +1303,15 @@
 
     function render() {
         renderChips();
-        var filtered = sorted(list.filter(matches));
+        var siteList = siteItems();
+        var filtered = sorted(siteList.filter(matches));
         var hotIds = {};
-        list.slice().sort(function(a, b) { return heat(b) - heat(a); })
+        siteList.slice().sort(function(a, b) { return heat(b) - heat(a); })
             .filter(function(s) { return heat(s) > 0; }).slice(0, 3)
             .forEach(function(s) { hotIds[s.id] = 1; });
         grid.innerHTML = filtered.map(function(s) { return cardHtml(s, true, !!hotIds[s.id]); }).join('');
         if (homeFeatured) {
-            var featured = list.slice().sort(function(a, b) {
+            var featured = siteList.slice().sort(function(a, b) {
                 return String(b.date || '').localeCompare(String(a.date || ''));
             }).slice(0, 4);
             homeFeatured.innerHTML = featured.map(function(s) { return homeCompactHtml(s); }).join('');
@@ -1284,16 +1322,16 @@
         var homeHot = document.getElementById('homeHotList');
         if (homeCats) {
             homeCats.innerHTML = '<button type="button" class="portal-cat" data-cat="">'
-                + '<span>' + T('全部') + '</span><b>' + list.length + '</b></button>'
+                + '<span>' + T('全部') + '</span><b>' + siteList.length + '</b></button>'
                 + CATS.map(function(c) {
                     var n = list.filter(function(s) { return (s.category || '') === c; }).length;
                     return '<button type="button" class="portal-cat" data-cat="' + esc(c) + '">'
                          + '<span>' + esc(T(c)) + '</span><b>' + n + '</b></button>';
                 }).join('');
         }
-        if (homeCatTotal) homeCatTotal.textContent = String(list.length);
+        if (homeCatTotal) homeCatTotal.textContent = String(siteList.length);
         if (homeHot) {
-            var hotSorted = list.slice().sort(function(a, b) {
+            var hotSorted = siteList.slice().sort(function(a, b) {
                 return (heat(b) - heat(a)) || (num(b.views) - num(a.views));
             });
             var hotList = hotSorted;
@@ -1310,11 +1348,12 @@
         if (emptyReset) emptyReset.style.display = query ? '' : 'none';
         if (totalLabel) {
             totalLabel.textContent = query
-                ? T('找到 ') + filtered.length + T(' 个（共 ') + list.length + T(' 个资源）')
-                : T('共 ') + list.length + T(' 个资源');
+                ? T('找到 ') + filtered.length + T(' 个（共 ') + siteList.length + T(' 个资源）')
+                : T('共 ') + siteList.length + T(' 个资源');
         }
-        if (statResources) statResources.textContent = String(list.length);
+        if (statResources) statResources.textContent = String(siteList.length);
         if (searchClear) searchClear.style.display = query ? '' : 'none';
+        renderShare();
         syncAuthUI();
         if (window.__bindCardFx) { window.__bindCardFx(grid); if (homeFeatured) window.__bindCardFx(homeFeatured); }
         if (window.__applyLangText) { window.__applyLangText(grid); if (homeFeatured) window.__applyLangText(homeFeatured); }
@@ -1620,6 +1659,19 @@
         if (!uploadAllowed()) { toast(T('上传功能已关闭，请联系管理员开启')); return; }
         if (!getToken()) { goLogin(); return; }
         openModal(null);
+    });
+
+    // 玩家分享：上传模组 / 存档（默认选中「长途旅行」分区）
+    var shareUploadBtn = document.getElementById('shareUploadBtn');
+    if (shareUploadBtn) shareUploadBtn.addEventListener('click', function() {
+        if (!uploadAllowed()) { toast(T('上传功能已关闭，请联系管理员开启')); return; }
+        if (!getToken()) { goLogin(); return; }
+        openModal(null);
+        var catEl = document.getElementById('swCat');
+        if (catEl) {
+            catEl.value = '长途旅行';
+            syncSwSubField();
+        }
     });
 
     if (uploadToggle) uploadToggle.addEventListener('change', function() {
@@ -2134,6 +2186,7 @@
         openSwDetail(item);
     }
     grid.addEventListener('click', handleAreaClick);
+    if (shareGrid) shareGrid.addEventListener('click', handleAreaClick);
     if (homeFeatured) homeFeatured.addEventListener('click', handleAreaClick);
     if (profileGrid) profileGrid.addEventListener('click', handleAreaClick);
 
@@ -2396,9 +2449,11 @@
     var tabSite = document.getElementById('dlTabSite');
     var tabMods = document.getElementById('dlTabMods');
     var tabLoader = document.getElementById('dlTabLoader');
+    var tabShare = document.getElementById('dlTabShare');
     var viewSite = document.getElementById('siteResView');
     var viewMods = document.getElementById('tldModsView');
     var viewLoader = document.getElementById('tldLoaderView');
+    var viewShare = document.getElementById('shareResView');
     var siteTip = document.getElementById('siteTip');
     var grid = document.getElementById('tldGrid');
     var chips = document.getElementById('tldChips');
@@ -2828,24 +2883,30 @@
 
     // ---- Tab 切换 ----
     function switchTab(which) {
+        var toSite = which === 'site';
         var toMods = which === 'mods';
         var toLoader = which === 'loader';
-        tabSite.classList.toggle('active', !toMods && !toLoader);
+        var toShare = which === 'share';
+        tabSite.classList.toggle('active', toSite);
         tabMods.classList.toggle('active', toMods);
         tabLoader.classList.toggle('active', toLoader);
-        tabSite.setAttribute('aria-selected', String(!toMods && !toLoader));
+        if (tabShare) tabShare.classList.toggle('active', toShare);
+        tabSite.setAttribute('aria-selected', String(toSite));
         tabMods.setAttribute('aria-selected', String(toMods));
         tabLoader.setAttribute('aria-selected', String(toLoader));
-        viewSite.style.display = (!toMods && !toLoader) ? '' : 'none';
-        siteTip.style.display = (!toMods && !toLoader) ? '' : 'none';
+        if (tabShare) tabShare.setAttribute('aria-selected', String(toShare));
+        viewSite.style.display = toSite ? '' : 'none';
+        siteTip.style.display = toSite ? '' : 'none';
         viewMods.style.display = toMods ? '' : 'none';
         viewLoader.style.display = toLoader ? '' : 'none';
+        if (viewShare) viewShare.style.display = toShare ? '' : 'none';
         if (toMods && !loaded) loadMods();
         if (toLoader && window.__loaderInit) window.__loaderInit();
     }
     tabSite.addEventListener('click', function() { switchTab('site'); });
     tabMods.addEventListener('click', function() { switchTab('mods'); });
     if (tabLoader) tabLoader.addEventListener('click', function() { switchTab('loader'); });
+    if (tabShare) tabShare.addEventListener('click', function() { switchTab('share'); });
 
     // ---- 搜索 ----
     var searchTimer = null;
@@ -3426,6 +3487,8 @@
         '模组加载器': 'Mod Loaders', '小助手': 'Helpers', '游戏本体': 'Game Files', '工具': 'Tools',
         '游戏': 'Games', 'apk': 'APK', '文件': 'Files', '软件': 'Software',
         '长途旅行': 'The Long Drive', '模组': 'Mod', '存档': 'Save', '类型': 'Type',
+        '玩家分享': 'Player Shares', '还没有玩家分享': 'No player shares yet',
+        ' 个分享': ' shares',
         '待审核': 'Pending', '通过': 'Approve', '拒绝': 'Reject',
         '已提交，审核通过后显示': 'Submitted, visible after approval',
         '已通过审核': 'Approved', '已拒绝并删除': 'Rejected and deleted',
