@@ -32,7 +32,7 @@
     }
     </script>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css?v=20261107f">
+    <link rel="stylesheet" href="style.css?v=20261107g">
 </head>
 <body>
 <div class="app-container">
@@ -536,8 +536,12 @@
                     <input type="text" id="swBaidu" maxlength="500" placeholder="https://pan.baidu.com/s/...">
                 </label>
             </div>
-            <label class="dl-field" id="swFileField">上传文件
-                <input type="file" id="swFile">
+            <label class="dl-field" id="swFileField">上传文件 <span class="dl-img-hint">最大 200MB</span>
+                <div class="dl-drop" id="swDrop">
+                    <span class="dl-drop-icon">⤒</span>
+                    <span class="dl-drop-text" id="swDropText">点击选择文件，或直接把文件拖到这里</span>
+                </div>
+                <input type="file" id="swFile" class="dl-drop-input">
             </label>
             <label class="dl-field">封面图片 <span class="dl-img-hint">png/jpg/gif/webp，最大10MB，可留空</span>
                 <input type="file" id="swImage" accept="image/png,image/jpeg,image/gif,image/webp">
@@ -560,6 +564,6 @@
     <p lang="en">BENBAIJIE Resource Hub offers Long Drive mods, Long Drive Helper, TLDLoader and game mod downloads for players worldwide.</p>
 </footer>
 
-<script src="script.js?v=20261107f"></script>
+<script src="script.js?v=20261107g"></script>
 </body>
 </html>
