@@ -999,7 +999,9 @@
     var editingId = null;
     var pendingImage = null; // 'KEEP' 保持原图 | 'CLEAR' 移除 | 'DATA:...' 新图 | null 无操作
     var activeCat = '全部';
-    var CATS = ['工具', '游戏', 'apk', '文件', '软件'];
+    var activeSub = '全部';
+    var CATS = ['工具', '游戏', 'apk', '文件', '软件', '长途旅行'];
+    var TLD_SUBS = ['模组', '存档'];
     var viewedIds = {};
 
     function num(v) { return typeof v === 'number' ? v : ((v && v.length) || 0); }
@@ -1063,6 +1065,7 @@
     // ---- 搜索 / 排序 ----
     function matches(s) {
         if (activeCat !== '全部' && (s.category || '其他') !== activeCat) return false;
+        if (activeCat === '长途旅行' && activeSub !== '全部' && (s.sub || '') !== activeSub) return false;
         if (!query) return true;
         var hay = [s.name, s.desc, s.author, s.version, s.uploader].join(' ').toLowerCase();
         return query.toLowerCase().split(/\s+/).filter(Boolean).every(function(term) {
@@ -1103,6 +1106,8 @@
                + (im.fb ? ' data-fb="' + esc(im.fb) + '"' : '') + '>';
         }
         h += '<span class="dl-cat-badge">' + esc(T(s.category || '其他')) + '</span>';
+        if (s.category === '长途旅行' && s.sub) h += '<span class="dl-sub-badge">' + esc(T(s.sub)) + '</span>';
+        if (s.status === 'pending') h += '<span class="dl-pending-badge">' + T('待审核') + '</span>';
         if (isHot) h += '<span class="dl-hot-badge">' + T('热门') + '</span>';
         h += '</div><div class="software-info">';
         h += '<div class="software-name">' + esc(s.name) + '</div>';
@@ -1124,8 +1129,12 @@
             h += '<button type="button" class="download-btn" data-id="' + esc(s.id) + '">' + T('下载') + '</button>';
         }
         if (withTools && canManage(s)) {
-            h += '<div class="dl-tools">'
-               + '<button type="button" class="f-btn dl-edit">' + T('编辑') + '</button>'
+            h += '<div class="dl-tools">';
+            if (isAdmin() && s.status === 'pending') {
+                h += '<button type="button" class="f-btn dl-approve">' + T('通过') + '</button>'
+                   + '<button type="button" class="f-btn dl-reject">' + T('拒绝') + '</button>';
+            }
+            h += '<button type="button" class="f-btn dl-edit">' + T('编辑') + '</button>'
                + '<button type="button" class="f-btn dl-del">' + T('删除') + '</button>';
             if (isAdmin()) {
                 h += '<button type="button" class="f-btn dl-up" title="上移">↑</button>'
@@ -1198,6 +1207,7 @@
     }
 
     var chipsBox = document.getElementById('dlChips');
+    var subChipsBox = document.getElementById('dlSubChips');
 
     function renderChips() {
         if (!chipsBox) return;
@@ -1212,6 +1222,26 @@
             return '<button type="button" class="tld-chip' + (activeCat === c ? ' active' : '')
                  + '" data-cat="' + esc(c) + '">' + esc(T(c)) + ' <span>' + n + '</span></button>';
         }).join('');
+        // 长途旅行的子分类（模组/存档）
+        if (subChipsBox) {
+            if (activeCat === '长途旅行') {
+                var subCounts = {};
+                list.forEach(function(s) {
+                    if ((s.category || '') !== '长途旅行') return;
+                    var sb = s.sub || '';
+                    subCounts[sb] = (subCounts[sb] || 0) + 1;
+                });
+                var total = counts['长途旅行'] || 0;
+                subChipsBox.innerHTML = ['全部'].concat(TLD_SUBS).map(function(sb) {
+                    var n = (sb === '全部') ? total : (subCounts[sb] || 0);
+                    return '<button type="button" class="tld-chip sub' + (activeSub === sb ? ' active' : '')
+                         + '" data-sub="' + esc(sb) + '">' + esc(T(sb)) + ' <span>' + n + '</span></button>';
+                }).join('');
+                subChipsBox.style.display = '';
+            } else {
+                subChipsBox.style.display = 'none';
+            }
+        }
     }
 
     if (chipsBox) {
@@ -1219,6 +1249,15 @@
             var chip = e.target.closest('.tld-chip');
             if (!chip) return;
             activeCat = chip.getAttribute('data-cat') || '全部';
+            activeSub = '全部';
+            render();
+        });
+    }
+    if (subChipsBox) {
+        subChipsBox.addEventListener('click', function(e) {
+            var chip = e.target.closest('.tld-chip');
+            if (!chip) return;
+            activeSub = chip.getAttribute('data-sub') || '全部';
             render();
         });
     }
@@ -1529,6 +1568,9 @@
         });
         var catReset = document.getElementById('swCat');
         if (catReset) catReset.value = CATS[0];
+        var subReset = document.getElementById('swSub');
+        if (subReset) subReset.value = TLD_SUBS[0];
+        syncSwSubField();
         var swFileEl = document.getElementById('swFile');
         if (swFileEl) swFileEl.value = '';
         pendingDropFile = null;
@@ -1552,6 +1594,9 @@
             saveBtn.textContent = T('保存修改');
             var catEl = document.getElementById('swCat');
             if (catEl) catEl.value = CATS.indexOf(item.category) !== -1 ? item.category : CATS[0];
+            var subEl = document.getElementById('swSub');
+            if (subEl) subEl.value = TLD_SUBS.indexOf(item.sub) !== -1 ? item.sub : TLD_SUBS[0];
+            syncSwSubField();
             if (item.image) {
                 pendingImage = 'KEEP';
                 var im = imgSrc(item);
@@ -1579,7 +1624,7 @@
 
     if (uploadToggle) uploadToggle.addEventListener('change', function() {
         var want = !!uploadToggle.checked;
-        apiPost('/api/admin/settings', { upload_open: want }).then(function(res) {
+        apiPost('/api/admin/settings', { token: getToken(), upload_open: want }).then(function(res) {
             if (res && res.ok) {
                 uploadOpen = !!res.upload_open;
                 toast(uploadOpen ? T('已开启用户上传资源') : T('已关闭用户上传资源'));
@@ -1594,6 +1639,13 @@
         });
     });
     if (loginLink) loginLink.addEventListener('click', goLogin);
+    // 分区为「长途旅行」时显示 模组/存档 子类型
+    var swCatEl = document.getElementById('swCat');
+    function syncSwSubField() {
+        var f = document.getElementById('swSubField');
+        if (f) f.style.display = (swCatEl && swCatEl.value === '长途旅行') ? '' : 'none';
+    }
+    if (swCatEl) swCatEl.addEventListener('change', syncSwSubField);
     document.getElementById('swCancelBtn').addEventListener('click', closeModal);
     modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
 
@@ -1733,6 +1785,7 @@
             pan123: '',
             baidu: '',
             category: (document.getElementById('swCat') || {}).value || CATS[0],
+            sub: ((document.getElementById('swCat') || {}).value === '长途旅行') ? ((document.getElementById('swSub') || {}).value || TLD_SUBS[0]) : '',
             image: image
         };
         if (isAdmin()) {
@@ -1788,7 +1841,8 @@
             if (res.ok) {
                 var wasEdit = !!editingId;
                 closeModal();
-                toast(wasEdit ? '资源已更新' : '上传成功，感谢分享！');
+                if (res.status === 'pending') toast('已提交，审核通过后显示');
+                else toast(wasEdit ? '资源已更新' : '上传成功，感谢分享！');
                 load();
             } else {
                 if (res.error && res.error.indexOf('登录') !== -1) {
@@ -2051,6 +2105,18 @@
             apiPost('/api/software_delete', { token: getToken(), id: id }).then(function(res) {
                 if (res.ok) { toast('已删除'); load(); }
                 else toast(res.error || '删除失败');
+            }).catch(function() {});
+            return;
+        }
+        var approveBtn = e.target.closest('.dl-approve');
+        var rejectBtn = e.target.closest('.dl-reject');
+        if (approveBtn || rejectBtn) {
+            if (!isAdmin()) return;
+            var act = rejectBtn ? 'reject' : 'approve';
+            if (rejectBtn && !confirm('拒绝将删除「' + (item.name || '') + '」及其文件，确定？')) return;
+            apiPost('/api/software_approve', { token: getToken(), id: id, action: act }).then(function(res) {
+                if (res.ok) { toast(act === 'approve' ? '已通过审核' : '已拒绝并删除'); load(); }
+                else toast(res.error || '操作失败');
             }).catch(function() {});
             return;
         }
@@ -3359,6 +3425,10 @@
         '请先登录后再上传资源': 'Please log in before uploading',
         '模组加载器': 'Mod Loaders', '小助手': 'Helpers', '游戏本体': 'Game Files', '工具': 'Tools',
         '游戏': 'Games', 'apk': 'APK', '文件': 'Files', '软件': 'Software',
+        '长途旅行': 'The Long Drive', '模组': 'Mod', '存档': 'Save', '类型': 'Type',
+        '待审核': 'Pending', '通过': 'Approve', '拒绝': 'Reject',
+        '已提交，审核通过后显示': 'Submitted, visible after approval',
+        '已通过审核': 'Approved', '已拒绝并删除': 'Rejected and deleted',
         '直链下载': 'Direct Download', '速度快，推荐': 'Fast, recommended',
         '小飞机网盘': 'Feijipan', '不限速，无需登录': 'No speed limit, no login',
         '夸克网盘': 'Quark Drive', '123 网盘': '123 Drive', '百度网盘': 'Baidu Drive',
