@@ -654,8 +654,8 @@ body {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 36px;
-    padding: 8px 20px;
-    font-size: 15px;
+    padding: 7px 16px;
+    font-size: 13px;
     color: #e2eaf5;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -664,34 +664,34 @@ body {
 
 .home-hero {
     text-align: center;
-    margin: 22px 0 10px;
+    margin: 16px 0 8px;
 }
 
 .home-title {
-    font-size: clamp(48px, 8.4vw, 112px);
-    line-height: 1.05;
+    font-size: clamp(26px, 3.5vw, 44px);
+    line-height: 1.12;
     font-weight: 800;
     background: linear-gradient(130deg, #ffffff 0%, var(--accent-cyan) 50%, var(--accent-violet) 100%);
     background-size: 200% 200%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    letter-spacing: 2px;
-    margin-bottom: 14px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
     animation: gradientShift 8s ease infinite;
     filter: drop-shadow(0 4px 24px rgba(106, 184, 255, 0.25));
 }
 
 .home-sub {
-    font-size: 20px;
+    font-size: 15px;
     color: #bdc9db;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     font-weight: 400;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 .desc-line {
-    font-size: 16px;
+    font-size: 14px;
     color: var(--text-muted);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     display: inline-block;
@@ -810,7 +810,7 @@ body {
         padding-bottom: 51.75%;
     }
     .home-title {
-        font-size: 42px;
+        font-size: 26px;
     }
 }
 
@@ -1785,7 +1785,7 @@ body {
 
 /* ===== 资源下载站改版 ===== */
 .hero-card {
-    padding: 40px 32px 34px;
+    padding: 28px 24px 24px;
 }
 
 .home-eyebrow {
@@ -1805,7 +1805,7 @@ body {
     align-items: center;
     gap: 8px;
     max-width: 760px;
-    margin: 26px auto 14px;
+    margin: 20px auto 12px;
     padding: 6px 6px 6px 20px;
     background: rgba(8, 12, 20, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.2);
