@@ -3865,6 +3865,66 @@ main.main-content {
     width: 100%;
 }
 
+/* 首页公告滚动条（从左往右滚动） */
+.ann-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.ann-badge {
+    flex: none;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #0a1220;
+    background: linear-gradient(135deg, #6ab8ff, #a78bfa);
+    box-shadow: 0 0 12px rgba(106, 184, 255, 0.35);
+}
+
+.ann-viewport {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    height: 20px;
+    mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+}
+
+.ann-track {
+    display: flex;
+    width: max-content;
+    animation: annScroll 26s linear infinite;
+    will-change: transform;
+}
+
+.ann-item {
+    white-space: nowrap;
+    font-size: 13px;
+    line-height: 20px;
+    color: #c8d6e8;
+    padding-right: 64px;
+    letter-spacing: 0.2px;
+}
+
+@keyframes annScroll {
+    from { transform: translateX(-50%); }
+    to { transform: translateX(0); }
+}
+
+.ann-bar:hover .ann-track {
+    animation-play-state: paused;
+}
+
 .portal-icons {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
