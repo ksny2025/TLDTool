@@ -4310,16 +4310,43 @@ main.main-content {
 }
 
 .portal-social {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     justify-content: flex-start;
-    gap: 6px;
+    gap: 8px;
     margin-top: 0;
 }
 
 .portal-social .social-btn {
-    padding: 5px 12px;
-    border-radius: 6px;
-    font-size: 11.5px;
+    padding: 8px 10px;
+    border-radius: 9px;
+    font-size: 12px;
+    gap: 7px;
+    justify-content: flex-start;
     box-shadow: none;
+}
+
+.portal-social .social-btn svg {
+    width: 15px;
+    height: 15px;
+    flex: none;
+    opacity: 0.92;
+}
+
+.portal-social .social-btn span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.portal-social .social-btn:hover {
+    border-color: var(--brand, rgba(255, 255, 255, 0.55));
+    box-shadow: 0 0 0 1px var(--brand, rgba(255, 255, 255, 0.5)), 0 8px 20px -10px var(--brand, rgba(0, 0, 0, 0.6));
+}
+
+.portal-social .social-btn:hover svg {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px var(--brand, transparent));
 }
 
 @media (max-width: 900px) {
@@ -4394,6 +4421,10 @@ main.main-content {
 
     .portal-stats {
         grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .portal-social {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
