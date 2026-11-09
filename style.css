@@ -3754,6 +3754,14 @@ body {
     color: #fff;
     background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
     box-shadow: 0 6px 18px -8px rgba(106, 184, 255, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    overflow: hidden;
+}
+
+.brand-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .brand-text {
