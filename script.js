@@ -2774,7 +2774,7 @@
             }
             return pick.then(function(d) {
                 dlStatus.textContent = T('正在下载 ') + (m.FileName || 'mod') + ' …';
-                return fetch('/api/tldfile?u=' + encodeURIComponent(m.Link)).then(function(resp) {
+                return fetch(tldFileUrl(m)).then(function(resp) {
                     if (!resp.ok) throw new Error('HTTP ' + resp.status);
                     return resp.blob();
                 }).then(function(blob) {
@@ -2796,11 +2796,19 @@
         });
     }
 
+    // 模组下载地址：文件名放进 URL 路径，避免隧道网关丢掉 Content-Disposition 后
+    // 手机浏览器把文件存成无扩展名的 "tldfile"
+    function tldFileUrl(m) {
+        var name = m.FileName || 'mod.dll';
+        var fileUrl = '/api/tldfile/' + encodeURIComponent(name) + '?u=' + encodeURIComponent(m.Link);
+        return window.__apiUrl ? window.__apiUrl(fileUrl) : fileUrl;
+    }
+
     function plainDownload(m) {
         var a = document.createElement('a');
-        var fileUrl = '/api/tldfile?u=' + encodeURIComponent(m.Link);
+        var fileUrl = tldFileUrl(m);
         // 线上必须走后端隧道的绝对地址，否则会打到 GitHub Pages 静态站（404，浏览器提示「无法下载 - 没有文件」）
-        a.href = window.__apiUrl ? window.__apiUrl(fileUrl) : fileUrl;
+        a.href = fileUrl;
         a.download = m.FileName || 'mod.dll';
         document.body.appendChild(a);
         a.click();
