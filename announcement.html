@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>最新公告 - BENBAIJIE 资源下载站</title>
+    <meta name="description" content="BENBAIJIE 资源下载站最新公告：站点更新、资源上传规则与下载方式说明。">
+    <meta name="keywords" content="BENBAIJIE,公告,资源下载站,更新">
+    <meta name="author" content="BENBAIJIE">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://znine.fun/announcement.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="BENBAIJIE 资源下载站">
+    <meta property="og:title" content="最新公告 - BENBAIJIE 资源下载站">
+    <meta property="og:description" content="站点更新、资源上传规则与下载方式说明。">
+    <meta property="og:url" content="https://znine.fun/announcement.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css?v=20261109h">
+</head>
+<body data-keep-title>
+<div class="app-container">
+    <aside class="sidebar" id="siteSidebar"></aside>
+
+    <main class="main-content">
+        <div id="announcement-page" class="page-view active-page">
+            <h2 class="page-title">最新公告</h2>
+            <div class="card-pane">
+                <div class="announcement-list" id="annList"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer class="seo-footer">
+    <p><strong>BENBAIJIE 资源下载站</strong> 最新公告与站点动态。</p>
+</footer>
+
+<script src="layout.js"></script>
+<script>
+(function () {
+    var host = (location.hostname || '').toLowerCase();
+    var remote = (host === 'znine.fun' || host === 'www.znine.fun' || host === 'ksny2025.github.io');
+    var API = remote ? 'https://api.znine.fun:54037' : '';
+
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+    function fmtDate(ts) {
+        var d = new Date(ts * 1000);
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function render(list) {
+        var box = document.getElementById('annList');
+        if (!box) return;
+        if (!list || !list.length) {
+            box.innerHTML = '<div class="announcement-empty">暂无公告</div>';
+            return;
+        }
+        box.innerHTML = list.map(function (a) {
+            return '<div class="announcement-item">' +
+                '<div class="announcement-title">' + esc(a.title) + '</div>' +
+                '<div class="announcement-meta"><span>日期 ' + fmtDate(a.time) + '</span><span>作者 ' + esc(a.author) + '</span></div>' +
+                '<div class="announcement-content">' + esc(a.content) + '</div>' +
+                '</div>';
+        }).join('');
+    }
+    fetch(API + '/api/announcements').then(function (r) { return r.json(); }).then(function (res) {
+        if (res && res.ok) { render(res.announcements); return; }
+        throw new Error('no api');
+    }).catch(function () {
+        fetch('data/announcements.json').then(function (r) { return r.json(); }).then(render).catch(function () {});
+    });
+})();
+</script>
+</body>
+</html>

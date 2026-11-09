@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>我的 - BENBAIJIE 资源下载站</title>
+    <meta name="description" content="BENBAIJIE 资源下载站个人中心：查看我的收藏、点赞、上传的资源与回复，管理账号头像和密码。">
+    <meta name="keywords" content="BENBAIJIE,个人中心,我的收藏,我的点赞,账号管理">
+    <meta name="author" content="BENBAIJIE">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://znine.fun/profile.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="BENBAIJIE 资源下载站">
+    <meta property="og:title" content="我的 - BENBAIJIE 资源下载站">
+    <meta property="og:description" content="查看我的收藏、点赞、上传的资源与回复。">
+    <meta property="og:url" content="https://znine.fun/profile.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css?v=20261109h">
+</head>
+<body data-nav="profile" data-has-app data-keep-title>
+<div class="app-container">
+    <aside class="sidebar" id="siteSidebar"></aside>
+
+    <main class="main-content">
+        <div id="profile-page" class="page-view active-page">
+            <h2 class="page-title">我的</h2>
+            <div class="card-pane" id="profileCard"></div>
+            <div class="card-pane" id="profileManagePane" style="display:none;">
+                <div class="pm-head">
+                    <div class="pm-title">账号管理</div>
+                    <button type="button" class="pm-close" data-pact="manage-close">✕</button>
+                </div>
+                <div class="pm-avatar-row">
+                    <span class="avatar avatar-lg avatar-letter" id="pmAvatar">?</span>
+                    <div class="avatar-side">
+                        <label class="code-btn avatar-upload-btn" for="pmAvatarInput">上传头像</label>
+                        <input type="file" id="pmAvatarInput" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
+                        <div class="account-stats" id="pmAccountStats"></div>
+                    </div>
+                </div>
+                <div class="auth-error" id="pmAvatarMsg"></div>
+                <div class="pm-sub">修改密码</div>
+                <form class="auth-form change-pwd-form" id="pmChangePwdForm">
+                    <input type="password" id="pmOldPwd" placeholder="当前密码" required autocomplete="current-password">
+                    <input type="password" id="pmNewPwd" placeholder="新密码（至少6位）" minlength="6" required autocomplete="new-password">
+                    <button type="submit" class="auth-submit">确认修改</button>
+                    <div class="auth-error" id="pmPwdError"></div>
+                </form>
+            </div>
+            <div class="card-pane" id="profileListCard" style="display:none;">
+                <div class="dl-tabs" id="profileTabs"></div>
+                <div class="download-grid" id="profileGrid"></div>
+                <div class="profile-empty" id="profileEmpty" style="display:none;">
+                    <div class="dl-empty-title" id="profileEmptyTitle"></div>
+                    <div class="dl-empty-sub" id="profileEmptySub"></div>
+                    <button type="button" class="f-btn" id="profileGoLibrary">去资源库逛逛</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer class="seo-footer">
+    <p><strong>BENBAIJIE 资源下载站</strong> 个人中心，管理你的收藏、点赞与上传。</p>
+</footer>
+
+<script src="detail-manifest.js"></script>
+<script src="layout.js"></script>
+<script src="script.js?v=20261109h"></script>
+</body>
+</html>

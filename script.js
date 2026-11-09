@@ -139,6 +139,8 @@
     }
 
     navItems.forEach(function(btn) {
+        // 拆分页面后导航是 <a> 链接，直接跳转即可，不再做单页切换
+        if (btn.tagName === 'A' || btn.hasAttribute('href')) return;
         btn.addEventListener('click', function(e) {
             var pageTarget = btn.getAttribute('data-page');
             if (pageTarget && pages[pageTarget]) {
@@ -325,7 +327,7 @@
     function setAuthVisible(showAuth) {
         authPane.style.display = showAuth ? '' : 'none';
         chatPane.style.display = showAuth ? 'none' : 'flex';
-        annForm.style.display = (!showAuth && isAdmin()) ? 'flex' : 'none';
+        if (annForm) annForm.style.display = (!showAuth && isAdmin()) ? 'flex' : 'none';
         if (!showAuth) {
             startPolling();
         } else {
@@ -865,7 +867,7 @@
         });
     }
 
-    annForm.addEventListener('submit', function(e) {
+    if (annForm) annForm.addEventListener('submit', function(e) {
         e.preventDefault();
         annError.textContent = '';
         var payload = {
@@ -890,7 +892,7 @@
         }).catch(function() { annError.textContent = '无法连接服务器'; });
     });
 
-    annList.addEventListener('click', function(e) {
+    if (annList) annList.addEventListener('click', function(e) {
         var edit = e.target.closest('.ann-edit');
         if (edit) {
             var a = annsCache.find(function(x) { return x.id === edit.getAttribute('data-id'); });
@@ -944,10 +946,11 @@
 })();
 
 (function() {
-    // 资源库：搜索 / 排序 / 多渠道下载 / 登录后上传资源
+    // 资源库 / 首页推荐 / 我的：三个页面共用同一份资源数据
     var grid = document.getElementById('downloadGrid');
-    if (!grid) return;
     var homeFeatured = document.getElementById('homeFeatured');
+    var profileCardEl = document.getElementById('profileCard');
+    if (!grid && !homeFeatured && !profileCardEl) return;
     var searchInput = document.getElementById('dlSearchInput');
     var searchClear = document.getElementById('dlSearchClear');
     var sortSelect = document.getElementById('dlSort');
@@ -1310,7 +1313,7 @@
         siteList.slice().sort(function(a, b) { return heat(b) - heat(a); })
             .filter(function(s) { return heat(s) > 0; }).slice(0, 3)
             .forEach(function(s) { hotIds[s.id] = 1; });
-        grid.innerHTML = filtered.map(function(s) { return cardHtml(s, true, !!hotIds[s.id]); }).join('');
+        if (grid) grid.innerHTML = filtered.map(function(s) { return cardHtml(s, true, !!hotIds[s.id]); }).join('');
         if (homeFeatured) {
             var featured = siteList.slice().sort(function(a, b) {
                 return String(b.date || '').localeCompare(String(a.date || ''));
@@ -1508,17 +1511,46 @@
         render();
     }
 
+    // 首页搜索 / 分类跳转到资源库时，URL 上带着 q 或 cat
+    try {
+        var __sp = new URLSearchParams(location.search);
+        var __q = __sp.get('q');
+        var __cat = __sp.get('cat');
+        if (__q) { query = __q; if (searchInput) searchInput.value = __q; }
+        if (__cat && CATS.indexOf(__cat) !== -1) activeCat = __cat;
+    } catch (e) {}
+
+    function siteRoot() { return window.__SITE_ROOT || ''; }
+
     function goLibrary() {
-        var nav = document.querySelector('.nav-item[data-page="download"]');
-        if (nav) nav.click();
-        setTimeout(function() { if (searchInput) searchInput.focus(); }, 320);
+        // 已拆分页面：不在资源库页时直接跳转，并把搜索词/分类带过去
+        if (/library\.html$/i.test(location.pathname)) {
+            if (searchInput) { try { searchInput.focus(); } catch (e) {} }
+            return;
+        }
+        var q = '';
+        if (query) q = '?q=' + encodeURIComponent(query);
+        else if (activeCat && activeCat !== '全部') q = '?cat=' + encodeURIComponent(activeCat);
+        location.href = siteRoot() + 'library.html' + q;
     }
 
     function goLogin() {
-        var nav = document.querySelector('.nav-item[data-page="chat"]');
-        if (nav) nav.click();
-        var email = document.getElementById('loginEmail');
-        if (email) setTimeout(function() { try { email.focus(); } catch (e) {} }, 380);
+        if (/chat\.html$/i.test(location.pathname)) {
+            var email = document.getElementById('loginEmail');
+            if (email) setTimeout(function() { try { email.focus(); } catch (e) {} }, 200);
+            return;
+        }
+        location.href = siteRoot() + 'chat.html';
+    }
+
+    // 有独立详情页时优先跳转，没有则退回弹窗
+    function openDetailOrModal(item) {
+        if (!item) return;
+        if (window.__DETAIL_IDS && window.__DETAIL_IDS[item.id]) {
+            location.href = siteRoot() + 'soft/' + encodeURIComponent(item.id) + '.html';
+            return;
+        }
+        openSwDetail(item);
     }
 
     // ---- 下载方式选择弹窗 ----
@@ -1699,10 +1731,11 @@
         if (f) f.style.display = (swCatEl && swCatEl.value === '长途旅行') ? '' : 'none';
     }
     if (swCatEl) swCatEl.addEventListener('change', syncSwSubField);
-    document.getElementById('swCancelBtn').addEventListener('click', closeModal);
-    modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    var swCancelBtn = document.getElementById('swCancelBtn');
+    if (swCancelBtn) swCancelBtn.addEventListener('click', closeModal);
+    if (modal) modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
 
-    imgInput.addEventListener('change', function() {
+    if (imgInput) imgInput.addEventListener('change', function() {
         var file = imgInput.files && imgInput.files[0];
         if (!file) {
             if (pendingImage && pendingImage.indexOf('DATA:') === 0) pendingImage = null;
@@ -1725,7 +1758,7 @@
         reader.readAsDataURL(file);
     });
 
-    imgClear.addEventListener('click', function() {
+    if (imgClear) imgClear.addEventListener('click', function() {
         pendingImage = 'CLEAR';
         imgInput.value = '';
         imgPreview.style.display = 'none';
@@ -1789,6 +1822,7 @@
     document.addEventListener('dragover', function(e) { e.preventDefault(); });
     document.addEventListener('drop', function(e) {
         e.preventDefault();
+        if (!modal) return;
         if (modal.style.display === 'flex') return; // 弹窗开着，交给弹窗自己的处理
         var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
         if (!f) return;
@@ -1807,7 +1841,7 @@
         setTimeout(function() { if (el.parentNode) el.remove(); }, 2800);
     }
 
-    saveBtn.addEventListener('click', function() {
+    if (saveBtn) saveBtn.addEventListener('click', function() {
         var agreeBox = document.getElementById('swAgree');
         if (agreeBox && !agreeBox.checked) {
             swError.textContent = '请先勾选并确认遵守上传内容须知（禁止色情、暴力、血腥恶心等违规内容）';
@@ -2184,9 +2218,9 @@
             return;
         }
         if (e.target.closest('.software-img')) return; // 点图片 = 看大图
-        openSwDetail(item);
+        openDetailOrModal(item);
     }
-    grid.addEventListener('click', handleAreaClick);
+    if (grid) grid.addEventListener('click', handleAreaClick);
     if (shareGrid) shareGrid.addEventListener('click', handleAreaClick);
     if (homeFeatured) homeFeatured.addEventListener('click', handleAreaClick);
     if (profileGrid) profileGrid.addEventListener('click', handleAreaClick);
@@ -2369,7 +2403,7 @@
             var id = row.getAttribute('data-id');
             for (var i = 0; i < list.length; i++) {
                 if (String(list[i].id) === String(id)) {
-                    openSwDetail(list[i]);
+                    openDetailOrModal(list[i]);
                     return;
                 }
             }
@@ -2432,6 +2466,7 @@
     }).catch(function() {});
 
     loadSettings();
+    if (profileActive()) loadProfileMe();
     load();
 })();
 
@@ -3736,7 +3771,10 @@
         });
         var btn = document.getElementById('langBtn');
         if (btn) btn.textContent = toEn ? '中文' : 'EN';
-        document.title = toEn ? 'BENBAIJIE Download Center' : 'BENBAIJIE 资源下载站';
+        // 拆分后的每个页面都有自己的标题，保留页面自身的 title
+        if (!document.body.hasAttribute('data-keep-title')) {
+            document.title = toEn ? 'BENBAIJIE Download Center' : 'BENBAIJIE 资源下载站';
+        }
         window.dispatchEvent(new Event('langchange'));
     }
 

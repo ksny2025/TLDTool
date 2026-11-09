@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://znine.fun/</loc>
-    <lastmod>2026-11-07</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
+  <url><loc>https://znine.fun/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://znine.fun/library.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://znine.fun/chat.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://znine.fun/profile.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://znine.fun/about.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://znine.fun/announcement.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://znine.fun/soft/54afe728f0fdd1a5.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/069ccfde3edce012.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/db862042e157e519.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/3a716196332c7132.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/e2420cd7d2d4f69e.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/a37d3c534f04e17a.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/b252251bc9dbc3f9.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/c56f4a2a49002431.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/f33bf0dc3cf23fa0.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/8622ab4a46857d81.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/b54cb4fbd2c272fd.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/031b1577290a4385.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/088e22ece9141a88.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/f68dd2681dbea424.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/4b34a0c0934a4f42.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://znine.fun/soft/0005e5f0927f6734.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

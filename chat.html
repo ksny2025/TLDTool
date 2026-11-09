@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>聊天室与论坛 - BENBAIJIE 资源下载站</title>
+    <meta name="description" content="BENBAIJIE 资源下载站聊天室与论坛：登录后可以实时聊天、发帖交流长途旅行模组与游戏资源。">
+    <meta name="keywords" content="BENBAIJIE,聊天室,论坛,长途旅行模组,游戏资源交流">
+    <meta name="author" content="BENBAIJIE">
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://znine.fun/chat.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="BENBAIJIE 资源下载站">
+    <meta property="og:title" content="聊天室与论坛 - BENBAIJIE 资源下载站">
+    <meta property="og:description" content="实时聊天、发帖交流长途旅行模组与游戏资源。">
+    <meta property="og:url" content="https://znine.fun/chat.html">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css?v=20261109h">
+</head>
+<body data-nav="chat" data-has-app data-keep-title>
+<div class="app-container">
+    <aside class="sidebar" id="siteSidebar"></aside>
+
+    <main class="main-content">
+        <div id="chat-page" class="page-view active-page">
+            <h2 class="page-title">聊天室</h2>
+
+            <div class="card-pane" id="authPane">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="loginTab" type="button">登录</button>
+                    <button class="auth-tab" id="registerTab" type="button">注册</button>
+                </div>
+
+                <form class="auth-form" id="loginForm">
+                    <div class="field-row">
+                        <input type="text" id="loginEmail" placeholder="邮箱" required autocomplete="username">
+                        <span class="field-hint" id="loginEmailHint">邮箱格式不正确</span>
+                    </div>
+                    <input type="password" id="loginPassword" placeholder="密码" required autocomplete="current-password">
+                    <button type="submit" class="auth-submit">登录</button>
+                    <div class="auth-links"><button type="button" class="auth-link" id="forgotLink">忘记密码？</button></div>
+                </form>
+
+                <form class="auth-form" id="registerForm" style="display:none;">
+                    <input type="text" id="regUsername" placeholder="用户名" maxlength="20" required>
+                    <div class="field-row">
+                        <input type="email" id="regEmail" placeholder="邮箱" required autocomplete="email">
+                        <span class="field-hint" id="regEmailHint">邮箱格式不正确</span>
+                    </div>
+                    <div class="code-row" id="regCodeRow" style="display:none;">
+                        <input type="text" id="regCode" placeholder="邮箱验证码" maxlength="6" inputmode="numeric">
+                        <button type="button" class="code-btn" id="regCodeBtn">获取验证码</button>
+                    </div>
+                    <input type="password" id="regPassword" placeholder="密码（至少6位）" minlength="6" required autocomplete="new-password">
+                    <button type="submit" class="auth-submit">注册并登录</button>
+                </form>
+
+                <form class="auth-form" id="resetForm" style="display:none;">
+                    <div class="field-row">
+                        <input type="email" id="resetEmail" placeholder="注册时用的邮箱" required autocomplete="email">
+                        <span class="field-hint" id="resetEmailHint">邮箱格式不正确</span>
+                    </div>
+                    <div class="code-row">
+                        <input type="text" id="resetCode" placeholder="邮箱验证码" maxlength="6" inputmode="numeric" required>
+                        <button type="button" class="code-btn" id="resetCodeBtn">获取验证码</button>
+                    </div>
+                    <input type="password" id="resetPassword" placeholder="新密码（至少6位）" minlength="6" required autocomplete="new-password">
+                    <button type="submit" class="auth-submit">重置密码</button>
+                    <div class="auth-links"><button type="button" class="auth-link" id="backToLogin">返回登录</button></div>
+                </form>
+
+                <div class="auth-error" id="authError"></div>
+            </div>
+
+            <div class="card-pane chat-pane" id="chatPane" style="display:none;">
+                <div class="chat-header">
+                    <div class="chat-header-btns">
+                        <button class="chat-logout" id="logoutBtn" type="button">退出登录</button>
+                    </div>
+                </div>
+                <div class="chat-subtabs">
+                    <button class="auth-tab active" id="tabChat" type="button">聊天室</button>
+                    <button class="auth-tab" id="tabForum" type="button">论坛</button>
+                </div>
+                <div id="chatView">
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <form class="chat-input-row" id="chatForm">
+                        <input type="text" id="chatInput" placeholder="说点什么..." maxlength="500" autocomplete="off">
+                        <button type="submit" class="chat-send">发送</button>
+                    </form>
+                </div>
+                <div id="forumView" style="display:none;">
+                    <div class="forum-toolbar">
+                        <input type="text" id="forumSearch" placeholder="搜索帖子标题、内容或作者..." maxlength="50" autocomplete="off">
+                        <button class="f-btn" id="newPostBtn" type="button">＋ 发帖</button>
+                    </div>
+                    <form class="forum-compose" id="postForm" style="display:none;">
+                        <input type="text" id="postTitle" placeholder="帖子标题" maxlength="50" required>
+                        <input type="text" id="postTags" placeholder="标签（用逗号分隔，最多5个）" maxlength="60">
+                        <textarea id="postContent" placeholder="分享点什么..." maxlength="2000" rows="3" required></textarea>
+                        <div class="compose-btns">
+                            <button type="button" class="f-btn" id="cancelPostBtn">取消</button>
+                            <button type="submit" class="f-btn primary">发布</button>
+                        </div>
+                    </form>
+                    <div class="forum-list" id="forumList"></div>
+                    <div class="post-detail" id="postDetail" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer class="seo-footer">
+    <p><strong>BENBAIJIE 资源下载站</strong> 聊天室与论坛，交流长途旅行模组与游戏资源。</p>
+</footer>
+
+<script src="detail-manifest.js"></script>
+<script src="layout.js"></script>
+<script src="script.js?v=20261109h"></script>
+</body>
+</html>
