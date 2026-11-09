@@ -3846,7 +3846,7 @@ body {
     max-width: 1120px;
     margin: 0 auto;
     padding: 6px 18px 8px;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 38px;
     box-sizing: border-box;
     border-top: 1px solid rgba(255, 255, 255, 0.07);
