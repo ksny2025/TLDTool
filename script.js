@@ -216,30 +216,8 @@
         });
     }
 
-    // 卡片动效（倾斜+浮现），供下载页动态渲染后重新绑定
-    function bindTilt(card) {
-        var img = card.querySelector('.software-img');
-        card.addEventListener('mousemove', function(e) {
-            var rect = card.getBoundingClientRect();
-            var x = e.clientX - rect.left;
-            var y = e.clientY - rect.top;
-            var px = x / rect.width;
-            var py = y / rect.height;
-            var rx = (py - 0.5) * -8;
-            var ry = (px - 0.5) * 10;
-            card.style.transform =
-                'translateY(-6px) perspective(900px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
-            if (img) {
-                img.style.setProperty('--mx', (px * 100) + '%');
-                img.style.setProperty('--my', (py * 100) + '%');
-            }
-            card.style.setProperty('--mx', (px * 100) + '%');
-            card.style.setProperty('--my', (py * 100) + '%');
-        });
-        card.addEventListener('mouseleave', function() {
-            card.style.transform = '';
-        });
-    }
+    // 卡片动效已去除鼠标倾斜/光圈，仅保留静态样式
+    function bindTilt(card) {}
 
     window.__bindCardFx = function(scope) {
         var root = scope || document;
@@ -274,19 +252,6 @@
     };
 
     window.__bindCardFx(document);
-
-    var homeBtns = document.querySelectorAll('#home-page .social-btn, #about-page .group-btn');
-    homeBtns.forEach(function(btn) {
-        btn.addEventListener('mousemove', function(e) {
-            var rect = btn.getBoundingClientRect();
-            var x = e.clientX - rect.left - rect.width / 2;
-            var y = e.clientY - rect.top - rect.height / 2;
-            btn.style.transform = 'translate(' + (x * 0.15) + 'px, ' + (y * 0.25 - 2) + 'px)';
-        });
-        btn.addEventListener('mouseleave', function() {
-            btn.style.transform = '';
-        });
-    });
 
     var initialPage = document.querySelector('.page-view.active-page');
     if (initialPage) revealInPage(initialPage);
@@ -1306,6 +1271,54 @@
 
     var hotOffset = 0;
 
+    // 资源库列表分页：每页 8 个
+    var LIB_PAGE_SIZE = 8;
+    var libPage = 1;
+    var libPager = null;
+    var libSig = '';
+
+    function ensurePager() {
+        if (libPager || !grid) return;
+        libPager = document.getElementById('dlPager');
+        if (!libPager) {
+            libPager = document.createElement('div');
+            libPager.id = 'dlPager';
+            libPager.className = 'dl-pager';
+            grid.parentNode.insertBefore(libPager, grid.nextSibling);
+        }
+        libPager.addEventListener('click', function(e) {
+            var btn = e.target && e.target.closest ? e.target.closest('[data-page]') : null;
+            if (!btn) return;
+            var p = btn.getAttribute('data-page');
+            if (p === 'prev') libPage = Math.max(1, libPage - 1);
+            else if (p === 'next') libPage = libPage + 1;
+            else libPage = parseInt(p, 10) || 1;
+            render();
+            var top = grid.getBoundingClientRect().top + (window.pageYOffset || 0) - 120;
+            if (window.scrollTo) window.scrollTo({ top: top, behavior: 'smooth' });
+        });
+    }
+
+    function renderPager(total) {
+        if (!libPager) return;
+        var pages = Math.max(1, Math.ceil(total / LIB_PAGE_SIZE));
+        if (total <= LIB_PAGE_SIZE) {
+            libPager.innerHTML = '';
+            libPager.style.display = 'none';
+            return;
+        }
+        libPager.style.display = '';
+        var html = '<button type="button" class="dl-page-btn" data-page="prev"'
+            + (libPage === 1 ? ' disabled' : '') + '>' + T('上一页') + '</button>';
+        for (var i = 1; i <= pages; i++) {
+            html += '<button type="button" class="dl-page-btn'
+                + (i === libPage ? ' active' : '') + '" data-page="' + i + '">' + i + '</button>';
+        }
+        html += '<button type="button" class="dl-page-btn" data-page="next"'
+            + (libPage === pages ? ' disabled' : '') + '>' + T('下一页') + '</button>';
+        libPager.innerHTML = html;
+    }
+
     function render() {
         renderChips();
         var siteList = siteItems();
@@ -1314,7 +1327,18 @@
         siteList.slice().sort(function(a, b) { return heat(b) - heat(a); })
             .filter(function(s) { return heat(s) > 0; }).slice(0, 3)
             .forEach(function(s) { hotIds[s.id] = 1; });
-        if (grid) grid.innerHTML = filtered.map(function(s) { return cardHtml(s, true, !!hotIds[s.id]); }).join('');
+        var sig = query + '|' + activeCat + '|' + sortMode;
+        if (sig !== libSig) { libSig = sig; libPage = 1; }
+        var pages = Math.max(1, Math.ceil(filtered.length / LIB_PAGE_SIZE));
+        if (libPage > pages) libPage = pages;
+        if (libPage < 1) libPage = 1;
+        var pageStart = (libPage - 1) * LIB_PAGE_SIZE;
+        var pageList = filtered.slice(pageStart, pageStart + LIB_PAGE_SIZE);
+        if (grid) {
+            grid.innerHTML = pageList.map(function(s) { return cardHtml(s, true, !!hotIds[s.id]); }).join('');
+            ensurePager();
+            renderPager(filtered.length);
+        }
         if (homeFeatured) {
             var featured = siteList.slice().sort(function(a, b) {
                 return String(b.date || '').localeCompare(String(a.date || ''));
