@@ -65,7 +65,7 @@
                         '<ul class="music-list" id="musicList"></ul>' +
                     '</div>' +
                 '</div>' +
-                '<button class="theme-btn" id="themeToggle" type="button" aria-label="切换深浅色">☀</button>' +
+                '<button class="theme-btn" id="themeToggle" type="button" aria-label="切换深浅色"></button>' +
                 '<button class="lang-btn top-lang" id="langBtn" type="button">EN</button>' +
             '</div>' +
         '</div>' +
@@ -96,10 +96,10 @@
     function paintTheme() {
         if (!themeBtn) return;
         if (currentTheme() === 'light') {
-            themeBtn.textContent = '☾';
+            themeBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 14.6A8.4 8.4 0 1 1 9.4 3.8a6.8 6.8 0 0 0 10.8 10.8z"/></svg>';
             themeBtn.title = '切换到深色';
         } else {
-            themeBtn.textContent = '☀';
+            themeBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 5.4V2.6M12 18.6v2.8M5.4 12H2.6M18.6 12h2.8M7.3 7.3 5.4 5.4M16.7 7.3 18.6 5.4M16.7 16.7 18.6 18.6M7.3 16.7 5.4 18.6"/></svg>';
             themeBtn.title = '切换到浅色';
         }
     }
