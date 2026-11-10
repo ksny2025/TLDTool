@@ -65,6 +65,7 @@
                         '<ul class="music-list" id="musicList"></ul>' +
                     '</div>' +
                 '</div>' +
+                '<button class="theme-btn" id="themeToggle" type="button" aria-label="切换深浅色">☀</button>' +
                 '<button class="lang-btn top-lang" id="langBtn" type="button">EN</button>' +
             '</div>' +
         '</div>' +
@@ -85,6 +86,39 @@
     }
     placeSlider();
     window.addEventListener('resize', placeSlider);
+
+    // 深浅色切换 + 顶栏高度同步（避免固定顶栏遮住内容）
+    var rootEl = document.documentElement;
+    var themeBtn = aside.querySelector('#themeToggle');
+    function currentTheme() {
+        return rootEl.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    }
+    function paintTheme() {
+        if (!themeBtn) return;
+        if (currentTheme() === 'light') {
+            themeBtn.textContent = '☾';
+            themeBtn.title = '切换到深色';
+        } else {
+            themeBtn.textContent = '☀';
+            themeBtn.title = '切换到浅色';
+        }
+    }
+    function syncTopbarHeight() {
+        rootEl.style.setProperty('--topbar-h', aside.offsetHeight + 'px');
+    }
+    paintTheme();
+    syncTopbarHeight();
+    window.addEventListener('resize', syncTopbarHeight);
+    window.addEventListener('load', syncTopbarHeight);
+    if (themeBtn) {
+        themeBtn.addEventListener('click', function () {
+            var next = currentTheme() === 'light' ? 'dark' : 'light';
+            rootEl.setAttribute('data-theme', next);
+            try { localStorage.setItem('site_theme', next); } catch (e) {}
+            paintTheme();
+            syncTopbarHeight();
+        });
+    }
 
     // 详情页没有加载 script.js，这里补上搜索跳转与语言按钮的最小逻辑
     if (!hasApp) {
