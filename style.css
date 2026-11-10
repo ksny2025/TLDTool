@@ -5177,3 +5177,123 @@ a.detail-link small {
     .detail-btn.primary { width: 100%; padding: 15px 20px; }
     .detail-links { grid-template-columns: 1fr; }
 }
+
+/* ===== 资源列表卡片：参照 fuzhu86 列表页（分类 / 标题 / 两行简介 / 底部数据）===== */
+.download-grid {
+    grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+    gap: 22px;
+    align-items: stretch;
+}
+
+.software-card {
+    border-radius: 18px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.software-card:hover {
+    border-color: rgba(255, 255, 255, 0.24);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        0 22px 40px -20px rgba(0, 0, 0, 0.7);
+}
+
+.software-info {
+    padding: 16px 18px 18px;
+}
+
+.software-cat {
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--accent-cyan);
+    margin-bottom: 7px;
+    letter-spacing: 0.3px;
+    opacity: 0.9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.software-name {
+    font-size: 1.02rem;
+    line-height: 1.45;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.software-desc {
+    font-size: 0.84rem;
+    line-height: 1.6;
+    color: #9fb0c6;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+}
+
+.software-meta {
+    border-top: none;
+    padding-top: 0;
+    margin-bottom: 12px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.software-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: auto;
+    flex-wrap: wrap;
+}
+
+.dl-mini-stats {
+    margin: 0;
+    gap: 10px;
+    font-size: 11.5px;
+    color: #8b9bb0;
+}
+
+.dl-count::before {
+    content: "↓ ";
+}
+
+.download-btn {
+    margin-top: 0;
+    padding: 8px 18px;
+    font-size: 0.82rem;
+    align-self: center;
+    flex-shrink: 0;
+}
+
+@media (max-width: 720px) {
+    .download-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+    .software-info {
+        padding: 12px 12px 14px;
+    }
+    .software-name {
+        font-size: 0.94rem;
+    }
+    .software-desc {
+        font-size: 0.78rem;
+    }
+    .download-btn {
+        padding: 6px 12px;
+        font-size: 0.76rem;
+    }
+}

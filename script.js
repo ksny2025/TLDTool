@@ -1100,35 +1100,36 @@
 
     function cardHtml(s, withTools, isHot) {
         var im = imgSrc(s);
+        var catLabel = T(s.category || '其他');
+        if (s.category === '长途旅行' && s.sub) catLabel += ' · ' + T(s.sub);
         var h = '<div class="software-card" data-id="' + esc(s.id) + '" data-name="' + esc(s.name) + '">';
         h += '<div class="software-img"' + (im ? ' data-img-src="' + esc(im.src) + '"' : '') + '>';
         if (im) {
             h += '<img src="' + esc(im.src) + '" alt="' + esc(s.name) + '"'
                + (im.fb ? ' data-fb="' + esc(im.fb) + '"' : '') + '>';
         }
-        h += '<span class="dl-cat-badge">' + esc(T(s.category || '其他')) + '</span>';
-        if (s.category === '长途旅行' && s.sub) h += '<span class="dl-sub-badge">' + esc(T(s.sub)) + '</span>';
         if (s.status === 'pending') h += '<span class="dl-pending-badge">' + T('待审核') + '</span>';
         if (isHot) h += '<span class="dl-hot-badge">' + T('热门') + '</span>';
         h += '</div><div class="software-info">';
+        h += '<div class="software-cat">' + esc(catLabel) + '</div>';
         h += '<div class="software-name">' + esc(s.name) + '</div>';
         h += '<div class="software-desc">' + esc(s.desc) + '</div>';
-        h += '<div class="version-meta">版本 ' + esc(s.version || '-')
-           + ' | 日期 ' + esc(s.date || '-')
-           + ' | 大小 ' + esc(s.size || '-')
-           + ' | 作者 ' + esc(s.author || '-');
-        if (s.uploader && !s.uploader_admin) h += ' | 上传 ' + esc(s.uploader);
-        h += '<span class="dl-count" data-soft="' + esc(s.name) + '">' + T(' · 下载 ')
-           + (downloads[s.name] || 0) + T(' 次') + '</span></div>';
-        h += '<div class="dl-mini-stats">'
-           + '<span>' + T('点赞') + ' ' + num(s.likes) + '</span>'
-           + '<span>' + T('收藏') + ' ' + num(s.favs) + '</span>'
-           + '<span>' + T('回复') + ' ' + (s.replies || []).length + '</span>'
-           + '<span>' + T('浏览') + ' ' + num(s.views) + '</span>'
+        h += '<div class="version-meta software-meta">版本 ' + esc(s.version || '-')
+           + ' · 大小 ' + esc(s.size || '-')
+           + ' · ' + esc(s.date || '-') + ' · ' + esc(s.author || '-');
+        if (s.uploader && !s.uploader_admin) h += ' · 上传 ' + esc(s.uploader);
+        h += '</div>';
+        h += '<div class="software-foot"><div class="dl-mini-stats">'
+           + '<span title="' + T('浏览') + '">◎ ' + num(s.views) + '</span>'
+           + '<span title="' + T('点赞') + '">♡ ' + num(s.likes) + '</span>'
+           + '<span title="' + T('收藏') + '">★ ' + num(s.favs) + '</span>'
+           + '<span title="' + T('回复') + '">✎ ' + (s.replies || []).length + '</span>'
+           + '<span class="dl-count" title="' + T('下载') + '" data-soft="' + esc(s.name) + '">' + (downloads[s.name] || 0) + '</span>'
            + '</div>';
         if (mirrors(s).length) {
             h += '<button type="button" class="download-btn" data-id="' + esc(s.id) + '">' + T('下载') + '</button>';
         }
+        h += '</div>';
         if (withTools && canManage(s)) {
             h += '<div class="dl-tools">';
             if (isAdmin() && s.status === 'pending') {
@@ -3484,7 +3485,7 @@
         var downloads = res.downloads || {};
         document.querySelectorAll('.dl-count').forEach(function(span) {
             var n = downloads[span.getAttribute('data-soft')] || 0;
-            span.textContent = T(' · 下载 ') + n + T(' 次');
+            span.textContent = n;
         });
     }
 
@@ -3507,7 +3508,7 @@
             if (!res.ok) return;
             document.querySelectorAll('.dl-count').forEach(function(span) {
                 if (span.getAttribute('data-soft') === name) {
-                    span.textContent = T(' · 下载 ') + res.count + T(' 次');
+                    span.textContent = res.count;
                 }
             });
         }).catch(function() {});
