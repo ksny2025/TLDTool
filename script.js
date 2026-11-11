@@ -3843,10 +3843,15 @@
 
 /* ===== 左上角音乐播放器 ===== */
 (function () {
+    var MUSIC_DIR = '歌曲/纯音乐/';
     var MUSIC_TRACKS = [
-        { title: '示例歌曲 1', artist: '待添加', src: 'music/1.mp3', cover: 'music/1.jpg' },
-        { title: '示例歌曲 2', artist: '待添加', src: 'music/2.mp3', cover: 'music/2.jpg' },
-        { title: '示例歌曲 3', artist: '待添加', src: 'music/3.mp3', cover: 'music/3.jpg' }
+        { title: 'Autumn Leaf', artist: 'Re:Plus', src: MUSIC_DIR + 'Autumn Leaf-Re Plus.mp3', cover: 'https://imge.kugou.com/stdmusic/240/20260703/20260703114042602362.jpg' },
+        { title: 'Beyond the Memory', artist: 'July', src: MUSIC_DIR + 'Beyond the Memory-July.aac', cover: 'https://imge.kugou.com/stdmusic/240/20190329/20190329165004892505.jpg' },
+        { title: '晴れゆく空', artist: 'RADWIMPS', src: MUSIC_DIR + '晴れゆく空-RADWIMPS.m4a', cover: 'https://imge.kugou.com/stdmusic/240/20191031/20191031200710493094.jpg' },
+        { title: 'Ghiblian Magic', artist: 'ldst', src: MUSIC_DIR + 'Ghiblian Magic-ldst.mp3', cover: 'https://imge.kugou.com/stdmusic/240/20190825/20190825083606352084.jpg' },
+        { title: 'Leisure Time', artist: 'TypeD', src: MUSIC_DIR + 'Leisure Time-TypeD.mp3', cover: 'https://imge.kugou.com/stdmusic/240/20260614/20260614125303400814.jpg' },
+        { title: 'Differences', artist: 'Rain', src: MUSIC_DIR + 'Differences-Rain.mp3', cover: 'https://imge.kugou.com/stdmusic/240/20251010/20251010181151572176.jpg' },
+        { title: 'Phone Kisses', artist: 'suhmeduh', src: MUSIC_DIR + 'Phone Kisses-suhmeduh.mp3', cover: 'https://imge.kugou.com/stdmusic/240/20250810/20250810215911377241.jpg' }
     ];
 
     var player = document.getElementById('musicPlayer');
@@ -3870,6 +3875,9 @@
     audio.preload = 'metadata';
     var current = 0;
     var audioError = false;
+    var srcQueue = [];
+    var srcPos = 0;
+    var wantPlay = false;
 
     function pausedBefore() {
         try { return localStorage.getItem(PREF_KEY) === '1'; } catch (e) { return false; }
@@ -3878,7 +3886,13 @@
         try { localStorage.setItem(PREF_KEY, '1'); } catch (e) {}
     }
     function asset(p) {
-        return window.__apiUrl ? window.__apiUrl('/' + p) : p;
+        return p || '';
+    }
+    // 线上 Pages 里没有音频文件，优先走后端 api 域名；后端不可用时回退站点内相对路径
+    function sourcesFor(t) {
+        var rel = t.src;
+        var api = window.__apiUrl ? window.__apiUrl('/' + rel) : '';
+        return (api && api !== rel) ? [api, rel] : [rel];
     }
 
     function setPlayingUI(on) {
@@ -3943,21 +3957,60 @@
         artistEl.textContent = T(t.artist || '');
         setCover(t.cover ? asset(t.cover) : '');
         audioError = false;
-        audio.src = asset(t.src);
+        srcQueue = sourcesFor(t);
+        srcPos = 0;
+        audio.src = srcQueue[0];
         renderList();
-        if (autoPlay) play();
+        if (autoPlay) {
+            play();
+        } else {
+            wantPlay = false;
+        }
     }
 
     function play() {
         if (!MUSIC_TRACKS.length) return;
+        wantPlay = true;
         var p = audio.play();
-        if (p && p.catch) p.catch(function () { setPlayingUI(false); });
+        if (p && p.catch) p.catch(function () {
+            wantPlay = false;
+            setPlayingUI(false);
+            armGestureAutoplay();
+        });
+    }
+
+    // 浏览器拦截自动播放时，等用户第一次点击/按键再把第一首接上；主动暂停过就不再接
+    var gestureArmed = false;
+    function armGestureAutoplay() {
+        if (gestureArmed || pausedBefore()) return;
+        gestureArmed = true;
+        var kick = function () {
+            document.removeEventListener('pointerdown', kick, true);
+            document.removeEventListener('keydown', kick, true);
+            if (!pausedBefore() && audio.paused) {
+                wantPlay = true;
+                var p = audio.play();
+                if (p && p.catch) p.catch(function () { wantPlay = false; });
+            }
+        };
+        document.addEventListener('pointerdown', kick, true);
+        document.addEventListener('keydown', kick, true);
     }
 
     audio.addEventListener('playing', function () { setPlayingUI(true); });
     audio.addEventListener('pause', function () { setPlayingUI(false); });
     audio.addEventListener('ended', function () { load(current + 1, true); });
     audio.addEventListener('error', function () {
+        // 当前音源取不到就换下一个候选（后端 → 站点内相对路径）
+        if (srcPos + 1 < srcQueue.length) {
+            srcPos++;
+            audio.src = srcQueue[srcPos];
+            if (wantPlay) {
+                var p = audio.play();
+                if (p && p.catch) p.catch(function () {});
+            }
+            return;
+        }
         audioError = true;
         setPlayingUI(false);
         if (MUSIC_TRACKS.length) artistEl.textContent = T('待添加音频文件');
@@ -3977,6 +4030,7 @@
         if (audio.paused) {
             play();
         } else {
+            wantPlay = false;
             audio.pause();
             rememberPaused();
         }
