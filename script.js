@@ -3878,6 +3878,7 @@
     var srcQueue = [];
     var srcPos = 0;
     var wantPlay = false;
+    var pausedByUser = false;
 
     function pausedBefore() {
         try { return localStorage.getItem(PREF_KEY) === '1'; } catch (e) { return false; }
@@ -3894,6 +3895,31 @@
         var api = window.__apiUrl ? window.__apiUrl('/' + rel) : '';
         return (api && api !== rel) ? [api, rel] : [rel];
     }
+
+    // 记住当前曲目与播放位置，切换页面后接着放而不是从头开始
+    var STATE_KEY = 'znine_music_state';
+    var seekPending = 0;
+    var lastSavedAt = 0;
+
+    function readState() {
+        try {
+            var s = JSON.parse(localStorage.getItem(STATE_KEY) || 'null');
+            if (s && typeof s.i === 'number' && s.i >= 0 && s.i < MUSIC_TRACKS.length) return s;
+        } catch (e) {}
+        return null;
+    }
+    function saveState() {
+        if (!MUSIC_TRACKS.length) return;
+        try {
+            localStorage.setItem(STATE_KEY, JSON.stringify({
+                i: current,
+                t: audio.currentTime || 0,
+                p: !audio.paused && !audio.ended
+            }));
+        } catch (e) {}
+    }
+    window.addEventListener('pagehide', saveState);
+    window.addEventListener('beforeunload', saveState);
 
     function setPlayingUI(on) {
         disc.classList.toggle('playing', on);
@@ -3949,7 +3975,7 @@
         });
     }
 
-    function load(i, autoPlay) {
+    function load(i, autoPlay, seekTo) {
         if (!MUSIC_TRACKS.length) return;
         current = (i + MUSIC_TRACKS.length) % MUSIC_TRACKS.length;
         var t = MUSIC_TRACKS[current];
@@ -3959,6 +3985,7 @@
         audioError = false;
         srcQueue = sourcesFor(t);
         srcPos = 0;
+        seekPending = (typeof seekTo === 'number' && seekTo > 0) ? seekTo : 0;
         audio.src = srcQueue[0];
         renderList();
         if (autoPlay) {
@@ -3971,6 +3998,7 @@
     function play() {
         if (!MUSIC_TRACKS.length) return;
         wantPlay = true;
+        pausedByUser = false;
         var p = audio.play();
         if (p && p.catch) p.catch(function () {
             wantPlay = false;
@@ -3979,15 +4007,15 @@
         });
     }
 
-    // 浏览器拦截自动播放时，等用户第一次点击/按键再把第一首接上；主动暂停过就不再接
+    // 浏览器拦截自动播放时，等用户第一次点击/按键再把音乐接上；主动暂停过就不再接
     var gestureArmed = false;
     function armGestureAutoplay() {
-        if (gestureArmed || pausedBefore()) return;
+        if (gestureArmed || pausedByUser) return;
         gestureArmed = true;
         var kick = function () {
             document.removeEventListener('pointerdown', kick, true);
             document.removeEventListener('keydown', kick, true);
-            if (!pausedBefore() && audio.paused) {
+            if (!pausedByUser && audio.paused) {
                 wantPlay = true;
                 var p = audio.play();
                 if (p && p.catch) p.catch(function () { wantPlay = false; });
@@ -3998,6 +4026,22 @@
     }
 
     audio.addEventListener('playing', function () { setPlayingUI(true); });
+    audio.addEventListener('loadedmetadata', function () {
+        if (seekPending > 0) {
+            try {
+                var d = isFinite(audio.duration) ? audio.duration : 0;
+                audio.currentTime = d > 1 ? Math.min(seekPending, d - 0.5) : seekPending;
+            } catch (e) {}
+            seekPending = 0;
+        }
+        saveState();
+    });
+    audio.addEventListener('timeupdate', function () {
+        if (Math.abs(audio.currentTime - lastSavedAt) >= 3) {
+            lastSavedAt = audio.currentTime;
+            saveState();
+        }
+    });
     audio.addEventListener('pause', function () { setPlayingUI(false); });
     audio.addEventListener('ended', function () { load(current + 1, true); });
     audio.addEventListener('error', function () {
@@ -4031,8 +4075,10 @@
             play();
         } else {
             wantPlay = false;
+            pausedByUser = true;
             audio.pause();
             rememberPaused();
+            saveState();
         }
     });
     prevBtn.addEventListener('click', function () { load(current - 1, true); });
@@ -4060,10 +4106,17 @@
         if (e.key === 'Escape') panel.classList.remove('open');
     });
 
+    // 恢复到上一个页面播放到的曲目和位置，接着放而不是从头开始
+    var saved = readState();
     renderList();
     if (MUSIC_TRACKS.length) {
-        load(0, false);
-        // 上次暂停过就不再自动播放；否则尝试自动播放（浏览器可能拦截，拦截后保持暂停）
-        if (!pausedBefore()) play();
+        if (saved) {
+            load(saved.i, false, saved.t);
+            if (saved.p) play();
+        } else {
+            load(0, false);
+            // 上次暂停过就不再自动播放；否则尝试自动播放（浏览器可能拦截，拦截后等首次交互接上）
+            if (!pausedBefore()) play();
+        }
     }
 })();
