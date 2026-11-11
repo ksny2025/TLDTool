@@ -6978,3 +6978,96 @@ html[data-theme="dark"] .theme-btn:hover {
         min-height: 36px;
     }
 }
+
+/* ===== 浅色主题补充：修复浅色下不可读的控件 ===== */
+html[data-theme="light"] .top-lang {
+    background: #fbfbfb !important;
+    border: 1px solid #d9d9d9 !important;
+    color: #1a1a1a !important;
+}
+
+html[data-theme="light"] .top-lang:hover {
+    background: #f2f2f2 !important;
+    border-color: #c9c9c9 !important;
+}
+
+html[data-theme="light"] .loader-step {
+    background: #fbfbfb;
+    border-color: #e4e7ec;
+}
+
+html[data-theme="light"] .loader-step-title {
+    color: #1e232b;
+}
+
+html[data-theme="light"] .loader-variant-btn {
+    background: #ffffff;
+    border-color: #d9d9d9;
+}
+
+html[data-theme="light"] .loader-variant-btn b {
+    color: #1e232b;
+}
+
+html[data-theme="light"] .loader-variant-btn span {
+    color: #5a6472;
+}
+
+html[data-theme="light"] .loader-variant-btn.selected {
+    background: #eaf3ff;
+    border-color: #0067c0;
+}
+
+html[data-theme="light"] .loader-btn:not(.primary),
+html[data-theme="light"] .loader-mini-btn {
+    background: #fbfbfb;
+    border-color: #d9d9d9;
+    color: #1a1a1a;
+}
+
+html[data-theme="light"] .loader-btn:not(.primary):hover,
+html[data-theme="light"] .loader-mini-btn:hover {
+    background: #f2f2f2;
+    border-color: #c9c9c9;
+    color: #1a1a1a;
+}
+
+html[data-theme="light"] .loader-state {
+    background: #eef1f5;
+    color: #5a6472;
+}
+
+html[data-theme="light"] .loader-path-input {
+    background: #ffffff;
+    border-color: #d9d9d9;
+    color: #1e232b;
+}
+
+html[data-theme="light"] .loader-log {
+    background: #f7f8fa;
+    border-color: #e4e7ec;
+    color: #3c4655;
+}
+
+html[data-theme="light"] .tld-page-btn {
+    background: #fbfbfb;
+    border-color: #d9d9d9;
+    color: #5a6472;
+}
+
+html[data-theme="light"] .tld-page-btn:hover:not(.disabled) {
+    color: #1e232b;
+    border-color: #c9c9c9;
+}
+
+html[data-theme="light"] .tld-page-btn.active {
+    background: #0067c0;
+    border-color: #0067c0;
+    color: #ffffff;
+}
+
+/* 深色主题：搜索框清除按钮的悬停反馈 */
+html[data-theme="dark"] .dl-search-clear:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #e8e8e8 !important;
+}
