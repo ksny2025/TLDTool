@@ -4291,9 +4291,9 @@ main.main-content {
     overflow: hidden;
 }
 
-.hc-meta {
+.home-card-item .hc-meta {
     margin-top: auto;
-    padding-right: 54px;
+    padding-right: 64px;
     font-size: 10.5px;
     color: #77879d;
     white-space: nowrap;
@@ -4301,14 +4301,16 @@ main.main-content {
     text-overflow: ellipsis;
 }
 
-.hc-dl {
+.home-card-item .hc-dl {
     position: absolute;
     right: 9px;
     bottom: 9px;
     margin: 0;
     padding: 4px 10px;
+    min-height: 0;
     border-radius: 5px;
     font-size: 11px;
+    line-height: 1.4;
     box-shadow: none;
 }
 
