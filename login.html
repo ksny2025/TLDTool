@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLD 账号登录</title>
+<style>
+    :root {
+        --bg-base: #101216;
+        --bg-card: rgba(24, 30, 44, 0.62);
+        --border-soft: rgba(255, 255, 255, 0.07);
+        --border-glow: rgba(122, 148, 176, 0.35);
+        --accent-cyan: #7a94b0;
+        --accent-teal: #7ea09c;
+        --text-main: #e8edf5;
+        --text-muted: #8b9bb0;
+        --text-dim: #6b7a90;
+        --radius-lg: 22px;
+        --shadow-deep: 0 24px 48px -16px rgba(0, 0, 0, 0.65);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", "微软雅黑", sans-serif; }
+
+    html, body { min-height: 100vh; }
+
+    body {
+        background-color: var(--bg-base);
+        background-image:
+            radial-gradient(circle at 18% 22%, rgba(122, 148, 176, 0.14) 0%, transparent 45%),
+            radial-gradient(circle at 82% 70%, rgba(134, 144, 158, 0.12) 0%, transparent 50%),
+            radial-gradient(circle at 50% 100%, rgba(126, 160, 156, 0.08) 0%, transparent 55%);
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 420px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-deep);
+        backdrop-filter: blur(18px);
+        padding: 34px 30px 26px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+
+    .logo {
+        width: 42px; height: 42px; border-radius: 13px;
+        background: linear-gradient(140deg, var(--accent-cyan), var(--accent-teal));
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 17px; color: #101216; letter-spacing: 0.5px;
+    }
+
+    .brand h1 { font-size: 19px; font-weight: 600; letter-spacing: 0.3px; }
+    .brand p { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+
+    .field { margin-bottom: 15px; }
+
+    .field label {
+        display: block; font-size: 12.5px; color: var(--text-muted); margin-bottom: 7px;
+    }
+
+    .field input {
+        width: 100%; height: 44px; padding: 0 13px;
+        background: rgba(10, 14, 20, 0.55);
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        color: var(--text-main);
+        font-size: 14px;
+        outline: none;
+        transition: border-color .18s, box-shadow .18s;
+    }
+
+    .field input:focus {
+        border-color: var(--border-glow);
+        box-shadow: 0 0 0 3px rgba(122, 148, 176, 0.12);
+    }
+
+    .field input::placeholder { color: var(--text-dim); }
+
+    .pwd { position: relative; }
+    .pwd input { padding-right: 60px; }
+
+    .pwd button {
+        position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; color: var(--text-dim);
+        font-size: 12px; cursor: pointer; padding: 6px 8px; border-radius: 8px;
+    }
+
+    .pwd button:hover { color: var(--text-muted); background: rgba(255,255,255,0.04); }
+
+    .error {
+        display: none; font-size: 12.5px; color: #e08c8c;
+        background: rgba(224, 140, 140, 0.08);
+        border: 1px solid rgba(224, 140, 140, 0.18);
+        border-radius: 10px; padding: 9px 12px; margin-bottom: 14px;
+    }
+
+    .error.show { display: block; }
+
+    .submit {
+        width: 100%; height: 45px; border: none; border-radius: 12px;
+        background: linear-gradient(120deg, var(--accent-cyan), var(--accent-teal));
+        color: #0f1216; font-size: 14.5px; font-weight: 600; letter-spacing: 0.5px;
+        cursor: pointer; transition: filter .18s, transform .18s;
+    }
+
+    .submit:hover { filter: brightness(1.08); }
+    .submit:active { transform: translateY(1px); }
+    .submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .foot {
+        margin-top: 18px; display: flex; justify-content: space-between;
+        font-size: 12px; color: var(--text-dim);
+    }
+
+    .foot a { color: var(--text-muted); text-decoration: none; }
+    .foot a:hover { color: var(--accent-cyan); }
+
+    /* 登录成功视图 */
+    .done { display: none; }
+    .done.show { display: block; }
+
+    .done h2 { font-size: 18px; margin-bottom: 6px; }
+    .done .hint { font-size: 12.5px; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px; }
+
+    .token-box {
+        display: flex; gap: 8px; align-items: center;
+        background: rgba(10, 14, 20, 0.6);
+        border: 1px solid var(--border-soft);
+        border-radius: 12px; padding: 10px 12px;
+    }
+
+    .token-box code {
+        flex: 1; font-family: Consolas, monospace; font-size: 11.5px;
+        color: var(--text-muted); word-break: break-all; line-height: 1.5;
+        max-height: 66px; overflow: auto;
+    }
+
+    .copy {
+        flex: none; height: 30px; padding: 0 12px; border-radius: 9px;
+        border: 1px solid var(--border-soft); background: rgba(255,255,255,0.05);
+        color: var(--text-main); font-size: 12px; cursor: pointer;
+    }
+
+    .copy:hover { border-color: var(--border-glow); }
+
+    .meta { margin-top: 14px; font-size: 12px; color: var(--text-dim); }
+    .meta b { color: var(--text-muted); font-weight: 500; }
+
+    .back { margin-top: 18px; text-align: center; font-size: 12.5px; }
+    .back a { color: var(--text-muted); text-decoration: none; }
+    .back a:hover { color: var(--accent-cyan); }
+
+    @media (max-width: 460px) {
+        .card { padding: 26px 20px 20px; }
+    }
+</style>
+</head>
+<body>
+<div class="card">
+    <div class="brand">
+        <div class="logo">TLD</div>
+        <div>
+            <h1>账号登录</h1>
+            <p id="appName">Long Drive 社区账号</p>
+        </div>
+    </div>
+
+    <form id="loginForm" autocomplete="on">
+        <div class="error" id="errBox"></div>
+
+        <div class="field">
+            <label for="account">邮箱或用户名</label>
+            <input id="account" type="text" placeholder="you@example.com" autocomplete="username" required>
+        </div>
+
+        <div class="field">
+            <label for="password">密码</label>
+            <div class="pwd">
+                <input id="password" type="password" placeholder="请输入密码" autocomplete="current-password" required>
+                <button type="button" id="togglePwd">显示</button>
+            </div>
+        </div>
+
+        <button class="submit" id="submitBtn" type="submit">登录</button>
+    </form>
+
+    <div class="foot">
+        <a href="https://znine.fun/index.html" target="_blank" rel="noopener">没有账号？去注册</a>
+        <a href="https://znine.fun/index.html" target="_blank" rel="noopener">忘记密码</a>
+    </div>
+
+    <div class="done" id="doneBox">
+        <h2>登录成功</h2>
+        <p class="hint" id="doneHint">凭据已生成，可复制下面的 Token 给你的软件使用。</p>
+        <div class="token-box">
+            <code id="tokenText"></code>
+            <button class="copy" id="copyBtn" type="button">复制</button>
+        </div>
+        <div class="meta">账号：<b id="doneUser"></b></div>
+        <div class="back"><a href="https://znine.fun/index.html">返回主站</a></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var params = new URLSearchParams(location.search);
+    var redirect = params.get('redirect') || '';
+    var appName = params.get('app') || '';
+
+    if (appName) {
+        document.getElementById('appName').textContent = appName;
+        document.title = appName + ' 登录';
+    }
+
+    function apiBase() {
+        var h = location.hostname;
+        if (location.protocol === 'file:' || h === 'localhost' || h === '127.0.0.1') {
+            return 'http://localhost:18080';
+        }
+        return 'https://api.znine.fun:54037';
+    }
+
+    var errBox = document.getElementById('errBox');
+    var form = document.getElementById('loginForm');
+    var btn = document.getElementById('submitBtn');
+
+    function showError(msg) {
+        errBox.textContent = msg;
+        errBox.classList.add('show');
+    }
+
+    function clearError() {
+        errBox.textContent = '';
+        errBox.classList.remove('show');
+    }
+
+    document.getElementById('togglePwd').addEventListener('click', function () {
+        var input = document.getElementById('password');
+        var on = input.type === 'password';
+        input.type = on ? 'text' : 'password';
+        this.textContent = on ? '隐藏' : '显示';
+    });
+
+    function buildCallback(token, username) {
+        var url = new URL(redirect, location.href);
+        url.searchParams.set('token', token);
+        if (username) url.searchParams.set('username', username);
+        return url.toString();
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearError();
+
+        var account = document.getElementById('account').value.trim();
+        var password = document.getElementById('password').value;
+        if (!account || !password) {
+            showError('请填写账号和密码');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = '登录中...';
+
+        fetch(apiBase() + '/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: account, password: password })
+        }).then(function (r) {
+            return r.json().then(function (d) { return { status: r.status, data: d }; });
+        }).then(function (res) {
+            if (!res.data || !res.data.ok) {
+                throw new Error((res.data && res.data.error) || '登录失败（HTTP ' + res.status + '）');
+            }
+            var token = res.data.token;
+            var username = res.data.username || account;
+
+            try { localStorage.setItem('chat_token', token); } catch (err) {}
+
+            if (redirect) {
+                var target = buildCallback(token, username);
+                document.getElementById('doneHint').textContent = '登录成功，正在返回应用...';
+                if (window.opener) {
+                    try { window.opener.postMessage({ type: 'tld-login', token: token, username: username }, '*'); } catch (err) {}
+                }
+                window.location.replace(target);
+                return;
+            }
+
+            if (window.opener) {
+                try { window.opener.postMessage({ type: 'tld-login', token: token, username: username }, '*'); } catch (err) {}
+            }
+
+            form.style.display = 'none';
+            document.querySelector('.foot').style.display = 'none';
+            document.getElementById('doneBox').classList.add('show');
+            document.getElementById('tokenText').textContent = token;
+            document.getElementById('doneUser').textContent = username;
+        }).catch(function (err) {
+            showError(err.message || '网络错误，请稍后再试');
+        }).then(function () {
+            btn.disabled = false;
+            btn.textContent = '登录';
+        });
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', function () {
+        var text = document.getElementById('tokenText').textContent;
+        var done = function () {
+            var b = document.getElementById('copyBtn');
+            b.textContent = '已复制';
+            setTimeout(function () { b.textContent = '复制'; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, done);
+        } else {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+            done();
+        }
+    });
+})();
+</script>
+</body>
+</html>
