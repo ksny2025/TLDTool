@@ -66,6 +66,7 @@
                     '</div>' +
                 '</div>' +
                 '<button class="theme-btn" id="themeToggle" type="button" aria-label="切换深浅色"></button>' +
+                '<a class="top-login" id="topLoginBtn" href="' + base + 'login.html">登录</a>' +
                 '<button class="lang-btn top-lang" id="langBtn" type="button">EN</button>' +
             '</div>' +
         '</div>' +
@@ -76,6 +77,16 @@
             navItem('profile', '我的', 'profile.html') +
             '<div class="nav-slider" id="navSlider"></div>' +
         '</div>';
+
+    if (!document.getElementById('topLoginStyle')) {
+        var st = document.createElement('style');
+        st.id = 'topLoginStyle';
+        st.textContent = '.top-login{display:inline-flex;align-items:center;height:34px;padding:0 16px;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.3px;color:#0f1216;background:linear-gradient(120deg,#7a94b0,#7ea09c);text-decoration:none;white-space:nowrap;transition:filter .18s,transform .18s;flex:none}' +
+            '.top-login:hover{filter:brightness(1.08);transform:translateY(-1px)}' +
+            '.top-login:active{transform:translateY(0)}' +
+            '@media (max-width:560px){.top-login{height:31px;padding:0 12px;font-size:12px}}';
+        document.head.appendChild(st);
+    }
 
     var slider = aside.querySelector('#navSlider');
     var act = aside.querySelector('.nav-item.active');
