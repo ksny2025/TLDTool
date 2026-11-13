@@ -168,7 +168,7 @@
         <div class="logo">TLD</div>
         <div>
             <h1>账号登录</h1>
-            <p id="appName">Long Drive 社区账号</p>
+            <p id="appName" hidden></p>
         </div>
     </div>
 
@@ -215,7 +215,9 @@
     var appName = params.get('app') || '';
 
     if (appName) {
-        document.getElementById('appName').textContent = appName;
+        var sub = document.getElementById('appName');
+        sub.textContent = appName;
+        sub.hidden = false;
         document.title = appName + ' 登录';
     }
 
