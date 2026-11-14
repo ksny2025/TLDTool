@@ -446,6 +446,23 @@ html[data-theme="light"] .download-grid .software-card{
     border-radius:10px !important;
     box-shadow:var(--fz-shadow) !important;
 }
+/* 卡片上的分类：空心紫点 + 文字，与参考站一致 */
+html[data-theme="light"] .software-card .software-cat{
+    display:inline-flex !important;
+    align-items:center !important;
+    gap:6px !important;
+    font-size:12px !important;
+    font-weight:400 !important;
+    color:#5c6169 !important;
+    line-height:1 !important;
+}
+html[data-theme="light"] .software-card .software-cat::before{
+    content:"" !important;
+    width:7px;height:7px;
+    border:2px solid #6c6cee;
+    border-radius:50%;
+    flex:0 0 auto;
+}
 html[data-theme="light"] .card-pane .dl-tabs{border-color:rgba(0,0,0,.05) !important}
 html[data-theme="light"] .dl-tab{color:#777 !important}
 html[data-theme="light"] .dl-tab.active{color:#6c6cee !important;border-color:#6c6cee !important}
