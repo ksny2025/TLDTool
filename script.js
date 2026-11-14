@@ -970,6 +970,8 @@
     var CATS = ['工具', '游戏', 'apk', '文件', '软件'];
     var TLD_SUBS = ['模组', '存档'];
     var viewedIds = {};
+    // 同一标签页内已浏览过的资源要跨页面切换保留，避免来回切页重复计数
+    try { viewedIds = JSON.parse(sessionStorage.getItem('viewed_res') || '{}') || {}; } catch (e) { viewedIds = {}; }
 
     function num(v) { return typeof v === 'number' ? v : ((v && v.length) || 0); }
     function heat(s) {
@@ -2131,6 +2133,7 @@
         swDetail.querySelector('.tld-detail').scrollTop = 0;
         if (!viewedIds[item.id]) {
             viewedIds[item.id] = true;
+            try { sessionStorage.setItem('viewed_res', JSON.stringify(viewedIds)); } catch (e) {}
             apiPost('/api/resource_view', { id: item.id }).then(function(res) {
                 if (res && res.ok) {
                     item.views = res.views;
@@ -3542,7 +3545,15 @@
         post('/api/ping', { cid: cid }).then(updateAll).catch(function() {});
     }
 
-    post('/api/visit').then(ping).catch(function() {});
+    // 总浏览量按标签页会话计一次，页面间来回切换不再重复累加
+    var pvCounted = false;
+    try { pvCounted = sessionStorage.getItem('pv_counted') === '1'; } catch (e) {}
+    if (pvCounted) {
+        ping();
+    } else {
+        try { sessionStorage.setItem('pv_counted', '1'); } catch (e) {}
+        post('/api/visit').then(ping).catch(function() {});
+    }
     ping();
     setInterval(ping, 5000);
 
