@@ -973,7 +973,7 @@
 
     function num(v) { return typeof v === 'number' ? v : ((v && v.length) || 0); }
     function heat(s) {
-        return (downloads[s.name] || 0) * 3 + num(s.likes) * 5 + num(s.favs) * 4 + num(s.views) + ((s.replies || []).length) * 2;
+        return (downloads[s.id] || 0) * 3 + num(s.likes) * 5 + num(s.favs) * 4 + num(s.views) + ((s.replies || []).length) * 2;
     }
 
     function isAdmin() { return localStorage.getItem('chat_admin') === '1'; }
@@ -1048,7 +1048,7 @@
         } else if (sortMode === 'hot') {
             out.sort(function(a, b) { return heat(b) - heat(a); });
         } else if (sortMode === 'dl') {
-            out.sort(function(a, b) { return (downloads[b.name] || 0) - (downloads[a.name] || 0); });
+            out.sort(function(a, b) { return (downloads[b.id] || 0) - (downloads[a.id] || 0); });
         }
         return out;
     }
@@ -1089,7 +1089,7 @@
            + '<span title="' + T('点赞') + '">♡ ' + num(s.likes) + '</span>'
            + '<span title="' + T('收藏') + '">★ ' + num(s.favs) + '</span>'
            + '<span title="' + T('回复') + '">✎ ' + (s.replies || []).length + '</span>'
-           + '<span class="dl-count" title="' + T('下载') + '" data-soft="' + esc(s.name) + '">' + (downloads[s.name] || 0) + '</span>'
+           + '<span class="dl-count" title="' + T('下载') + '" data-soft="' + esc(s.id) + '">' + (downloads[s.id] || 0) + '</span>'
            + '</div>';
         if (mirrors(s).length) {
             h += '<button type="button" class="download-btn" data-id="' + esc(s.id) + '">' + T('下载') + '</button>';
@@ -1132,7 +1132,7 @@
         var hcVer = String(s.version || '-').replace(/^v\s*/i, '');
         h += '<div class="hc-meta">v' + esc(hcVer)
            + ' · ' + esc(s.size || '-')
-           + ' · ' + esc(T('下载')) + ' ' + (downloads[s.name] || 0) + '</div>';
+           + ' · ' + esc(T('下载')) + ' ' + (downloads[s.id] || 0) + '</div>';
         h += '</div>';
         if (mirrors(s).length) {
             h += '<button type="button" class="download-btn hc-dl" data-id="' + esc(s.id) + '">' + T('下载') + '</button>';
@@ -1145,7 +1145,7 @@
         return '<button type="button" class="hot-row" data-id="' + esc(s.id) + '">'
              + '<span class="hot-rank">' + (index + 1) + '</span>'
              + '<span class="hot-name">' + esc(s.name) + '</span>'
-             + '<span class="hot-meta">↓ ' + (downloads[s.name] || 0) + '</span>'
+             + '<span class="hot-meta">↓ ' + (downloads[s.id] || 0) + '</span>'
              + '</button>';
     }
 
@@ -2030,7 +2030,7 @@
     function updateDetailStats() {
         if (!detailItem) return;
         swDetail.querySelector('#swDetailStats').innerHTML =
-            '<span>' + T('下载') + ' ' + (downloads[detailItem.name] || 0) + '</span>' +
+            '<span>' + T('下载') + ' ' + (downloads[detailItem.id] || 0) + '</span>' +
             '<span>' + T('浏览') + ' ' + num(detailItem.views) + '</span>' +
             '<span>' + T('点赞') + ' ' + num(detailItem.likes) + '</span>' +
             '<span>' + T('收藏') + ' ' + num(detailItem.favs) + '</span>';
@@ -3527,11 +3527,12 @@
         var card = btn.closest('.software-card');
         if (!card) return;
         var name = card.getAttribute('data-name') || '';
-        if (!name) return;
-        post('/api/download', { name: name }).then(function(res) {
+        var sid = card.getAttribute('data-id') || '';
+        if (!sid && !name) return;
+        post('/api/download', { id: sid, name: name }).then(function(res) {
             if (!res.ok) return;
             document.querySelectorAll('.dl-count').forEach(function(span) {
-                if (span.getAttribute('data-soft') === name) {
+                if (span.getAttribute('data-soft') === sid) {
                     span.textContent = res.count;
                 }
             });
