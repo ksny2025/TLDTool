@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全部资源 - BENBAIJIE 资源站（新版样式预览）</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<style>
+  :root{
+    --bg:#f5f6f7;
+    --card:#fff;
+    --ink:#4e5358;
+    --muted:#777;
+    --line:#eceef1;
+    --blue:#648ff5;
+    --indigo:#6c6cee;
+    --pink:#ff6699;
+    --red:#ff4757;
+    --radius:10px;
+    --shadow:0 15px 20px rgba(0,0,0,.05);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;overflow-x:hidden}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans","Microsoft YaHei",sans-serif;
+    font-size:14px;line-height:1.6;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+
+  /* ---------- 顶部两行导航 ---------- */
+  .site-header{background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.04);position:sticky;top:0;z-index:30}
+  .h-row1{display:flex;align-items:center;gap:18px;height:60px}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:19px;letter-spacing:.5px}
+  .logo-mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--indigo));display:grid;place-items:center;color:#fff;font-size:14px}
+  .quick-links{display:flex;align-items:center;gap:16px;color:#6b7075;font-size:13px}
+  .quick-links span{display:inline-flex;gap:5px;align-items:center}
+  .dot-red{width:15px;height:15px;border-radius:50%;background:var(--red);color:#fff;font-size:9px;display:grid;place-items:center}
+  .h-tools{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .icon-btn{width:34px;height:34px;border-radius:50%;background:#f4f5f7;display:grid;place-items:center;color:#5b6065;font-size:15px}
+  .icon-btn:hover{background:#eceef1}
+  .login-btn{padding:0 16px;height:34px;border-radius:999px;background:linear-gradient(135deg,var(--blue),var(--indigo));color:#fff;font-size:13px;display:inline-flex;align-items:center}
+  .h-row2{border-top:1px solid #f1f2f4}
+  .nav-list{display:flex;align-items:center;gap:22px;height:42px;overflow-x:auto}
+  .nav-list::-webkit-scrollbar{display:none}
+  .nav-item{display:inline-flex;align-items:center;gap:6px;color:#5b6065;font-size:13.5px;white-space:nowrap;padding:4px 0;border-bottom:2px solid transparent}
+  .nav-item:hover{color:var(--indigo)}
+  .nav-item.on{color:var(--indigo);border-color:var(--indigo);font-weight:600}
+
+  /* ---------- Banner ---------- */
+  .banner{position:relative;height:250px;overflow:hidden;
+    background:
+      radial-gradient(120% 90% at 50% 108%, rgba(255,214,170,.55), transparent 60%),
+      radial-gradient(60% 55% at 72% 62%, rgba(255,138,170,.35), transparent 70%),
+      linear-gradient(180deg,#20233c 0%,#3a3352 30%,#7c5570 58%,#c07a7a 78%,#e8ae8c 100%);
+  }
+  .banner::after{content:"";position:absolute;left:0;right:0;bottom:0;height:96px;
+    background:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath fill='%23231f38' fill-opacity='.75' d='M0 120V78h40v-18h26v18h22V54h30v24h18V66h34v12h20V40h28v40h26V60h30v18h22V48h30v30h24V70h28v8h20V44h30v34h26V62h30v16h22V52h30v26h24V72h28v6h20V58h30v20h26V68h30v10h22V50h30v28h24V74h28v4h20V62h30v16h26V70h30v8h22V56h30v22h24V76h28v2h20V66h30v12h26V72h30v6h22V60h30v18h24V78h28v-2h20v44z'/%3E%3C/svg%3E") bottom/100% 96px no-repeat;
+    pointer-events:none;
+  }
+  .banner-mask{position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,18,34,.45),rgba(16,18,34,.18) 50%,rgba(245,246,247,.92))}
+  .banner-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;text-align:center;padding-bottom:26px}
+  .banner-title{font-size:26px;font-weight:700;letter-spacing:1px;text-shadow:0 2px 12px rgba(0,0,0,.35);display:flex;align-items:center;gap:10px}
+  .banner-count{font-size:13px;font-weight:400;opacity:.85}
+  .banner-sub{font-size:13px;opacity:.85}
+
+  /* ---------- 筛选面板 ---------- */
+  .filter-panel{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-top:-34px;position:relative;z-index:5;padding:6px 18px}
+  .filter-row{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid #f4f5f7}
+  .filter-row:last-child{border-bottom:0}
+  .filter-label{flex:0 0 auto;color:#8a8f95;font-size:13px;display:flex;align-items:center;gap:6px;padding-top:3px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:3px 12px;border-radius:8px;background:#f4f5f7;color:#5b6065;font-size:13px;border:1px solid transparent;transition:.15s}
+  .chip:hover{background:#eef0f3}
+  .chip.on{background:#eef2ff;border-color:var(--indigo);color:var(--indigo);font-weight:600}
+
+  /* ---------- 资源卡片 ---------- */
+  .list-head{display:flex;align-items:center;justify-content:space-between;margin:20px 2px 12px}
+  .list-head h2{margin:0;font-size:16px;font-weight:600}
+  .list-head span{color:#9aa0a6;font-size:12.5px}
+  .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+  .card{display:flex;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.5);overflow:hidden;transition:transform .18s,box-shadow .18s}
+  .card:hover{transform:translateY(-2px);box-shadow:0 18px 26px rgba(0,0,0,.08)}
+  .card-cover{flex:0 0 190px;height:135px;background:#e9ebef;overflow:hidden;position:relative}
+  .card-cover img{width:100%;height:100%;object-fit:cover;transition:transform .25s}
+  .card:hover .card-cover img{transform:scale(1.05)}
+  .card-body{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+  .tag{display:inline-block;align-self:flex-start;padding:1px 9px;border-radius:6px;background:#eef2ff;color:#5b7bd5;font-size:11.5px}
+  .card-title{margin:0;font-size:16px;font-weight:500;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card-desc{margin:0;font-size:13px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card-meta{margin-top:auto;display:flex;align-items:center;gap:16px;color:#8a8f95;font-size:12.5px}
+  .card-meta i{font-style:normal;margin-right:4px}
+
+  /* ---------- 分页 ---------- */
+  .pager{display:flex;justify-content:center;align-items:center;gap:8px;margin:26px 0 40px}
+  .pager button{min-width:34px;height:34px;border-radius:8px;background:#fff;box-shadow:var(--shadow);color:#5b6065}
+  .pager button.on{background:var(--indigo);color:#fff}
+  .pager button:disabled{opacity:.45}
+
+  /* ---------- 右侧悬浮 ---------- */
+  .dock{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:40}
+  .dock button{width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 8px 18px rgba(0,0,0,.1);color:#5b6065;font-size:16px;display:grid;place-items:center}
+  .dock button:hover{color:var(--indigo)}
+
+  @media(max-width:1100px){
+    .quick-links{display:none}
+  }
+  @media(max-width:860px){
+    .cards{grid-template-columns:1fr}
+    .banner{height:190px}
+    .banner-title{font-size:20px}
+    .quick-links{display:none}
+    .dock{display:none}
+    .card-cover{flex:0 0 120px;height:100px}
+  }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap h-row1">
+    <a class="logo" href="index.html"><span class="logo-mark">B</span>BENBAIJIE</a>
+    <nav class="quick-links">
+      <span>必备工具</span>
+      <span>永久发布地址</span>
+      <span>侵权处理 <span class="dot-red">删</span></span>
+    </nav>
+    <div class="h-tools">
+      <button class="icon-btn" title="搜索">⌕</button>
+      <button class="icon-btn" title="夜间模式">◐</button>
+      <button class="icon-btn" title="语言">A</button>
+      <a class="login-btn" href="login.html">登录</a>
+    </div>
+  </div>
+  <div class="h-row2">
+    <div class="wrap"><nav class="nav-list">
+      <a class="nav-item on" href="#">⌂ 首页</a>
+      <a class="nav-item" href="#">◇ 工具</a>
+      <a class="nav-item" href="#">▤ 游戏</a>
+      <a class="nav-item" href="#">◈ apk</a>
+      <a class="nav-item" href="#">▣ 软件</a>
+      <a class="nav-item" href="#">▧ 文件</a>
+      <a class="nav-item" href="#">◎ 全部资源</a>
+    </nav></div>
+  </div>
+</header>
+
+<section class="banner">
+  <div class="banner-mask"></div>
+  <div class="banner-inner">
+    <div class="banner-title"><span id="bannerIcon">▤</span><span id="bannerTitle">全部资源</span><span class="banner-count" id="bannerCount">共 0 篇</span></div>
+    <div class="banner-sub">工具 · 软件 · 游戏辅助，持续更新</div>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="filter-panel">
+    <div class="filter-row">
+      <div class="filter-label">☰ 分类：</div>
+      <div class="chips" id="catChips"></div>
+    </div>
+    <div class="filter-row">
+      <div class="filter-label">⇅ 排序：</div>
+      <div class="chips" id="sortChips">
+        <button class="chip on" data-sort="new">◔ 最新发布</button>
+        <button class="chip" data-sort="update">◑ 最近更新</button>
+        <button class="chip" data-sort="views">◉ 最多浏览</button>
+        <button class="chip" data-sort="likes">♡ 最多点赞</button>
+        <button class="chip" data-sort="replies">▤ 最多评论</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-head"><h2 id="listTitle">最近发布</h2><span id="listTip">共 0 条资源</span></div>
+  <div class="cards" id="cards"></div>
+  <div class="pager" id="pager"></div>
+</div>
+
+<div class="dock">
+  <button title="搜索">⌕</button>
+  <button title="刷新">↻</button>
+  <button title="返回顶部" onclick="scrollTo({top:0,behavior:'smooth'})">↑</button>
+  <button title="夜间模式">◐</button>
+</div>
+
+<script>
+(function(){
+  var state = { cat: 'all', sort: 'new', page: 1, size: 10 };
+  var all = [], cats = ['all'];
+
+  function fmt(n){ return n >= 1000 ? (n/1000).toFixed(1) + 'k' : String(n||0); }
+
+  function cardHTML(it){
+    var cover = it.image ? it.image : '';
+    var fallback = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="380" height="270"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#648ff5"/><stop offset="1" stop-color="#6c6cee"/></linearGradient></defs><rect width="380" height="270" fill="url(#g)"/><text x="190" y="150" font-size="54" fill="rgba(255,255,255,.9)" text-anchor="middle" font-family="sans-serif">' + (it.name||'R').slice(0,1) + '</text></svg>');
+    return '<a class="card" href="soft/' + it.id + '.html">' +
+      '<div class="card-cover"><img loading="lazy" src="' + (cover || fallback) + '" onerror="this.src=\'' + fallback + '\'" alt=""></div>' +
+      '<div class="card-body">' +
+        '<span class="tag">' + (it.category || '资源') + '</span>' +
+        '<h3 class="card-title">' + (it.name || '未命名资源') + '</h3>' +
+        '<p class="card-desc">' + (it.desc || '暂无简介') + '</p>' +
+        '<div class="card-meta"><span><i>◉</i>' + fmt(it.views) + ' 浏览</span><span><i>♡</i>' + fmt(it.likes) + '</span><span><i>▤</i>' + ((it.replies && it.replies.length) || 0) + '</span><span>' + (it.date || '') + '</span></div>' +
+      '</div></a>';
+  }
+
+  function renderCats(){
+    var html = '<button class="chip' + (state.cat==='all'?' on':'') + '" data-cat="all">全部</button>';
+    cats.forEach(function(c){
+      if (c === 'all') return;
+      html += '<button class="chip' + (state.cat===c?' on':'') + '" data-cat="' + c + '">' + c + '</button>';
+    });
+    document.getElementById('catChips').innerHTML = html;
+  }
+
+  function filtered(){
+    var list = all.filter(function(it){ return state.cat === 'all' || it.category === state.cat; });
+    var key = { new: 'date', update: 'date', views: 'views', likes: 'likes', replies: 'replies' }[state.sort];
+    list.sort(function(a,b){
+      if (key === 'replies') return ((b.replies&&b.replies.length)||0) - ((a.replies&&a.replies.length)||0);
+      if (key === 'date') return String(b.date||'').localeCompare(String(a.date||''));
+      return (b[key]||0) - (a[key]||0);
+    });
+    return list;
+  }
+
+  function render(){
+    var list = filtered();
+    var pages = Math.max(1, Math.ceil(list.length / state.size));
+    if (state.page > pages) state.page = pages;
+    var slice = list.slice((state.page-1)*state.size, state.page*state.size);
+    document.getElementById('cards').innerHTML = slice.map(cardHTML).join('') || '<p style="color:#9aa0a6">这个分类下还没有资源</p>';
+    document.getElementById('listTip').textContent = '共 ' + list.length + ' 条资源';
+    document.getElementById('bannerCount').textContent = '共 ' + list.length + ' 篇';
+    document.getElementById('listTitle').textContent = {new:'最近发布',update:'最近更新',views:'最多浏览',likes:'最多点赞',replies:'最多评论'}[state.sort];
+    var p = '';
+    for (var i=1;i<=pages;i++) p += '<button class="' + (i===state.page?'on':'') + '" data-page="' + i + '">' + i + '</button>';
+    document.getElementById('pager').innerHTML = p;
+  }
+
+  document.addEventListener('click', function(e){
+    var c = e.target.closest('[data-cat]');
+    if (c) { state.cat = c.dataset.cat; state.page = 1; renderCats(); render(); return; }
+    var s = e.target.closest('[data-sort]');
+    if (s) {
+      state.sort = s.dataset.sort; state.page = 1;
+      document.querySelectorAll('[data-sort]').forEach(function(b){ b.classList.toggle('on', b === s); });
+      render(); return;
+    }
+    var pg = e.target.closest('[data-page]');
+    if (pg) { state.page = +pg.dataset.page; render(); window.scrollTo({top: 0, behavior:'smooth'}); }
+  });
+
+  function loadData(){
+    return fetch('/api/software', {cache:'no-store'}).then(function(r){
+      if (!r.ok) throw new Error('local');
+      return r.json();
+    }).catch(function(){
+      return fetch('https://api.znine.fun:54037/api/software', {cache:'no-store'}).then(function(r){ return r.json(); });
+    });
+  }
+
+  loadData().then(function(d){
+    all = Array.isArray(d) ? d : (d.software || []);
+    var set = {};
+    all.forEach(function(it){ if (it && it.category) set[it.category] = 1; });
+    cats = ['all'].concat(Object.keys(set));
+    renderCats(); render();
+  }).catch(function(){
+    document.getElementById('cards').innerHTML = '<p style="color:#9aa0a6">后端未连接，无法加载资源列表。启动后端后刷新预览即可。</p>';
+  });
+})();
+</script>
+</body>
+</html>
