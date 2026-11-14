@@ -1134,7 +1134,8 @@
         var hcVer = String(s.version || '-').replace(/^v\s*/i, '');
         h += '<div class="hc-meta">v' + esc(hcVer)
            + ' · ' + esc(s.size || '-')
-           + ' · ' + esc(T('下载')) + ' ' + (downloads[s.id] || 0) + '</div>';
+           + ' · ' + esc(T('下载')) + ' ' + (downloads[s.id] || 0)
+           + ' · ' + esc(T('浏览')) + ' ' + num(s.views) + '</div>';
         h += '</div>';
         if (mirrors(s).length) {
             h += '<button type="button" class="download-btn hc-dl" data-id="' + esc(s.id) + '">' + T('下载') + '</button>';
@@ -1147,7 +1148,7 @@
         return '<button type="button" class="hot-row" data-id="' + esc(s.id) + '">'
              + '<span class="hot-rank">' + (index + 1) + '</span>'
              + '<span class="hot-name">' + esc(s.name) + '</span>'
-             + '<span class="hot-meta">↓ ' + (downloads[s.id] || 0) + '</span>'
+             + '<span class="hot-meta">◎ ' + num(s.views) + ' · ↓ ' + (downloads[s.id] || 0) + '</span>'
              + '</button>';
     }
 
@@ -3528,6 +3529,7 @@
     var statTotal = document.getElementById('statTotal');
     var statToday = document.getElementById('statToday');
     var statOnline = document.getElementById('statOnline');
+    var statDownloads = document.getElementById('statDownloads');
 
     function updateAll(res) {
         if (!res || !res.ok) return;
@@ -3535,6 +3537,13 @@
         if (statToday) statToday.textContent = res.today_pv;
         if (statOnline) statOnline.textContent = res.online;
         var downloads = res.downloads || {};
+        if (statDownloads) {
+            var dlSum = 0;
+            for (var k in downloads) {
+                if (Object.prototype.hasOwnProperty.call(downloads, k)) dlSum += Number(downloads[k]) || 0;
+            }
+            statDownloads.textContent = dlSum;
+        }
         document.querySelectorAll('.dl-count').forEach(function(span) {
             var n = downloads[span.getAttribute('data-soft')] || 0;
             span.textContent = n;
