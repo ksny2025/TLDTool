@@ -423,14 +423,28 @@ html[data-theme="light"] .card-pane{color:#4e5358 !important}
 html[data-theme="light"] .auth-tabs,
 html[data-theme="light"] .chat-subtabs{
     background:#f4f5f7 !important;
-    border:1px solid transparent !important;
+    border:0 !important;
     border-radius:10px !important;
+    padding:4px !important;
 }
-html[data-theme="light"] .auth-tab{color:#777 !important;background:transparent !important}
+html[data-theme="light"] .auth-tab{
+    color:#777 !important;
+    background:transparent !important;
+    border:1px solid transparent !important;
+    border-radius:8px !important;
+    box-shadow:none !important;
+}
 html[data-theme="light"] .auth-tab.active{
     background:#fff !important;
     color:#6c6cee !important;
+    border:0 !important;
     box-shadow:0 2px 8px -4px rgba(0,0,0,.18) !important;
+}
+html[data-theme="light"] .auth-error:empty{
+    display:none !important;
+    padding:0 !important;
+    border:0 !important;
+    background:none !important;
 }
 html[data-theme="light"] .auth-form input,
 html[data-theme="light"] .chat-input-row input,
