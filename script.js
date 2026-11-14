@@ -1571,8 +1571,14 @@
     // 有独立详情页时优先跳转，没有则退回弹窗
     function openDetailOrModal(item) {
         if (!item) return;
+        var path = 'soft/' + encodeURIComponent(item.id) + '.html';
         if (window.__DETAIL_IDS && window.__DETAIL_IDS[item.id]) {
-            location.href = siteRoot() + 'soft/' + encodeURIComponent(item.id) + '.html';
+            location.href = siteRoot() + path;
+            return;
+        }
+        // 新上传的资源页可能还没发布到 Pages，直接走后端同款详情页
+        if (window.__API_BASE) {
+            location.href = window.__API_BASE + '/' + path;
             return;
         }
         openSwDetail(item);
