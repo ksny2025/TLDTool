@@ -291,11 +291,18 @@ html[data-theme="light"] .home-card-item .software-img{
     min-width:190px !important;
     height:auto !important;
     min-height:142px !important;
+    aspect-ratio:auto !important;
+    margin:0 !important;
+    border:0 !important;
     border-radius:0 !important;
+    background:#eef0f3 !important;
+    box-shadow:none !important;
     overflow:hidden !important;
 }
+html[data-theme="light"] .home-card-item .software-img::after{display:none !important}
 html[data-theme="light"] .home-card-item .software-img img{
     width:100% !important;height:100% !important;object-fit:cover !important;
+    padding:0 !important;filter:none !important;transform:none !important;
     transition:transform .4s !important;
 }
 html[data-theme="light"] .home-card-item:hover .software-img img{transform:scale(1.05) !important}
