@@ -1713,6 +1713,18 @@
 
     function closeModal() { modal.style.display = 'none'; }
 
+    // 上传/编辑弹窗里是否已有用户填写的内容
+    function modalHasDraft() {
+        var ids = ['swName', 'swDesc', 'swVersion', 'swSize', 'swUrl', 'swPan', 'swQuark', 'swPan123', 'swBaidu'];
+        for (var i = 0; i < ids.length; i++) {
+            var el = document.getElementById(ids[i]);
+            if (el && el.value.trim()) return true;
+        }
+        if (pendingImage || pendingDropFile) return true;
+        var f = document.getElementById('swFile');
+        return !!(f && f.files && f.files.length);
+    }
+
     if (uploadBtn) uploadBtn.addEventListener('click', function() {
         if (!uploadAllowed()) { toast(T('上传功能已关闭，请联系管理员开启')); return; }
         if (!getToken()) { goLogin(); return; }
@@ -1758,7 +1770,14 @@
     if (swCatEl) swCatEl.addEventListener('change', syncSwSubField);
     var swCancelBtn = document.getElementById('swCancelBtn');
     if (swCancelBtn) swCancelBtn.addEventListener('click', closeModal);
-    if (modal) modal.addEventListener('click', function(e) { if (e.target === modal) closeModal(); });
+    if (modal) modal.addEventListener('click', function(e) {
+        if (e.target !== modal) return;
+        if (modalHasDraft()) {
+            toast('已填写的内容不会丢失，请点「取消」退出');
+            return;
+        }
+        closeModal();
+    });
 
     if (imgInput) imgInput.addEventListener('change', function() {
         var file = imgInput.files && imgInput.files[0];
