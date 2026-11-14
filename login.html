@@ -7,29 +7,28 @@
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <style>
     :root {
-        --bg-base: #101216;
-        --bg-card: rgba(24, 30, 44, 0.62);
-        --border-soft: rgba(255, 255, 255, 0.07);
-        --border-glow: rgba(122, 148, 176, 0.35);
-        --accent-cyan: #7a94b0;
-        --accent-teal: #7ea09c;
-        --text-main: #e8edf5;
-        --text-muted: #8b9bb0;
-        --text-dim: #6b7a90;
+        --bg-base: #f5f6f7;
+        --bg-card: #ffffff;
+        --border-soft: #eceef1;
+        --border-glow: rgba(108, 108, 238, 0.45);
+        --accent-cyan: #648ff5;
+        --accent-teal: #6c6cee;
+        --text-main: #4e5358;
+        --text-muted: #777777;
+        --text-dim: #9aa0a7;
         --radius-lg: 22px;
-        --shadow-deep: 0 24px 48px -16px rgba(0, 0, 0, 0.65);
+        --shadow-deep: 0 0 #0000, 0 15px 20px -5px rgba(0, 0, 0, 0.07), 0 6px 8px -5px rgba(0, 0, 0, 0.05);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", "微软雅黑", sans-serif; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, "Segoe UI", "微软雅黑", sans-serif; }
 
     html, body { min-height: 100vh; }
 
     body {
         background-color: var(--bg-base);
         background-image:
-            radial-gradient(circle at 18% 22%, rgba(122, 148, 176, 0.14) 0%, transparent 45%),
-            radial-gradient(circle at 82% 70%, rgba(134, 144, 158, 0.12) 0%, transparent 50%),
-            radial-gradient(circle at 50% 100%, rgba(126, 160, 156, 0.08) 0%, transparent 55%);
+            radial-gradient(circle at 18% 22%, rgba(100, 143, 245, 0.10) 0%, transparent 45%),
+            radial-gradient(circle at 82% 70%, rgba(108, 108, 238, 0.08) 0%, transparent 50%);
         color: var(--text-main);
         display: flex;
         align-items: center;
@@ -41,10 +40,9 @@
         width: 100%;
         max-width: 420px;
         background: var(--bg-card);
-        border: 1px solid var(--border-soft);
+        border: 1px solid rgba(0, 0, 0, 0.04);
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-deep);
-        backdrop-filter: blur(18px);
         padding: 30px 30px 24px;
     }
 
@@ -54,7 +52,7 @@
 
     .tabs {
         display: flex; gap: 4px; padding: 4px; margin-bottom: 20px;
-        background: rgba(10, 14, 20, 0.5);
+        background: #f4f5f7;
         border: 1px solid var(--border-soft);
         border-radius: 12px;
     }
@@ -66,7 +64,7 @@
         transition: background .18s, color .18s;
     }
 
-    .tab.active { background: rgba(122, 148, 176, 0.18); color: var(--text-main); }
+    .tab.active { background: rgba(108, 108, 238, 0.12); color: var(--text-main); }
 
     .field { margin-bottom: 14px; }
 
@@ -74,7 +72,7 @@
 
     .field input {
         width: 100%; height: 44px; padding: 0 13px;
-        background: rgba(10, 14, 20, 0.55);
+        background: #f7f8fa;
         border: 1px solid var(--border-soft);
         border-radius: 12px;
         color: var(--text-main);
@@ -99,7 +97,7 @@
         font-size: 12px; cursor: pointer; padding: 6px 8px; border-radius: 8px;
     }
 
-    .pwd button:hover { color: var(--text-muted); background: rgba(255,255,255,0.04); }
+    .pwd button:hover { color: var(--text-muted); background: #f0f1f4; }
 
     .code-row { display: flex; gap: 8px; }
     .code-row input { flex: 1; }
@@ -126,7 +124,7 @@
     .submit {
         width: 100%; height: 45px; border: none; border-radius: 12px;
         background: linear-gradient(120deg, var(--accent-cyan), var(--accent-teal));
-        color: #0f1216; font-size: 14.5px; font-weight: 600; letter-spacing: 0.5px;
+        color: #ffffff; font-size: 14.5px; font-weight: 600; letter-spacing: 0.5px;
         cursor: pointer; transition: filter .18s, transform .18s;
     }
 
@@ -149,7 +147,7 @@
     .done .hint { font-size: 13px; color: var(--text-muted); line-height: 1.8; margin-bottom: 16px; }
 
     .acct {
-        background: rgba(10, 14, 20, 0.6);
+        background: #f7f8fa;
         border: 1px solid var(--border-soft);
         border-radius: 12px; padding: 12px 14px;
         font-size: 13px; color: var(--text-muted); line-height: 1.9;
@@ -159,7 +157,7 @@
 
     .close-btn {
         width: 100%; height: 42px; margin-top: 16px; border-radius: 12px;
-        border: 1px solid var(--border-soft); background: rgba(255,255,255,0.06);
+        border: 1px solid var(--border-soft); background: #f4f5f7;
         color: var(--text-main); font-size: 13.5px; cursor: pointer;
     }
 
