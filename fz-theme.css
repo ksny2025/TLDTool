@@ -333,11 +333,13 @@ html[data-theme="light"] .software-card.home-card-item:hover{
     box-shadow:0 0 #0000,0 18px 26px -8px rgba(0,0,0,.1) !important;
 }
 html[data-theme="light"] .home-card-item .software-img{
+    position:relative !important;
     flex:0 0 190px !important;
     width:190px !important;
     min-width:190px !important;
     height:auto !important;
     min-height:142px !important;
+    align-self:stretch !important;
     aspect-ratio:auto !important;
     margin:0 !important;
     border:0 !important;
@@ -348,6 +350,8 @@ html[data-theme="light"] .home-card-item .software-img{
 }
 html[data-theme="light"] .home-card-item .software-img::after{display:none !important}
 html[data-theme="light"] .home-card-item .software-img img{
+    position:absolute !important;
+    inset:0 !important;
     width:100% !important;height:100% !important;object-fit:cover !important;
     padding:0 !important;filter:none !important;transform:none !important;
     transition:transform .4s !important;
@@ -387,6 +391,9 @@ html[data-theme="light"] .home-card-item .hc-meta{
     font-size:12.5px !important;
     font-weight:400 !important;
     color:#8b9097 !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
 }
 html[data-theme="light"] .home-card-item .hc-dl{
     align-self:center !important;
@@ -475,26 +482,31 @@ html[data-theme="light"] .software-card .software-cat::before{
     flex:0 0 auto;
 }
 /* 资源库列表卡片：封面贴左满高，不留白边 */
-html[data-theme="light"] #downloadGrid .software-img{
+html[data-theme="light"] .download-grid:not(.home-featured) .software-img{
+    position:relative !important;
     flex:0 0 190px !important;
     width:190px !important;
     min-width:190px !important;
     height:auto !important;
     min-height:132px !important;
+    align-self:stretch !important;
     aspect-ratio:auto !important;
     margin:0 !important;
     border:0 !important;
     border-radius:0 !important;
     background:#eef0f3 !important;
     box-shadow:none !important;
+    overflow:hidden !important;
 }
-html[data-theme="light"] #downloadGrid .software-img::after{display:none !important}
-html[data-theme="light"] #downloadGrid .software-img img{
+html[data-theme="light"] .download-grid:not(.home-featured) .software-img::after{display:none !important}
+html[data-theme="light"] .download-grid:not(.home-featured) .software-img img{
+    position:absolute !important;
+    inset:0 !important;
     width:100% !important;height:100% !important;
     padding:0 !important;object-fit:cover !important;
     filter:none !important;transform:none !important;
 }
-html[data-theme="light"] #downloadGrid .software-info{padding-left:15px !important}
+html[data-theme="light"] .download-grid:not(.home-featured) .software-info{padding-left:15px !important}
 html[data-theme="light"] .card-pane .dl-tabs{border-color:rgba(0,0,0,.05) !important}
 html[data-theme="light"] .dl-tab{color:#777 !important}
 html[data-theme="light"] .dl-tab.active{color:#6c6cee !important;border-color:#6c6cee !important}
@@ -627,4 +639,33 @@ html[data-theme="light"] ::-webkit-scrollbar-track{background:transparent !impor
     html[data-theme="light"] .portal-banner .pb-content{padding:0 14px 22px !important}
     html[data-theme="light"] .home-portal .portal-stats .stat-badge{font-size:12px !important;padding:2px 9px !important}
     html[data-theme="light"] .home-portal > .portal-main .portal-left > .portal-panel:nth-child(2){flex-wrap:wrap !important;gap:8px !important}
+}
+
+@media (max-width:720px){
+    html[data-theme="light"] .download-grid:not(.home-featured) .software-img{
+        flex:0 0 110px !important;
+        width:110px !important;
+        min-width:110px !important;
+        min-height:82px !important;
+    }
+    html[data-theme="light"] .download-grid:not(.home-featured) .software-info{
+        padding:10px 12px !important;
+        min-width:0 !important;
+    }
+}
+
+@media (max-width:640px){
+    html[data-theme="light"] .topbar{padding:8px 10px !important;gap:8px !important}
+    html[data-theme="light"] .nav-links{padding:6px 10px 8px !important;gap:2px !important}
+    html[data-theme="light"] .nav-item{padding:4px 10px !important;font-size:13px !important}
+    html[data-theme="light"] .portal-banner{min-height:160px !important}
+    html[data-theme="light"] .portal-banner .pb-title{font-size:17px !important}
+    html[data-theme="light"] .portal-banner .pb-content{padding:0 12px 20px !important;gap:6px !important}
+    html[data-theme="light"] .portal-cat{padding:5px 10px !important;font-size:12.5px !important}
+    html[data-theme="light"] .portal-icons{grid-template-columns:repeat(3,minmax(0,1fr)) !important;padding:10px !important}
+    html[data-theme="light"] .home-card-item .hc-body{padding:10px 12px !important}
+    html[data-theme="light"] .home-card-item .hc-name{font-size:14.5px !important}
+    html[data-theme="light"] .home-card-item .hc-desc{font-size:12.5px !important;-webkit-line-clamp:2 !important}
+    html[data-theme="light"] .home-card-item .hc-meta{font-size:11.5px !important}
+    html[data-theme="light"] .home-card-item .hc-dl{margin-right:8px !important;padding:0 10px !important}
 }
