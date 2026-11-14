@@ -125,7 +125,7 @@
         themeBtn.addEventListener('click', function () {
             var next = currentTheme() === 'light' ? 'dark' : 'light';
             rootEl.setAttribute('data-theme', next);
-            try { localStorage.setItem('site_theme', next); } catch (e) {}
+            try { localStorage.setItem('site_theme_v2', next); } catch (e) {}
             paintTheme();
             syncTopbarHeight();
         });
