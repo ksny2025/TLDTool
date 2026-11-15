@@ -17,6 +17,32 @@
             '" href="' + base + file + '">' + label + '</a>';
     }
 
+    // 导航下拉：资源分类（点一下展开/再点收起）
+    var navCats = ['全部', '工具', '游戏', 'apk', '文件', '软件'];
+    var curCat = '';
+    try {
+        curCat = new URLSearchParams(location.search).get('cat') || '';
+    } catch (e) {}
+    function dropLink(cat, label) {
+        var href = base + 'library.html' + (cat === '全部' ? '' : '?cat=' + encodeURIComponent(cat));
+        var on = (cat === '全部' ? (!curCat || curCat === '全部') : curCat === cat);
+        return '<a href="' + href + '" role="menuitem"' + (on ? ' class="on"' : '') + '>' + label + '</a>';
+    }
+    var dropHtml = '<div class="nav-drop-wrap">' +
+        '<a class="nav-item nav-drop-trigger' + (active === 'library' ? ' active' : '') + '" data-page="library"' +
+            ' href="' + base + 'library.html" aria-haspopup="true" aria-expanded="false">资源库' +
+            '<svg class="nav-drop-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
+        '</a>' +
+        '<div class="nav-dropdown" id="navDropdown" role="menu" aria-label="资源分类">' +
+            dropLink('全部', '全部资源') +
+            dropLink('工具', '工具') +
+            dropLink('游戏', '游戏') +
+            dropLink('apk', 'apk') +
+            dropLink('文件', '文件') +
+            dropLink('软件', '软件') +
+        '</div>' +
+    '</div>';
+
     aside.innerHTML =
         '<div class="topbar">' +
             '<a class="logo-area" href="' + base + 'index.html" aria-label="BENBAIJIE 资源下载站首页">' +
@@ -72,7 +98,7 @@
         '</div>' +
         '<div class="nav-links">' +
             navItem('home', '主页', 'index.html') +
-            navItem('library', '资源库', 'library.html') +
+            dropHtml +
             navItem('chat', '聊天', 'chat.html') +
             navItem('profile', '我的', 'profile.html') +
             '<div class="nav-slider" id="navSlider"></div>' +
@@ -97,6 +123,44 @@
     }
     placeSlider();
     window.addEventListener('resize', placeSlider);
+
+    // 资源库下拉菜单：点一下展开，再点收起（带伸缩动画）
+    (function bindNavDropdown() {
+        var trigger = aside.querySelector('.nav-drop-trigger');
+        var drop = aside.querySelector('#navDropdown');
+        if (!trigger || !drop) return;
+        var isOpen = false;
+        function place() {
+            var r = trigger.getBoundingClientRect();
+            var w = Math.max(160, r.width + 28);
+            drop.style.width = w + 'px';
+            var left = Math.min(r.left, window.innerWidth - w - 12);
+            drop.style.left = Math.max(12, left) + 'px';
+            drop.style.top = (r.bottom + 8) + 'px';
+        }
+        function setOpen(v) {
+            isOpen = v;
+            if (v) place();
+            trigger.classList.toggle('open', v);
+            drop.classList.toggle('open', v);
+            trigger.setAttribute('aria-expanded', v ? 'true' : 'false');
+        }
+        trigger.addEventListener('click', function (e) {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+            e.preventDefault();
+            setOpen(!isOpen);
+        });
+        document.addEventListener('click', function (e) {
+            if (!isOpen) return;
+            if (!drop.contains(e.target) && !trigger.contains(e.target)) setOpen(false);
+        }, true);
+        document.addEventListener('keydown', function (e) {
+            if (isOpen && (e.key === 'Escape' || e.key === 'Esc')) setOpen(false);
+        });
+        window.addEventListener('resize', function () { if (isOpen) place(); });
+        window.addEventListener('scroll', function () { if (isOpen) place(); }, true);
+        drop.addEventListener('click', function () { setOpen(false); });
+    })();
 
     // 深浅色切换 + 顶栏高度同步（避免固定顶栏遮住内容）
     var rootEl = document.documentElement;
