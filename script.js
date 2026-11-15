@@ -967,6 +967,8 @@
     var editingId = null;
     var pendingImage = null; // 'KEEP' 保持原图 | 'CLEAR' 移除 | 'DATA:...' 新图 | null 无操作
     var activeCat = '全部';
+    var homeCatMode = '全部';
+    var homeSortMode = 'new';
     var CATS = ['工具', '游戏', 'apk', '文件', '软件'];
     var TLD_SUBS = ['模组', '存档'];
     var viewedIds = {};
@@ -1145,11 +1147,21 @@
     }
 
     function hotRowHtml(s, index) {
-        return '<button type="button" class="hot-row" data-id="' + esc(s.id) + '">'
-             + '<span class="hot-rank">' + (index + 1) + '</span>'
-             + '<span class="hot-name">' + esc(s.name) + '</span>'
-             + '<span class="hot-meta">◎ ' + num(s.views) + ' · ↓ ' + (downloads[s.id] || 0) + '</span>'
-             + '</button>';
+        var im = imgSrc(s);
+        var h = '<button type="button" class="hot-row" data-id="' + esc(s.id) + '">';
+        h += '<span class="hot-thumb">';
+        h += '<span class="hc-fallback">' + esc(String(s.name || '?').charAt(0)) + '</span>';
+        if (im) {
+            h += '<img src="' + esc(im.src) + '" alt="' + esc(s.name) + '"'
+               + (im.fb ? ' data-fb="' + esc(im.fb) + '"' : '') + '>';
+        }
+        h += '<span class="hot-rank">' + (index + 1) + '</span></span>';
+        h += '<span class="hot-body">';
+        h += '<span class="hot-name">' + esc(s.name) + '</span>';
+        h += '<span class="hot-desc">' + esc(s.desc) + '</span>';
+        h += '<span class="hot-meta">◎ ' + num(s.views) + ' · ' + esc(s.date || '') + '</span>';
+        h += '</span></button>';
+        return h;
     }
 
 
@@ -1343,7 +1355,13 @@
             renderPager(filtered.length);
         }
         if (homeFeatured) {
-            var featured = siteList.slice().sort(function(a, b) {
+            var featured = siteList.filter(function(s) {
+                return homeCatMode === '全部' || (s.category || '其他') === homeCatMode;
+            });
+            featured = featured.slice().sort(function(a, b) {
+                if (homeSortMode === 'views') return num(b.views) - num(a.views);
+                if (homeSortMode === 'likes') return num(b.likes) - num(a.likes);
+                if (homeSortMode === 'dl') return (downloads[b.id] || 0) - (downloads[a.id] || 0);
                 return String(b.date || '').localeCompare(String(a.date || ''));
             }).slice(0, 4);
             homeFeatured.innerHTML = featured.map(function(s) { return homeCompactHtml(s); }).join('');
@@ -2467,6 +2485,28 @@
     if (hotShuffleEl) {
         hotShuffleEl.addEventListener('click', function() {
             hotOffset = (hotOffset + 6) % Math.max(1, list.length);
+            render();
+        });
+    }
+    var homeFeCatsEl = document.getElementById('homeFeaturedCats');
+    if (homeFeCatsEl) {
+        homeFeCatsEl.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ft-cat');
+            if (!btn) return;
+            homeCatMode = btn.getAttribute('data-hcat') || '全部';
+            var all = homeFeCatsEl.querySelectorAll('.ft-cat');
+            for (var i = 0; i < all.length; i++) all[i].classList.toggle('active', all[i] === btn);
+            render();
+        });
+    }
+    var homeFeSortsEl = document.getElementById('homeFeaturedSorts');
+    if (homeFeSortsEl) {
+        homeFeSortsEl.addEventListener('click', function(e) {
+            var btn = e.target.closest('.ft-sort');
+            if (!btn) return;
+            homeSortMode = btn.getAttribute('data-hsort') || 'new';
+            var all = homeFeSortsEl.querySelectorAll('.ft-sort');
+            for (var i = 0; i < all.length; i++) all[i].classList.toggle('active', all[i] === btn);
             render();
         });
     }
