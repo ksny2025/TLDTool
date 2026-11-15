@@ -7,17 +7,17 @@
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <style>
     :root {
-        --bg-base: #f5f6f7;
-        --bg-card: #ffffff;
-        --border-soft: #eceef1;
+        --bg-base: #12141a;
+        --bg-card: #1a1d25;
+        --border-soft: #2a2f3b;
         --border-glow: rgba(108, 108, 238, 0.45);
         --accent-cyan: #648ff5;
         --accent-teal: #6c6cee;
-        --text-main: #4e5358;
-        --text-muted: #777777;
-        --text-dim: #9aa0a7;
+        --text-main: #e6e9ef;
+        --text-muted: #9aa1ad;
+        --text-dim: #7d8491;
         --radius-lg: 22px;
-        --shadow-deep: 0 0 #0000, 0 15px 20px -5px rgba(0, 0, 0, 0.07), 0 6px 8px -5px rgba(0, 0, 0, 0.05);
+        --shadow-deep: 0 0 #0000, 0 15px 20px -5px rgba(0, 0, 0, 0.45), 0 6px 8px -5px rgba(0, 0, 0, 0.4);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, "Segoe UI", "微软雅黑", sans-serif; }
@@ -27,8 +27,8 @@
     body {
         background-color: var(--bg-base);
         background-image:
-            radial-gradient(circle at 18% 22%, rgba(100, 143, 245, 0.10) 0%, transparent 45%),
-            radial-gradient(circle at 82% 70%, rgba(108, 108, 238, 0.08) 0%, transparent 50%);
+            radial-gradient(circle at 18% 22%, rgba(100, 143, 245, 0.16) 0%, transparent 45%),
+            radial-gradient(circle at 82% 70%, rgba(108, 108, 238, 0.14) 0%, transparent 50%);
         color: var(--text-main);
         display: flex;
         align-items: center;
@@ -40,7 +40,7 @@
         width: 100%;
         max-width: 420px;
         background: var(--bg-card);
-        border: 1px solid rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-deep);
         padding: 30px 30px 24px;
@@ -52,7 +52,7 @@
 
     .tabs {
         display: flex; gap: 4px; padding: 4px; margin-bottom: 20px;
-        background: #f4f5f7;
+        background: #232733;
         border: 1px solid var(--border-soft);
         border-radius: 12px;
     }
@@ -64,7 +64,7 @@
         transition: background .18s, color .18s;
     }
 
-    .tab.active { background: rgba(108, 108, 238, 0.12); color: var(--text-main); }
+    .tab.active { background: rgba(108, 108, 238, 0.2); color: #a5a5ff; }
 
     .field { margin-bottom: 14px; }
 
@@ -72,7 +72,7 @@
 
     .field input {
         width: 100%; height: 44px; padding: 0 13px;
-        background: #f7f8fa;
+        background: #20242e;
         border: 1px solid var(--border-soft);
         border-radius: 12px;
         color: var(--text-main);
@@ -97,7 +97,7 @@
         font-size: 12px; cursor: pointer; padding: 6px 8px; border-radius: 8px;
     }
 
-    .pwd button:hover { color: var(--text-muted); background: #f0f1f4; }
+    .pwd button:hover { color: var(--text-muted); background: #2a2f3b; }
 
     .code-row { display: flex; gap: 8px; }
     .code-row input { flex: 1; }
@@ -147,7 +147,7 @@
     .done .hint { font-size: 13px; color: var(--text-muted); line-height: 1.8; margin-bottom: 16px; }
 
     .acct {
-        background: #f7f8fa;
+        background: #20242e;
         border: 1px solid var(--border-soft);
         border-radius: 12px; padding: 12px 14px;
         font-size: 13px; color: var(--text-muted); line-height: 1.9;
@@ -157,7 +157,7 @@
 
     .close-btn {
         width: 100%; height: 42px; margin-top: 16px; border-radius: 12px;
-        border: 1px solid var(--border-soft); background: #f4f5f7;
+        border: 1px solid var(--border-soft); background: #232733;
         color: var(--text-main); font-size: 13.5px; cursor: pointer;
     }
 
