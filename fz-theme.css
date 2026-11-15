@@ -717,6 +717,8 @@ html[data-theme="dark"] .card-pane{
 }
 html[data-theme="dark"] .portal-panel-head{color:#e6e9ef !important;border-bottom-color:rgba(255,255,255,.06) !important}
 html[data-theme="dark"] .portal-panel-head span{color:#e6e9ef !important}
+html[data-theme="dark"] .home-portal > .portal-main .portal-left > .portal-panel:nth-child(2) .portal-panel-head{color:#e6e9ef !important}
+html[data-theme="dark"] .home-portal .featured-title{color:#e6e9ef !important}
 
 /* 公告 / 分类图标 / 数据条 */
 html[data-theme="dark"] .ann-bar{background:#1a1d25 !important;border-color:rgba(255,255,255,.06) !important;color:#9aa1ad !important}
