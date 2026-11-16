@@ -60,7 +60,7 @@
 })();
 
 /* ===== 后端在线状态探测 =====
-   直链下载优先走后端隧道（境内更快），隧道连不上时自动回退到 GitHub 仓库里的同名静态文件，
+   直链下载优先走后端隧道（速度稳定），隧道连不上时自动回退到 GitHub 仓库里的同名静态文件，
    保证离线（后端掉线）时下载依然可用。 */
 (function () {
     window.__backendOnline = !window.__API_BASE; // 本地直接访问（18080）时本身就是后端
@@ -1051,7 +1051,7 @@
     function mirrors(s) {
         var w = ways(s);
         var out = [];
-        if (w.direct) out.push({ kind: 'direct', label: '直链下载', sub: '速度快，推荐', url: w.direct });
+        if (w.direct) out.push({ kind: 'direct', label: '直链下载', sub: '下载速度稳定', url: w.direct });
         if (w.pan) out.push({ kind: 'pan', label: '小飞机网盘', sub: '不限速，无需登录', url: w.pan });
         if (w.quark) out.push({ kind: 'quark', label: '夸克网盘', sub: '整合全部资源', url: w.quark });
         if (w.pan123) out.push({ kind: 'pan123', label: '123 网盘', sub: '整合全部资源', url: w.pan123 });
@@ -3711,7 +3711,7 @@
         '待审核': 'Pending', '通过': 'Approve', '拒绝': 'Reject',
         '已提交，审核通过后显示': 'Submitted, visible after approval',
         '已通过审核': 'Approved', '已拒绝并删除': 'Rejected and deleted',
-        '直链下载': 'Direct Download', '速度快，推荐': 'Fast, recommended',
+        '直链下载': 'Direct Download', '下载速度稳定': 'Stable speed',
         '小飞机网盘': 'Feijipan', '不限速，无需登录': 'No speed limit, no login',
         '夸克网盘': 'Quark Drive', '123 网盘': '123 Drive', '百度网盘': 'Baidu Drive',
         '整合全部资源': 'All resources', '需登录百度账号': 'Baidu account required',
@@ -3805,7 +3805,7 @@
         '模组源': 'Mod source', '图片源': 'Image source',
         'GitLab（默认）': 'GitLab (default)', '服务器（已缓存，更稳定）': 'Server (cached, more stable)',
         '提示：模组来源于汉化作者B站：“网飞NetFei”（GitLab），点击「下载模组」直达 DLL 文件；下载后放入游戏目录 Mods 文件夹，配合模组加载器使用。列表每 6 小时自动同步一次。': 'Tip: mods come from the WorkshopTLD library (GitLab, localized by NetFei). Click "Download Mod" to get the DLL, then put it into the game Mods folder and use it with the mod loader. The list syncs every 6 hours.',
-        '提示：点「下载」可选择直链、小飞机网盘、夸克 / 123 / 百度网盘等镜像——直链速度快，网盘不限速；后端掉线时直链会自动切到静态站文件，仍可正常下载。登录后还可以上传自己的资源！': 'Tip: "Download" offers direct links plus Feijipan, Quark, 123 and Baidu mirrors. Direct links are fast; cloud drives have no speed limits. If the backend is offline, direct links fall back to static files. Log in to upload your own resources!',
+        '提示：点「下载」可选择直链、小飞机网盘、夸克 / 123 / 百度网盘等镜像——直链下载速度稳定，网盘不限速；后端掉线时直链会自动切到静态站文件，仍可正常下载。登录后还可以上传自己的资源！': 'Tip: "Download" offers direct links plus Feijipan, Quark, 123 and Baidu mirrors. Direct links have stable speed; cloud drives have no speed limits. If the backend is offline, direct links fall back to static files. Log in to upload your own resources!',
         // 模组加载器
         '路径：': 'Path: ',
         '修改': 'Change',
@@ -3857,7 +3857,7 @@
         '示例歌曲 1': 'Sample Song 1', '示例歌曲 2': 'Sample Song 2', '示例歌曲 3': 'Sample Song 3',
         // 下载方式 / 模组分类
         '直链下载': 'Direct link',
-        '速度快，推荐': 'Fast, recommended', '不限速，无需登录': 'No speed limit, no login',
+        '下载速度稳定': 'Stable speed', '不限速，无需登录': 'No speed limit, no login',
         '小飞机网盘': 'Feijipan', '夸克网盘': 'Quark Drive', '123 网盘': '123 Drive', '百度网盘': 'Baidu Drive',
         '上一页': 'Prev', '下一页': 'Next', '清空筛选': 'Clear filter',
         'WorkshopTLD 主库': 'WorkshopTLD (Main)',
