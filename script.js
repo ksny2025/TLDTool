@@ -1662,6 +1662,11 @@
         a.remove();
     }
 
+    function goDetail(s) {
+        if (!s || !s.id) return;
+        location.href = 'soft/' + encodeURIComponent(s.id) + '.html';
+    }
+
     function openChoice(s) {
         var ms = mirrors(s);
         var files = Array.isArray(s.files) ? s.files : [];
@@ -2250,7 +2255,7 @@
         var s = detailItem;
         if (!s) return;
         closeSwDetail();
-        openChoice(s);
+        goDetail(s);
     });
     swDetail.querySelector('#swLikeBtn').addEventListener('click', function() { doReact('like'); });
     swDetail.querySelector('#swFavBtn').addEventListener('click', function() { doReact('fav'); });
@@ -2307,7 +2312,7 @@
         var id = card.getAttribute('data-id');
         var item = list.find(function(s) { return s.id === id; });
         if (e.target.closest('.download-btn')) {
-            if (item) openChoice(item);
+            if (item) goDetail(item);
             return;
         }
         if (!item) return;
