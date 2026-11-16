@@ -217,3 +217,88 @@
         }
     }
 })();
+
+/* 多文件选择面板：资源包含多个文件时，先列出文件再选择下载 */
+(function () {
+    if (window.zninePickFile) return;
+
+    function fmtSize(n) {
+        n = Number(n) || 0;
+        if (n <= 0) return '';
+        var u = ['B', 'KB', 'MB', 'GB'];
+        var i = 0;
+        while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+        return (i === 0 ? n : n.toFixed(n >= 100 ? 0 : 1)) + ' ' + u[i];
+    }
+
+    window.zninePickFile = function (files, base, title) {
+        if (!files || !files.length) return false;
+        var old = document.getElementById('znine-pick-mask');
+        if (old && old.parentNode) old.parentNode.removeChild(old);
+
+        var wide = window.innerWidth > 560;
+        var mask = document.createElement('div');
+        mask.id = 'znine-pick-mask';
+        mask.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;'
+            + 'background:rgba(0,0,0,.55);display:flex;padding:0 0 env(safe-area-inset-bottom,0);'
+            + 'box-sizing:border-box;align-items:' + (wide ? 'center' : 'flex-end') + ';'
+            + 'justify-content:center;overflow:auto;';
+
+        var card = document.createElement('div');
+        card.style.cssText = 'width:100%;max-width:480px;background:#fff;box-sizing:border-box;'
+            + 'padding:18px 16px 20px;max-height:78vh;overflow:auto;'
+            + 'border-radius:' + (wide ? '16px' : '18px 18px 0 0') + ';';
+
+        var h = document.createElement('div');
+        h.textContent = title || '选择要下载的文件';
+        h.style.cssText = 'font:600 16px/1.4 system-ui,-apple-system,"Microsoft YaHei",sans-serif;'
+            + 'color:#141821;margin:0 0 14px;';
+        card.appendChild(h);
+
+        files.forEach(function (f) {
+            f = f || {};
+            var stored = String(f.stored || '').replace(/^\/+/, '');
+            var name = String(f.name || stored);
+            if (!stored) return;
+            var a = document.createElement('a');
+            a.href = (base || 'https://v6.znine.fun:18081') + '/files/'
+                + encodeURIComponent(stored) + '/' + encodeURIComponent(name);
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.style.cssText = 'display:block;padding:13px 14px;margin-bottom:10px;'
+                + 'border:1px solid #e5e8ef;border-radius:12px;background:#fafbfd;'
+                + 'text-decoration:none;color:#141821;-webkit-tap-highlight-color:transparent;';
+
+            var nm = document.createElement('div');
+            nm.textContent = name;
+            nm.style.cssText = 'font:500 14px/1.45 system-ui,-apple-system,"Microsoft YaHei",sans-serif;'
+                + 'word-break:break-all;';
+            a.appendChild(nm);
+
+            var sz = fmtSize(f.size);
+            if (sz) {
+                var sm = document.createElement('div');
+                sm.textContent = sz;
+                sm.style.cssText = 'font:400 12px/1.4 system-ui,sans-serif;color:#78819a;margin-top:3px;';
+                a.appendChild(sm);
+            }
+            card.appendChild(a);
+        });
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = '取消';
+        btn.style.cssText = 'width:100%;padding:13px;margin-top:2px;border:0;border-radius:12px;'
+            + 'background:#eef1f6;color:#333;font:500 14px system-ui,-apple-system,sans-serif;'
+            + '-webkit-tap-highlight-color:transparent;';
+        btn.onclick = function () { if (mask.parentNode) mask.parentNode.removeChild(mask); };
+        card.appendChild(btn);
+
+        mask.appendChild(card);
+        mask.addEventListener('click', function (e) {
+            if (e.target === mask && mask.parentNode) mask.parentNode.removeChild(mask);
+        });
+        document.body.appendChild(mask);
+        return true;
+    };
+})();

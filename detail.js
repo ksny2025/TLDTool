@@ -175,21 +175,36 @@
         var rel = raw.replace(/^\/+/, '');
         if (rel.indexOf('files/') !== 0) return;
 
+        var res = window.__RESOURCE || {};
+        var files = Array.isArray(res.files) ? res.files : [];
+        var multi = files.length > 1;
+        var href = IPV6_BASE + '/' + rel;
+        if (files.length === 1 && files[0] && files[0].stored) {
+            href = IPV6_BASE + '/files/' + encodeURIComponent(String(files[0].stored))
+                + '/' + encodeURIComponent(String(files[0].name || files[0].stored));
+        }
+
         var b = document.createElement('a');
         b.className = a.className;
-        b.setAttribute('href', IPV6_BASE + '/' + rel);
+        b.setAttribute('href', multi ? '#' : href);
         b.setAttribute('target', '_blank');
         b.setAttribute('rel', 'noopener noreferrer');
         b.setAttribute('data-ipv6', '1');
-        b.innerHTML = '<b>IPv6 直链</b><small>IPv6 网络下更快</small>';
+        b.innerHTML = '<b>IPv6 直链</b><small>'
+            + (multi ? '共 ' + files.length + ' 个文件，点击选择' : 'IPv6 网络下更快')
+            + '</small>';
         b.style.display = 'none';
 
         var show = function (ok) { if (ok) b.style.display = ''; };
         if (v6Probed) { show(v6Ok); } else { v6Waiters.push(show); }
 
-        b.addEventListener('click', function () {
+        b.addEventListener('click', function (e) {
             var name = a.getAttribute('data-file') || '';
             if (name) apiPost('/api/download', { name: name }).catch(function () {});
+            if (multi && window.zninePickFile) {
+                e.preventDefault();
+                window.zninePickFile(files, IPV6_BASE);
+            }
         });
         a.parentNode.insertBefore(b, a.nextSibling);
     }

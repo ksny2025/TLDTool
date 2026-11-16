@@ -1664,7 +1664,8 @@
 
     function openChoice(s) {
         var ms = mirrors(s);
-        if (!ms.length) return;
+        var files = Array.isArray(s.files) ? s.files : [];
+        if (!ms.length && !files.length) return;
         var h3 = choiceMask.querySelector('h3');
         if (h3) h3.textContent = T('选择下载方式');
         var cancel = choiceMask.querySelector('[data-cancel]');
@@ -1675,18 +1676,35 @@
                  + '" data-url="' + esc(m.url) + '">' + esc(T(m.label))
                  + '<em>' + esc(T(m.sub)) + '</em></button>';
         }).join('');
-        // IPv6 直链：仅当 URL 是本站 /files/ 直链且探测到 IPv6 可达时出现
+        // IPv6 直链：本站 /files/ 直链或含 files 列表时出现；多文件改为弹出文件清单
         var raw = String(s.url == null ? '' : s.url).trim();
         var rel = raw.replace(/^\/+/, '');
-        if (window.__ipv6Base && raw && !/^https?:/i.test(raw) && rel.indexOf('files/') === 0) {
-            html += '<button type="button" class="f-btn dl-choice-btn" data-ipv6="1" data-url="'
-                 + esc(window.__ipv6Base + '/' + rel) + '" style="display:none">IPv6 直链'
-                 + '<em>IPv6 网络下更快</em></button>';
+        var multi = files.length > 1;
+        var isFiles = raw && !/^https?:/i.test(raw) && rel.indexOf('files/') === 0;
+        if (window.__ipv6Base && (isFiles || files.length)) {
+            var href = window.__ipv6Base + '/' + rel;
+            if (files.length === 1 && files[0] && files[0].stored) {
+                href = window.__ipv6Base + '/files/' + encodeURIComponent(String(files[0].stored))
+                     + '/' + encodeURIComponent(String(files[0].name || files[0].stored));
+            }
+            html += '<button type="button" class="f-btn dl-choice-btn" data-ipv6="1"'
+                 + (multi ? ' data-pick="1"' : ' data-url="' + esc(href) + '"')
+                 + ' style="display:none">IPv6 直链<em>'
+                 + esc(multi ? '共 ' + files.length + ' 个文件，点击选择' : 'IPv6 网络下更快')
+                 + '</em></button>';
         }
         choiceList.innerHTML = html;
         var v6btn = choiceList.querySelector('[data-ipv6]');
-        if (v6btn && window.__onIpv6Status) {
-            window.__onIpv6Status(function(ok) { if (ok) v6btn.style.display = ''; });
+        if (v6btn) {
+            if (multi && window.zninePickFile) {
+                v6btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    window.zninePickFile(files, window.__ipv6Base);
+                });
+            }
+            if (window.__onIpv6Status) {
+                window.__onIpv6Status(function(ok) { if (ok) v6btn.style.display = ''; });
+            }
         }
         choiceMask.style.display = 'flex';
     }
