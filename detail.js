@@ -145,6 +145,55 @@
         return (API && backendOnline) ? API + '/' + rel : ROOT + rel;
     }
 
+    // IPv6 直连下载：只走 v6.znine.fun（仅有 AAAA 记录），IPv6 网络下绕开隧道
+    var IPV6_BASE = 'https://v6.znine.fun:18081';
+    var v6Probed = false;
+    var v6Ok = false;
+    var v6Waiters = [];
+
+    function probeIpv6() {
+        if (v6Probed || !REMOTE || !window.fetch) return;
+        v6Probed = true;
+        var ac = null;
+        try { ac = window.AbortController ? new AbortController() : null; } catch (e) { ac = null; }
+        var timer = setTimeout(function () { if (ac) { try { ac.abort(); } catch (e) {} } }, 2500);
+        fetch(IPV6_BASE + '/healthz', { cache: 'no-store', signal: ac ? ac.signal : undefined })
+            .then(function (r) { return !!r.ok; })
+            .catch(function () { return false; })
+            .then(function (ok) {
+                clearTimeout(timer);
+                v6Ok = ok;
+                v6Waiters.forEach(function (fn) { fn(ok); });
+                v6Waiters = [];
+            });
+    }
+
+    // 给相对 /files/ 直链补一个 IPv6 选项，仅在探测到 IPv6 可达时显示
+    function addIpv6Option(a) {
+        var raw = String(a.getAttribute('data-direct') || '').trim();
+        if (!raw || /^https?:/i.test(raw)) return;
+        var rel = raw.replace(/^\/+/, '');
+        if (rel.indexOf('files/') !== 0) return;
+
+        var b = document.createElement('a');
+        b.className = a.className;
+        b.setAttribute('href', IPV6_BASE + '/' + rel);
+        b.setAttribute('target', '_blank');
+        b.setAttribute('rel', 'noopener noreferrer');
+        b.setAttribute('data-ipv6', '1');
+        b.innerHTML = '<b>IPv6 直链</b><small>IPv6 网络下更快</small>';
+        b.style.display = 'none';
+
+        var show = function (ok) { if (ok) b.style.display = ''; };
+        if (v6Probed) { show(v6Ok); } else { v6Waiters.push(show); }
+
+        b.addEventListener('click', function () {
+            var name = a.getAttribute('data-file') || '';
+            if (name) apiPost('/api/download', { name: name }).catch(function () {});
+        });
+        a.parentNode.insertBefore(b, a.nextSibling);
+    }
+
     function initLinks() {
         document.querySelectorAll('[data-direct]').forEach(function (a) {
             a.setAttribute('href', directHref(a.getAttribute('data-direct')));
@@ -155,6 +204,7 @@
                 if (!name) return;
                 apiPost('/api/download', { name: name }).catch(function () {});
             });
+            addIpv6Option(a);
         });
     }
 
@@ -246,6 +296,7 @@
     // 后端在线状态探测
     function probe() {
         if (!API) { initLinks(); return; }
+        probeIpv6();
         fetch(API + '/api/config').then(function (r) { return r.json(); }).then(function () {
             backendOnline = true;
         }).catch(function () {

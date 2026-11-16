@@ -33,6 +33,32 @@
     }, true);
 })();
 
+/* IPv6 直连下载：v6.znine.fun 仅有 AAAA 记录，探测到 IPv6 可达后才展示该选项 */
+(function () {
+    if (!window.__API_BASE || !window.fetch) return;
+    var BASE = 'https://v6.znine.fun:18081';
+    var state = 'probing';
+    var waiters = [];
+    window.__ipv6Base = BASE;
+    window.__onIpv6Status = function (cb) {
+        if (typeof cb !== 'function') return;
+        if (state !== 'probing') { cb(state === 'ok'); return; }
+        waiters.push(cb);
+    };
+    var ac = null;
+    try { ac = window.AbortController ? new AbortController() : null; } catch (e) { ac = null; }
+    var timer = setTimeout(function () { if (ac) { try { ac.abort(); } catch (e) {} } }, 2500);
+    window.fetch(BASE + '/healthz', { cache: 'no-store', signal: ac ? ac.signal : undefined })
+        .then(function (r) { return !!r.ok; })
+        .catch(function () { return false; })
+        .then(function (ok) {
+            clearTimeout(timer);
+            state = ok ? 'ok' : 'fail';
+            waiters.forEach(function (fn) { fn(ok); });
+            waiters = [];
+        });
+})();
+
 /* ===== 后端在线状态探测 =====
    直链下载优先走后端隧道（境内更快），隧道连不上时自动回退到 GitHub 仓库里的同名静态文件，
    保证离线（后端掉线）时下载依然可用。 */
@@ -1644,11 +1670,24 @@
         var cancel = choiceMask.querySelector('[data-cancel]');
         if (cancel) cancel.textContent = T('取消');
         choiceName.textContent = s.name + (s.version ? ' · ' + s.version : '');
-        choiceList.innerHTML = ms.map(function(m) {
+        var html = ms.map(function(m) {
             return '<button type="button" class="f-btn dl-choice-btn' + (m.kind === 'direct' ? ' primary' : '')
                  + '" data-url="' + esc(m.url) + '">' + esc(T(m.label))
                  + '<em>' + esc(T(m.sub)) + '</em></button>';
         }).join('');
+        // IPv6 直链：仅当 URL 是本站 /files/ 直链且探测到 IPv6 可达时出现
+        var raw = String(s.url == null ? '' : s.url).trim();
+        var rel = raw.replace(/^\/+/, '');
+        if (window.__ipv6Base && raw && !/^https?:/i.test(raw) && rel.indexOf('files/') === 0) {
+            html += '<button type="button" class="f-btn dl-choice-btn" data-ipv6="1" data-url="'
+                 + esc(window.__ipv6Base + '/' + rel) + '" style="display:none">IPv6 直链'
+                 + '<em>IPv6 网络下更快</em></button>';
+        }
+        choiceList.innerHTML = html;
+        var v6btn = choiceList.querySelector('[data-ipv6]');
+        if (v6btn && window.__onIpv6Status) {
+            window.__onIpv6Status(function(ok) { if (ok) v6btn.style.display = ''; });
+        }
         choiceMask.style.display = 'flex';
     }
 
