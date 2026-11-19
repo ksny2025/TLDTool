@@ -151,24 +151,33 @@
     var v6Ok = false;
     var v6Waiters = [];
 
+    function checkIpv6(cb) {
+        if (!window.fetch) { cb(false); return; }
+        var ac = null;
+        try { ac = window.AbortController ? new AbortController() : null; } catch (e) { ac = null; }
+        var timer = setTimeout(function () { if (ac) { try { ac.abort(); } catch (e) {} } }, 4000);
+        fetch(IPV6_BASE + '/healthz?t=' + Date.now(), { cache: 'no-store', signal: ac ? ac.signal : undefined })
+            .then(function (r) { return !!r.ok; })
+            .catch(function () { return false; })
+            .then(function (ok) { clearTimeout(timer); v6Ok = ok; cb(ok); });
+    }
+
     function probeIpv6() {
         if (v6Probed || !REMOTE || !window.fetch) return;
         v6Probed = true;
-        var ac = null;
-        try { ac = window.AbortController ? new AbortController() : null; } catch (e) { ac = null; }
-        var timer = setTimeout(function () { if (ac) { try { ac.abort(); } catch (e) {} } }, 2500);
-        fetch(IPV6_BASE + '/healthz', { cache: 'no-store', signal: ac ? ac.signal : undefined })
-            .then(function (r) { return !!r.ok; })
-            .catch(function () { return false; })
-            .then(function (ok) {
-                clearTimeout(timer);
-                v6Ok = ok;
-                v6Waiters.forEach(function (fn) { fn(ok); });
-                v6Waiters = [];
-            });
+        checkIpv6(function (ok) {
+            if (ok) { finish(true); return; }
+            // 首次失败后再试一次，避免网络刚就绪时误判
+            setTimeout(function () { checkIpv6(finish); }, 800);
+        });
+        function finish(ok) {
+            v6Ok = ok;
+            v6Waiters.forEach(function (fn) { fn(ok); });
+            v6Waiters = [];
+        }
     }
 
-    // 给相对 /files/ 直链补一个 IPv6 选项，仅在探测到 IPv6 可达时显示
+    // 给相对 /files/ 直链补一个 IPv6 选项：默认展示，连不上时点击给出提示
     function addIpv6Option(a) {
         var raw = String(a.getAttribute('data-direct') || '').trim();
         if (!raw || /^https?:/i.test(raw)) return;
@@ -193,18 +202,27 @@
         b.innerHTML = '<b>IPv6 直链</b><small>'
             + (multi ? '共 ' + files.length + ' 个文件，点击选择' : 'IPv6 网络下更快')
             + '</small>';
-        b.style.display = 'none';
 
-        var show = function (ok) { if (ok) b.style.display = ''; };
+        var hint = b.querySelector('small');
+        var show = function (ok) {
+            if (!ok && hint) hint.textContent = multi ? '需 IPv6 网络，点击仍可尝试' : '需 IPv6 网络，连不上会提示';
+        };
         if (v6Probed) { show(v6Ok); } else { v6Waiters.push(show); }
 
         b.addEventListener('click', function (e) {
             var name = a.getAttribute('data-file') || '';
             if (name) apiPost('/api/download', { name: name }).catch(function () {});
-            if (multi && window.zninePickFile) {
-                e.preventDefault();
-                window.zninePickFile(files, IPV6_BASE);
-            }
+            var openIt = function () {
+                if (multi && window.zninePickFile) window.zninePickFile(files, IPV6_BASE);
+                else window.open(href, '_blank', 'noopener');
+            };
+            if (multi) e.preventDefault();
+            if (v6Ok) { if (multi) openIt(); return; }
+            e.preventDefault();
+            checkIpv6(function (ok) {
+                if (ok) { openIt(); return; }
+                if (window.confirm('当前网络连接不上 IPv6 服务器（可能没有 IPv6）。\n强制尝试下载可能失败，仍要继续吗？')) openIt();
+            });
         });
         a.parentNode.insertBefore(b, a.nextSibling);
     }

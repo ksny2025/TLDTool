@@ -33,30 +33,43 @@
     }, true);
 })();
 
-/* IPv6 直连下载：v6.znine.fun 仅有 AAAA 记录，探测到 IPv6 可达后才展示该选项 */
+/* IPv6 直连下载：v6.znine.fun 仅有 AAAA 记录；按钮默认展示，连不上时点击给出提示 */
 (function () {
     if (!window.__API_BASE || !window.fetch) return;
     var BASE = 'https://v6.znine.fun:18081';
     var state = 'probing';
     var waiters = [];
     window.__ipv6Base = BASE;
+    window.__ipv6Ok = false;
     window.__onIpv6Status = function (cb) {
         if (typeof cb !== 'function') return;
         if (state !== 'probing') { cb(state === 'ok'); return; }
         waiters.push(cb);
     };
-    var ac = null;
-    try { ac = window.AbortController ? new AbortController() : null; } catch (e) { ac = null; }
-    var timer = setTimeout(function () { if (ac) { try { ac.abort(); } catch (e) {} } }, 2500);
-    window.fetch(BASE + '/healthz', { cache: 'no-store', signal: ac ? ac.signal : undefined })
-        .then(function (r) { return !!r.ok; })
-        .catch(function () { return false; })
-        .then(function (ok) {
-            clearTimeout(timer);
-            state = ok ? 'ok' : 'fail';
-            waiters.forEach(function (fn) { fn(ok); });
-            waiters = [];
-        });
+    window.__checkIpv6 = function (cb) {
+        var ac = null;
+        try { ac = window.AbortController ? new AbortController() : null; } catch (e) { ac = null; }
+        var timer = setTimeout(function () { if (ac) { try { ac.abort(); } catch (e) {} } }, 4000);
+        window.fetch(BASE + '/healthz?t=' + Date.now(), { cache: 'no-store', signal: ac ? ac.signal : undefined })
+            .then(function (r) { return !!r.ok; })
+            .catch(function () { return false; })
+            .then(function (ok) {
+                clearTimeout(timer);
+                window.__ipv6Ok = ok;
+                cb(ok);
+            });
+    };
+    function settle(ok) {
+        state = ok ? 'ok' : 'fail';
+        window.__ipv6Ok = ok;
+        waiters.forEach(function (fn) { fn(ok); });
+        waiters = [];
+    }
+    window.__checkIpv6(function (ok) {
+        if (ok) { settle(true); return; }
+        // 首次失败后再试一次，避免网络刚就绪时误判
+        setTimeout(function () { window.__checkIpv6(settle); }, 800);
+    });
 })();
 
 /* ===== 后端在线状态探测 =====
@@ -1693,23 +1706,32 @@
                      + '/' + encodeURIComponent(String(files[0].name || files[0].stored));
             }
             html += '<button type="button" class="f-btn dl-choice-btn" data-ipv6="1"'
-                 + (multi ? ' data-pick="1"' : ' data-url="' + esc(href) + '"')
-                 + ' style="display:none">IPv6 直链<em>'
+                 + (multi ? ' data-pick="1"' : ' data-url="' + esc(href) + '"') + '>IPv6 直链<em>'
                  + esc(multi ? '共 ' + files.length + ' 个文件，点击选择' : 'IPv6 网络下更快')
                  + '</em></button>';
         }
         choiceList.innerHTML = html;
         var v6btn = choiceList.querySelector('[data-ipv6]');
         if (v6btn) {
-            if (multi && window.zninePickFile) {
-                v6btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    window.zninePickFile(files, window.__ipv6Base);
+            var v6em = v6btn.querySelector('em');
+            var v6base = multi ? '共 ' + files.length + ' 个文件，点击选择' : 'IPv6 网络下更快';
+            if (window.__onIpv6Status) {
+                window.__onIpv6Status(function(ok) {
+                    if (v6em) v6em.textContent = ok ? v6base : '需 IPv6 网络，连不上会提示';
                 });
             }
-            if (window.__onIpv6Status) {
-                window.__onIpv6Status(function(ok) { if (ok) v6btn.style.display = ''; });
-            }
+            v6btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var openIt = function() {
+                    if (multi && window.zninePickFile) window.zninePickFile(files, window.__ipv6Base);
+                    else if (v6btn.getAttribute('data-url')) goDownload(v6btn.getAttribute('data-url'));
+                };
+                if (window.__ipv6Ok || !window.__checkIpv6) { openIt(); return; }
+                window.__checkIpv6(function(ok) {
+                    if (ok) { openIt(); return; }
+                    if (window.confirm('当前网络连接不上 IPv6 服务器（可能没有 IPv6）。\n强制尝试下载可能失败，仍要继续吗？')) openIt();
+                });
+            });
         }
         choiceMask.style.display = 'flex';
     }
