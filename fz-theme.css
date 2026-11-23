@@ -1141,3 +1141,33 @@ html[data-theme="dark"] .nav-dropdown a.on::before{background:#a5a5ff !important
 /* 滚动条 */
 html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2) !important}
 
+/* ---------- 首页：赞助支持 ---------- */
+html[data-theme] .home-portal > .portal-main .portal-right > .portal-panel:nth-child(3){order:7}
+.sponsor-box{padding:2px 0 4px}
+.sponsor-tip{margin:0 0 10px;font-size:12.5px;color:#8b9097;line-height:1.6}
+.sponsor-btns{display:flex;gap:10px}
+.sponsor-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;border:0;border-radius:9px;background:#f4f5f7;color:#4e5358;font-size:13.5px;font-weight:600;cursor:pointer;transition:transform .15s,filter .15s}
+.sponsor-btn:hover{transform:translateY(-1px);filter:brightness(.97)}
+.sponsor-btn:active{transform:translateY(0)}
+.sponsor-dot{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;color:#fff;font-size:11px;font-weight:700}
+.sponsor-dot-alipay{background:#1677ff}
+.sponsor-dot-wechat{background:#07c160}
+.sponsor-mask{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(15,18,22,.55);opacity:0;pointer-events:none;transition:opacity .18s}
+.sponsor-mask.show{opacity:1;pointer-events:auto}
+.sponsor-dialog{width:100%;max-width:330px;background:#fff;border-radius:16px;padding:16px 16px 14px;box-shadow:0 24px 60px -20px rgba(0,0,0,.45);transform:translateY(10px) scale(.98);transition:transform .2s}
+.sponsor-mask.show .sponsor-dialog{transform:translateY(0) scale(1)}
+.sponsor-dialog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sponsor-dialog-head span{font-size:14.5px;font-weight:600;color:#3a3e44}
+.sponsor-close{width:28px;height:28px;border:0;border-radius:8px;background:#f2f3f5;color:#8b9097;font-size:14px;line-height:1;cursor:pointer}
+.sponsor-close:hover{background:#e8eaee;color:#4e5358}
+.sponsor-qr{display:block;width:100%;border-radius:10px;background:#f5f6f7}
+.sponsor-hint{margin:10px 0 0;text-align:center;font-size:12.5px;color:#8b9097}
+html[data-theme="dark"] .sponsor-btn{background:#232830;color:#c8d2e0}
+html[data-theme="dark"] .sponsor-tip,
+html[data-theme="dark"] .sponsor-hint{color:#8b949f}
+html[data-theme="dark"] .sponsor-dialog{background:#1b1f26;box-shadow:0 24px 60px -18px rgba(0,0,0,.7)}
+html[data-theme="dark"] .sponsor-dialog-head span{color:#e5edf7}
+html[data-theme="dark"] .sponsor-close{background:#2a3038;color:#9db2c8}
+html[data-theme="dark"] .sponsor-close:hover{background:#333a44}
+html[data-theme="dark"] .sponsor-qr{background:#2a3038}
+

@@ -34,7 +34,7 @@
     </script>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css?v=20261111a">
-    <link rel="stylesheet" href="fz-theme.css?v=13">
+    <link rel="stylesheet" href="fz-theme.css?v=14">
 </head>
 <body data-nav="home" data-has-app data-keep-title>
 <div class="app-container">
@@ -174,11 +174,36 @@
                                 </a>
                             </div>
                         </div>
+                        <div class="portal-panel">
+                            <div class="portal-panel-head"><span>赞助支持</span></div>
+                            <div class="sponsor-box">
+                                <p class="sponsor-tip">如果本站资源帮到了你，欢迎请我喝杯奶茶</p>
+                                <div class="sponsor-btns">
+                                    <button type="button" class="sponsor-btn" data-sponsor="alipay">
+                                        <span class="sponsor-dot sponsor-dot-alipay">支</span>支付宝
+                                    </button>
+                                    <button type="button" class="sponsor-btn" data-sponsor="wechat">
+                                        <span class="sponsor-dot sponsor-dot-wechat">微</span>微信
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </aside>
                 </div>
             </div>
         </div>
     </main>
+</div>
+
+<div class="sponsor-mask" id="sponsorMask" aria-hidden="true">
+    <div class="sponsor-dialog" role="dialog" aria-modal="true" aria-label="赞助二维码">
+        <div class="sponsor-dialog-head">
+            <span id="sponsorTitle">支付宝赞助</span>
+            <button type="button" class="sponsor-close" id="sponsorClose" aria-label="关闭">✕</button>
+        </div>
+        <img class="sponsor-qr" id="sponsorQr" alt="赞助二维码">
+        <p class="sponsor-hint" id="sponsorHint">打开支付宝「扫一扫」</p>
+    </div>
 </div>
 
 <footer class="seo-footer">
@@ -189,5 +214,38 @@
 <script src="detail-manifest.js"></script>
 <script src="layout.js?v=20261123a"></script>
 <script src="script.js?v=20261119a"></script>
+<script>
+/* 赞助弹窗：点按钮显示对应收款码 */
+(function () {
+    var mask = document.getElementById('sponsorMask');
+    if (!mask) return;
+    var qr = document.getElementById('sponsorQr');
+    var title = document.getElementById('sponsorTitle');
+    var hint = document.getElementById('sponsorHint');
+    var data = {
+        alipay: { img: 'sponsor-alipay.jpg', title: '支付宝赞助', hint: '打开支付宝「扫一扫」' },
+        wechat: { img: 'sponsor-wechat.png', title: '微信赞助', hint: '打开微信「扫一扫」' }
+    };
+    function open(kind) {
+        var d = data[kind];
+        if (!d) return;
+        qr.src = d.img;
+        title.textContent = d.title;
+        hint.textContent = d.hint;
+        mask.classList.add('show');
+        mask.setAttribute('aria-hidden', 'false');
+    }
+    function close() {
+        mask.classList.remove('show');
+        mask.setAttribute('aria-hidden', 'true');
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('[data-sponsor]'), function (b) {
+        b.addEventListener('click', function () { open(b.getAttribute('data-sponsor')); });
+    });
+    mask.addEventListener('click', function (e) { if (e.target === mask) close(); });
+    document.getElementById('sponsorClose').addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+})();
+</script>
 </body>
 </html>
