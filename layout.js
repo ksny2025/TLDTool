@@ -114,6 +114,50 @@
         document.head.appendChild(st);
     }
 
+    // 顶栏登录按钮：已登录就隐藏，退出登录后再显示
+    (function bindTopLogin() {
+        function sync() {
+            var btn = aside.querySelector('#topLoginBtn');
+            if (!btn) return;
+            var logged = false;
+            try { logged = !!localStorage.getItem('chat_token'); } catch (e) {}
+            btn.style.display = logged ? 'none' : '';
+        }
+        sync();
+        window.addEventListener('authchange', sync);
+
+        // 页面加载完成后校验一次 token，过期或失效时恢复登录按钮
+        document.addEventListener('DOMContentLoaded', function () {
+            var tk = '';
+            try { tk = localStorage.getItem('chat_token') || ''; } catch (e) {}
+            if (!tk) return;
+            var api = window.__apiUrl ? window.__apiUrl('/api/me') : '';
+            if (!api) {
+                var h = (location.hostname || '').toLowerCase();
+                api = (h === 'znine.fun' || h === 'www.znine.fun' || h === 'ksny2025.github.io')
+                    ? 'https://api.znine.fun:54037/api/me' : '/api/me';
+            }
+            fetch(api, { headers: { 'Authorization': 'Bearer ' + tk } })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res && res.ok) {
+                        try {
+                            if (res.username) localStorage.setItem('chat_username', res.username);
+                            localStorage.setItem('chat_admin', res.is_admin ? '1' : '0');
+                        } catch (e) {}
+                        return;
+                    }
+                    try {
+                        localStorage.removeItem('chat_token');
+                        localStorage.removeItem('chat_username');
+                        localStorage.removeItem('chat_admin');
+                    } catch (e) {}
+                    sync();
+                })
+                .catch(function () {});
+        });
+    })();
+
     var slider = aside.querySelector('#navSlider');
     var act = aside.querySelector('.nav-item.active');
     function placeSlider() {
